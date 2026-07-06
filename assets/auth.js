@@ -16,9 +16,9 @@
       });
       var result = await res.json();
       if (result && result.ok) {
-        sessionStorage.setItem(GAS_URL_KEY, gasUrl);
-        sessionStorage.setItem(TOKEN_KEY, result.token);
-        sessionStorage.setItem(USER_KEY, JSON.stringify({
+        localStorage.setItem(GAS_URL_KEY, gasUrl);
+        localStorage.setItem(TOKEN_KEY, result.token);
+        localStorage.setItem(USER_KEY, JSON.stringify({
           nombre: result.nombre, rol: result.rol, color: result.color
         }));
       }
@@ -29,8 +29,8 @@
   }
 
   function logout() {
-    var token = sessionStorage.getItem(TOKEN_KEY);
-    var url   = sessionStorage.getItem(GAS_URL_KEY);
+    var token = localStorage.getItem(TOKEN_KEY);
+    var url   = localStorage.getItem(GAS_URL_KEY);
     if (token && url) {
       fetch(url, {
         method: 'POST',
@@ -38,11 +38,12 @@
         body: JSON.stringify({ action: 'LOGOUT', _token: token })
       }).catch(function(){});
     }
-    sessionStorage.clear();
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   }
 
-  function isLoggedIn() { return !!sessionStorage.getItem(TOKEN_KEY); }
-  function getUser()    { try { return JSON.parse(sessionStorage.getItem(USER_KEY)||'{}'); } catch(e){ return {}; } }
+  function isLoggedIn() { return !!localStorage.getItem(TOKEN_KEY); }
+  function getUser()    { try { return JSON.parse(localStorage.getItem(USER_KEY)||'{}'); } catch(e){ return {}; } }
 
   global.MC_AUTH = { login, logout, isLoggedIn, getUser };
 

@@ -141,7 +141,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 </div>
 
 <script>
-var OP_NOMBRE=(function(){try{return JSON.parse(sessionStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
+var OP_NOMBRE=(function(){try{return JSON.parse(localStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
 var DATA={}, TIMER_INT=null, TIMER_START=null, TIMER_ITEM=null;
 
 // Saludo según hora

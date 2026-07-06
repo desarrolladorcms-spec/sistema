@@ -285,7 +285,7 @@ window.addEventListener('message',function(e){
 });
 window.addEventListener('popstate',function(e){if(e.state&&e.state.p)go(e.state.p,e.state.i,e.state.t);});
 
-// Auto-login si hay sesión activa en sessionStorage
+// Auto-login si hay sesión activa en localStorage (persiste entre cierres del navegador)
 if(MC_AUTH.isLoggedIn()){
   var u=MC_AUTH.getUser();
   if(u.nombre) initApp(u);

@@ -139,7 +139,7 @@ function bloquear(id){
     .withFailureHandler(function(e){notif('Error: '+e.message,false);})
     .op_pub_v2436_bloquearItem({id:id,bloqueadoPor:mapa[razon]||razon});
 }
-var OP_NOMBRE=(function(){try{return JSON.parse(sessionStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
+var OP_NOMBRE=(function(){try{return JSON.parse(localStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
 function cargar(){
   google.script.run
     .withSuccessHandler(render)

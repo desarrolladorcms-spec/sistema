@@ -142,7 +142,7 @@ select:focus,textarea:focus{outline:none;border-color:var(--v)}
 
 <script src="../assets/api.js"></script>
 <script>
-var OP_NOMBRE=(function(){try{return JSON.parse(sessionStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
+var OP_NOMBRE=(function(){try{return JSON.parse(localStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
 
 // ── Estado global ────────────────────────────────────────────────────────────
 var DATA = null;

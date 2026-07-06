@@ -5,15 +5,15 @@
  */
 (function(global) {
 
-  // La URL del GAS web app se carga desde sessionStorage (configurada en login)
+  // La URL del GAS web app se carga desde localStorage (configurada en login)
   function getBaseUrl() {
-    return sessionStorage.getItem('mc_gas_url') || window.MC_GAS_URL || '';
+    return localStorage.getItem('mc_gas_url') || window.MC_GAS_URL || '';
   }
   function getToken() {
-    return sessionStorage.getItem('mc_token') || '';
+    return localStorage.getItem('mc_token') || '';
   }
   function getUsuario() {
-    try { return JSON.parse(sessionStorage.getItem('mc_usuario') || '{}'); }
+    try { return JSON.parse(localStorage.getItem('mc_usuario') || '{}'); }
     catch(e) { return {}; }
   }
 
@@ -35,8 +35,9 @@
       });
       var result = await res.json();
       if (result && result.error === 'NO_AUTH') {
-        // Sesión expirada → redirigir al login
-        sessionStorage.clear();
+        // Sesión expirada → redirigir al login (se conserva la URL guardada)
+        localStorage.removeItem('mc_token');
+        localStorage.removeItem('mc_usuario');
         window.location.href = '/';
         return;
       }
