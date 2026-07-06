@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--v:#9F6FFF;--vl:rgba(159,111,255,.16);--vd:#7C3AED;--bg:#100B22;--surface:#1C1638;--surface2:#241D48;--border:rgba(255,255,255,.09);--text:#F3EFFF;--muted:#B3A6D9;--faint:#8577AD;--green:#34D399;--red:#F87171;--gold:#FDE68A;--sw:228px}
+:root{--v:#9F6FFF;--vl:rgba(159,111,255,.16);--vd:#7C3AED;--bg:#F3F1FA;--surface:#1C1638;--surface2:#241D48;--border:rgba(255,255,255,.09);--text:#F3EFFF;--muted:#B3A6D9;--faint:#8577AD;--green:#34D399;--red:#F87171;--gold:#FDE68A;--sw:228px}
 html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;font-size:13px;background:var(--bg);color:var(--text)}
 
 /* ── LOGIN ── */
@@ -257,7 +257,11 @@ function mcInjectTheme(iframe){
     var link=doc.createElement('link');
     link.id='mc-theme-override';
     link.rel='stylesheet';
-    link.href='../assets/theme.css';
+    // Se calcula la URL absoluta a partir del src YA RESUELTO del iframe
+    // (no de una ruta relativa dentro del documento del panel), para que
+    // funcione sin importar si el sitio vive en la raíz del dominio o en
+    // una subcarpeta (ej. tuusuario.github.io/repo/).
+    link.href=new URL('../assets/theme.css', iframe.src).href;
     doc.head.appendChild(link);
   }catch(e){}
 }

@@ -27,25 +27,37 @@
       usuario: u.nombre || '',  // Siempre enviar el usuario
       _rol: u.rol || ''
     });
-    try {
-      var res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' }, // Simple request → no preflight
-        body: JSON.stringify(payload)
-      });
-      var result = await res.json();
-      if (result && result.error === 'NO_AUTH') {
-        // Sesión expirada → redirigir al login (se conserva la URL guardada)
-        localStorage.removeItem('mc_token');
-        localStorage.removeItem('mc_usuario');
-        window.location.href = '/';
-        return;
+
+    // Reintenta automáticamente si la falla es de red (Apps Script saturado,
+    // por ejemplo si el Actualizador está corriendo al mismo tiempo en otra
+    // pestaña) — no reintenta si el servidor SÍ respondió con un error normal.
+    var intentos = 0, maxIntentos = 3;
+    while (intentos < maxIntentos) {
+      try {
+        var res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' }, // Simple request → no preflight
+          body: JSON.stringify(payload)
+        });
+        var result = await res.json();
+        if (result && result.error === 'NO_AUTH') {
+          // Sesión expirada → redirigir al login (se conserva la URL guardada)
+          localStorage.removeItem('mc_token');
+          localStorage.removeItem('mc_usuario');
+          window.location.href = '/';
+          return;
+        }
+        if (onSuccess) onSuccess(result);
+        return result;
+      } catch(e) {
+        intentos++;
+        if (intentos >= maxIntentos) {
+          console.error('MC_API error (tras ' + maxIntentos + ' intentos):', action, e);
+          if (onError) onError(e);
+          return;
+        }
+        await new Promise(function(r){ setTimeout(r, 600 * intentos); });
       }
-      if (onSuccess) onSuccess(result);
-      return result;
-    } catch(e) {
-      console.error('MC_API error:', action, e);
-      if (onError) onError(e);
     }
   }
 

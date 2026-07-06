@@ -16,7 +16,7 @@ let carga=(d.carga||[]).map(x=>{let w=Math.min(100,(x.total||0)*8);return '<div 
 let tools=(d.herramientas||[]).slice(0,6).map(x=>'<div class="item"><div class="name">'+esc(x.herramienta)+'</div><div>'+pill(x.dias<0?'Vencida '+Math.abs(x.dias)+'d':'Faltan '+x.dias+'d',x.dias<=3?'red':'yellow')+'</div><div class="meta">Proveedor: '+esc(x.proveedor||'-')+' · Vence: '+esc(x.vencimiento||'-')+'</div></div>').join('')||'<div class="empty">Sin herramientas críticas.</div>';
 let aud=(d.auditoria||[]).slice(0,6).map(x=>'<div class="item"><div class="name">'+esc(x.hoja)+' · '+esc(x.marca||x.id)+'</div><div>'+pill(x.nivel,x.nivel==='Alta'?'red':x.nivel==='Media'?'yellow':'blue')+'</div><div class="meta">'+esc(x.problema)+'<br>'+esc(x.accion)+'</div></div>').join('')||'<div class="empty">Auditoría sin problemas críticos.</div>';
 app.innerHTML=k+'<div class="grid"><div class="panel"><h2>📦 Entregas críticas</h2>'+urg+'</div><div class="panel"><h2>🧪 Demos por revisar</h2>'+demos+'</div><div class="panel"><h2>📥 Solicitudes pendientes</h2>'+sol+'</div><div class="panel"><h2>📲 WhatsApps pendientes</h2>'+wa+'</div><div class="panel"><h2>🕘 Tareas sin movimiento</h2>'+mov+'</div><div class="panel"><h2>⚖️ Carga laboral</h2>'+carga+'</div><div class="panel"><h2>🛠️ Herramientas por vencer</h2>'+tools+'</div><div class="panel sectionFull"><h2>🧹 Datos incompletos detectados</h2>'+aud+'</div></div>';}
-function openWhats(){google.script.run.mc_pub_abrirCentroWhatsApp();}function openAuditoria(){google.script.run.mc_pub_abrirAuditoriaDatos();}loadData();
+function openWhats(){parent.go('CentroWhatsApp','📲','WhatsApp');}function openAuditoria(){parent.go('AuditoriaDatos','🧾','Auditoría');}loadData();
 </script>
 <script>
 (function(){

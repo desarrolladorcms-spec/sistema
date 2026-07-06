@@ -1,34 +1,35 @@
 /**
- * THEME — Tema visual compartido de Monstruo Creativo (morado oscuro, tarjetas
- * redondeadas). Se inyecta automáticamente dentro de cada panel al cargar
- * (ver mcInjectTheme() en index.html) — no hace falta pegarlo a mano en cada
- * archivo de /panels/.
+ * THEME — Tema visual compartido de Monstruo Creativo. Se inyecta
+ * automáticamente dentro de cada panel al cargar (ver mcInjectTheme() en
+ * index.html) — no hace falta pegarlo a mano en cada archivo de /panels/.
+ *
+ * Dirección visual: sidebar morado oscuro (eso vive en index.html) +
+ * contenido principal CLARO con tarjetas blancas y acentos de color vivos
+ * (verde, rojo, ámbar, azul) para estados y badges — no todo oscuro parejo.
  *
  * Cómo funciona: la mayoría de paneles ya declaran sus propias variables CSS
  * (--v, --bg, --surface, --border, --text, --muted...) al inicio de su
  * <style>. Como este archivo se agrega DESPUÉS, en cascada CSS gana el
  * último — así que redefinir esas mismas variables aquí les cambia el color
- * a todos sin tocar sus archivos. Los paneles que no declaran variables
- * (usan colores directos) igual heredan el fondo oscuro y el estilo de
- * inputs/botones de las reglas genéricas de más abajo.
+ * a todos sin tocar sus archivos.
  */
 
 :root{
-  --v: #9F6FFF;
-  --vl: rgba(159,111,255,.16);
-  --vd: #7C3AED;
-  --bg: #100B22;
-  --surface: #1C1638;
-  --surface2: #241D48;
-  --border: rgba(255,255,255,.09);
-  --text: #F3EFFF;
-  --muted: #B3A6D9;
-  --faint: #8577AD;
-  --green: #34D399;
-  --red: #F87171;
-  --amber: #FBBF24;
-  --blue: #38BDF8;
-  --gold: #FDE68A;
+  --v: #7C3AED;
+  --vl: #F5F0FF;
+  --vd: #5B21B6;
+  --bg: #F3F1FA;
+  --surface: #FFFFFF;
+  --surface2: #F8F6FD;
+  --border: #E8E1F7;
+  --text: #221639;
+  --muted: #6B6285;
+  --faint: #9C93B5;
+  --green: #059669;
+  --red: #DC2626;
+  --amber: #D97706;
+  --blue: #0284C7;
+  --gold: #B45309;
 }
 
 /* ── Fondo y tipografía base — alcanza incluso a paneles con colores fijos ── */
@@ -37,14 +38,34 @@ html, body {
   color: var(--text) !important;
 }
 
-/* ── Tarjetas / superficies genéricas: si un panel usa alguna de estas
-   clases comunes, adopta la superficie oscura con bordes redondeados ── */
+/* ── Tarjetas / superficies genéricas: blancas, bordes redondeados, sombra
+   suave — si un panel usa alguna de estas clases comunes, la adopta ── */
 .card, .obs-card, .intro-card, .final-card, [class*="-card"] {
   background: var(--surface) !important;
   border-color: var(--border) !important;
   color: var(--text);
   border-radius: 18px !important;
+  box-shadow: 0 2px 10px rgba(124,58,237,.06);
 }
+
+/* ── Encabezados de panel (.hdr): de barra morada sólida a tarjeta clara,
+   siguiendo la estructura de paneles tipo dashboard (ícono + título, no una
+   franja oscura de borde a borde) — usado en ~20 paneles ── */
+.hdr {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 2px 10px rgba(124,58,237,.06) !important;
+}
+.hdr-title, .hdr-sub {
+  color: var(--text) !important;
+}
+.hdr .act-btn, .hdr button {
+  background: var(--vl) !important;
+  color: var(--v) !important;
+}
+
 
 /* ── Formularios ── */
 input, select, textarea {
@@ -64,8 +85,8 @@ button {
   font-family: inherit;
 }
 
-/* ── Scrollbar discreto, a juego con el tema oscuro ── */
+/* ── Scrollbar discreto ── */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--faint); }

@@ -84,10 +84,10 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#0F0820;color:#f
   </div>
   <div class="hdr-right">
     <button class="btn-hdr" onclick="cargar()">↻ Actualizar</button>
-    <button class="btn-hdr btn-midia" onclick="google.script.run.mc_pub_abrirPanelHoy()">📌 Mi Día</button>
-    <button class="btn-hdr" onclick="google.script.run.mc_pub_monitorSolicitudesPendientes()">🔔 Monitor</button>
-    <button class="btn-hdr" onclick="google.script.run.mc_pub_v2436_abrirPanelProyectos()">📦 Proyectos</button>
-    <button class="btn-hdr" onclick="google.script.run.mc_pub_abrirReporteMensual()">📊 Reporte</button>
+    <button class="btn-hdr btn-midia" onclick="parent.go('PanelMiDia_Master','☀','Mi Día')">📌 Mi Día</button>
+    <button class="btn-hdr" onclick="parent.go('MonitorSolicitudes','◎','Monitor')">🔔 Monitor</button>
+    <button class="btn-hdr" onclick="parent.go('PanelProyectos','📦','Proyectos')">📦 Proyectos</button>
+    <button class="btn-hdr" onclick="parent.go('ReporteMensual','📊','Reporte Mensual')">📊 Reporte</button>
   </div>
 </div>
 
@@ -119,22 +119,22 @@ function render(d){
   var alertasHtml='';
   var urgSols=sols.filter(function(s){return /urgente|alta/i.test(s.prioridad||'');});
   var clsA=urgSols.length?'alerta urgente':'alerta';
-  alertasHtml+='<div class="'+clsA+'" onclick="google.script.run.mc_pub_monitorSolicitudesPendientes()">'+
+  alertasHtml+='<div class="'+clsA+'" onclick="parent.go(\'MonitorSolicitudes\',\'◎\',\'Monitor\')">'+
     '<div><div class="alerta-n">'+sols.length+'</div><div class="alerta-lbl">Solicitudes por asignar</div></div>'+
     (urgSols.length?'<span class="alerta-badge" style="background:#DC2626;color:#fff">'+urgSols.length+' urgente'+(urgSols.length>1?'s':'')+'</span>':'<span class="alerta-badge" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)">—</span>')+
   '</div>';
-  alertasHtml+='<div class="'+(demos.length?'alerta urgente':'alerta')+'" onclick="google.script.run.mc_pub_abrirPanelRevisionDemos()">'+
+  alertasHtml+='<div class="'+(demos.length?'alerta urgente':'alerta')+'" onclick="parent.go(\'PanelRevisionDemos\',\'🧪\',\'Revisión Demos\')">'+
     '<div><div class="alerta-n">'+demos.length+'</div><div class="alerta-lbl">Demos para revisar</div></div>'+
     (demos.length?'<span class="alerta-badge" style="background:#8B5CF6;color:#fff">Pendiente</span>':'<span class="alerta-badge" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)">Al día</span>')+
   '</div>';
   var rojProy=sem.filter(function(p){return p.semaforo==='rojo';}).length;
-  alertasHtml+='<div class="'+(rojProy?'alerta urgente':'alerta')+'" onclick="google.script.run.mc_pub_v2436_abrirPanelProyectos()">'+
+  alertasHtml+='<div class="'+(rojProy?'alerta urgente':'alerta')+'" onclick="parent.go(\'PanelProyectos\',\'📦\',\'Proyectos\')">'+
     '<div><div class="alerta-n">'+rojProy+'</div><div class="alerta-lbl">Proyectos en riesgo</div></div>'+
     (rojProy?'<span class="alerta-badge" style="background:#DC2626;color:#fff">Atención</span>':'<span class="alerta-badge" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)">Sin riesgo</span>')+
   '</div>';
   var slaD=k.slaCompliance;
   var slaPct=slaD&&slaD.total?Math.round(slaD.dentroSLA/slaD.total*100):null;
-  alertasHtml+='<div class="alerta" onclick="google.script.run.mc_pub_abrirReporteMensual()">'+
+  alertasHtml+='<div class="alerta" onclick="parent.go(\'ReporteMensual\',\'📊\',\'Reporte Mensual\')">'+
     '<div><div class="alerta-n">'+(slaPct!==null?slaPct+'%':'—')+'</div><div class="alerta-lbl">SLA cumplido este mes</div></div>'+
     '<span class="alerta-badge" style="background:'+(slaPct===null?'rgba(255,255,255,.1)':slaPct>=90?'#059669':slaPct>=70?'#D97706':'#DC2626')+';color:#fff">'+(slaPct===null?'—':slaPct>=90?'Bien':slaPct>=70?'Regular':'Revisar')+'</span>'+
   '</div>';

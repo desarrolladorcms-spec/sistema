@@ -133,8 +133,8 @@ function renderPerfil(d){
     '<div class="actions-row">'+
       (d.telefono?'<button class="act-btn" style="background:#25D366;color:#fff" onclick="window.open(\'https://wa.me/'+d.telefono.replace(/\D/,'')+'\')">📲 WhatsApp</button>':'')+
       (d.web?'<button class="act-btn" style="background:#DBEAFE;color:#1E40AF" onclick="window.open(\''+d.web+'\',\'_blank\')">🌐 Ir al sitio</button>':'')+
-      '<button class="act-btn" style="background:var(--vl);color:#5B21B6" onclick="google.script.run.mc_pub_abrirFormBriefingWeb()">📋 Briefing</button>'+
-      '<button class="act-btn" style="background:#FEF9C3;color:#92400E" onclick="google.script.run.mc_pub_nuevoSoporte()">🛠️ Nuevo ticket</button>'+
+      '<button class="act-btn" style="background:var(--vl);color:#5B21B6" onclick="parent.go(\'FormBriefingWeb\',\'📋\',\'Briefing Web\')">📋 Briefing</button>'+
+      '<button class="act-btn" style="background:#FEF9C3;color:#92400E" onclick="parent.go(\'FormNuevoSoporte\',\'🛠️\',\'Nuevo Ticket\')">🛠️ Nuevo ticket</button>'+
     '</div></div>';
 
   // Proyectos activos

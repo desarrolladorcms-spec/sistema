@@ -63,7 +63,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
     <div class="hdr-title">🔔 Solicitudes Pendientes</div>
     <div class="hdr-actions">
       <button class="btn-hdr btn-refresh" onclick="cargar()">↻ Actualizar</button>
-      <button class="btn-hdr" style="background:#FDE68A;color:#1E1B4B" onclick="google.script.run.mc_pub_nuevoSoporte()">＋ Nuevo</button>
+      <button class="btn-hdr" style="background:#FDE68A;color:#1E1B4B" onclick="parent.go('FormNuevoSoporte','🛠️','Nuevo Ticket')">＋ Nuevo</button>
     </div>
   </div>
   <div class="kpis">
@@ -131,7 +131,7 @@ function renderCard(s){
     '<div class="sol-meta"><span>'+esc(s.meta||'')+'</span></div>'+
     '<div class="sol-actions">'+
       '<button class="act-btn act-asig" onclick="abrirAsig(\''+s.id+'\',\''+esc(s.marca)+' · '+esc((s.tarea||'').substring(0,40))+'\')">📋 Asignar</button>'+
-      (s.tipo==='demo'?'<button class="act-btn act-new" onclick="google.script.run.mc_pub_abrirPanelRevisionDemos()">👀 Revisar demo</button>':''+
+      (s.tipo==='demo'?'<button class="act-btn act-new" onclick="parent.go(\'PanelRevisionDemos\',\'🧪\',\'Revisión Demos\')">👀 Revisar demo</button>':''+
       '<button class="act-btn act-desc" onclick="">↘ Descartar</button>')+
     '</div>'+
   '</div>';
