@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<!--
+  SETUP.HTML — Corre el "Actualizador seguro" desde GitHub Pages
+  ───────────────────────────────────────────────────────────────────────
+  Reemplaza tener que abrir el Google Sheet y usar el sidebar de Apps
+  Script para crear las hojas/columnas internas. Hace exactamente lo
+  mismo, llamando a las mismas funciones, pero desde el navegador.
+
+  Uso: ábrela una sola vez (o cada vez que instales una versión nueva del
+  backend), pega la URL /exec del MASTER, y dale a "Ejecutar todo".
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuración inicial — MC CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;color:#0F172A;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:#fff;border-radius:20px;border:1px solid #E8ECF0;padding:32px;width:460px;
+    box-shadow:0 20px 60px rgba(0,0,0,.08)}
+  .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7C3AED,#A855F7);
+    display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
+  h1{font-size:19px;font-weight:800;margin-bottom:4px}
+  .sub{font-size:12.5px;color:#64748B;margin-bottom:20px;line-height:1.5}
+  label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;
+    display:block;margin-bottom:6px}
+  input{width:100%;padding:10px 12px;border:1.5px solid #E8ECF0;border-radius:10px;font-size:12.5px;
+    font-family:inherit;margin-bottom:16px}
+  .btn{width:100%;padding:11px 0;border:none;border-radius:10px;font-weight:700;font-size:13px;
+    cursor:pointer;margin-bottom:8px}
+  .btn-v{background:#7C3AED;color:#fff}
+  .btn-v:disabled{opacity:.5;cursor:not-allowed}
+  .btn-ghost{background:#F1F5F9;color:#334155}
+  .btn-red{background:#FEE2E2;color:#DC2626}
+  .progress-wrap{display:none;margin-top:20px}
+  .progress-bar{height:8px;background:#E8ECF0;border-radius:99px;overflow:hidden;margin-bottom:10px}
+  .progress-fill{height:100%;background:linear-gradient(135deg,#7C3AED,#A855F7);width:0%;transition:width .3s}
+  .step-info{font-size:12.5px;color:#334155;margin-bottom:4px}
+  .step-count{font-size:11px;color:#94A3B8;margin-bottom:14px}
+  .done-badge{display:none;background:#DCFCE7;color:#059669;padding:10px 12px;border-radius:10px;
+    font-size:12.5px;font-weight:700;margin-top:14px;text-align:center}
+  .error-box{display:none;background:#FEE2E2;color:#DC2626;padding:10px 12px;border-radius:10px;
+    font-size:11.5px;margin-top:10px;max-height:120px;overflow-y:auto;white-space:pre-line}
+  .log-box{font-size:10.5px;color:#94A3B8;margin-top:10px;max-height:100px;overflow-y:auto;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🧠</div>
+  <h1>Configuración inicial</h1>
+  <div class="sub">Esto crea las hojas y columnas internas que el sistema necesita, sin tener que abrir el Google Sheet. Solo hace falta correrlo una vez (o cuando instales una versión nueva del backend).</div>
+
+  <label>URL del sistema (la que termina en /exec)</label>
+  <input id="url" placeholder="https://script.google.com/macros/s/..." />
+
+  <button class="btn btn-v" id="btnEjecutar" onclick="ejecutarTodo()">▶ Ejecutar todo</button>
+  <button class="btn btn-ghost" id="btnEstado" onclick="verEstado()">Ver estado actual</button>
+  <button class="btn btn-red" id="btnReiniciar" onclick="reiniciar()">♻ Reiniciar avance</button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="step-info" id="stepInfo">—</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="step-count" id="stepCount"></div>
+  </div>
+
+  <div class="done-badge" id="doneBadge">✅ Listo. Ya puedes cerrar esta página y usar el sistema normalmente.</div>
+  <div class="error-box" id="errorBox"></div>
+  <div class="log-box" id="logBox"></div>
+</div>
+
+<script>
+var corriendo = false;
+
+function urlBase() {
+  var u = document.getElementById('url').value.trim();
+  if (u) localStorage.setItem('mc_gas_url', u);
+  return u || localStorage.getItem('mc_gas_url') || '';
+}
+
+(function precargarUrl() {
+  var saved = localStorage.getItem('mc_gas_url');
+  if (saved) document.getElementById('url').value = saved;
+})();
+
+async function llamar(accion) {
+  var url = urlBase();
+  if (!url) { alert('Pega primero la URL del sistema (la que termina en /exec).'); return null; }
+  try {
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: accion })
+    });
+    return await res.json();
+  } catch (e) {
+    mostrarError('Error de conexión: ' + e.message);
+    return null;
+  }
+}
+
+function mostrarError(msg) {
+  var box = document.getElementById('errorBox');
+  box.style.display = 'block';
+  box.textContent = msg;
+}
+
+function pintarEstado(r) {
+  if (!r || !r.ok) { mostrarError((r && r.msg) || 'No se pudo leer el estado.'); return; }
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('stepInfo').textContent = r.pasoActual || '—';
+  document.getElementById('stepCount').textContent = 'Paso ' + r.pasoActualNumero + ' de ' + r.totalPasos;
+  var pct = Math.round((r.pasoActualNumero / r.totalPasos) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  if (r.errors && r.errors.length) {
+    mostrarError(r.errors.slice(-5).join('\n'));
+  } else {
+    document.getElementById('errorBox').style.display = 'none';
+  }
+
+  if (r.log && r.log.length) {
+    document.getElementById('logBox').innerHTML = r.log.slice(-6).map(function (l) { return '· ' + l; }).join('<br>');
+  }
+
+  if (r.done) {
+    document.getElementById('doneBadge').style.display = 'block';
+    document.getElementById('progressFill').style.width = '100%';
+  }
+  return r.done;
+}
+
+async function verEstado() {
+  var r = await llamar('SETUP_ESTADO');
+  pintarEstado(r);
+}
+
+async function ejecutarTodo() {
+  if (corriendo) return;
+  corriendo = true;
+  document.getElementById('btnEjecutar').disabled = true;
+  document.getElementById('btnEjecutar').textContent = 'Ejecutando...';
+  document.getElementById('doneBadge').style.display = 'none';
+
+  var terminado = false;
+  var intentos = 0;
+  while (!terminado && intentos < 200) {
+    intentos++;
+    var r = await llamar('SETUP_CONTINUAR');
+    if (!r) break;
+    terminado = pintarEstado(r);
+    if (terminado) break;
+    await new Promise(function (res) { setTimeout(res, 400); });
+  }
+
+  corriendo = false;
+  document.getElementById('btnEjecutar').disabled = false;
+  document.getElementById('btnEjecutar').textContent = '▶ Ejecutar todo';
+}
+
+async function reiniciar() {
+  if (!confirm('¿Reiniciar el avance del actualizador desde cero?')) return;
+  var r = await llamar('SETUP_REINICIAR');
+  document.getElementById('doneBadge').style.display = 'none';
+  pintarEstado(r);
+}
+</script>
+</body>
+</html>
