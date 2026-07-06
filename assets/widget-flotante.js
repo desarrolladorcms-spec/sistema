@@ -152,7 +152,7 @@
     b.title = 'Fijar Mi Día en pantalla';
     b.textContent = '📌';
     b.style.cssText = [
-      'position:fixed;right:86px;bottom:22px;width:44px;height:44px;border-radius:50%;',
+      'position:fixed;left:86px;bottom:22px;width:44px;height:44px;border-radius:50%;',
       'background:#fff;color:#7C3AED;border:1px solid #E8ECF0;font-size:18px;cursor:pointer;',
       'box-shadow:0 4px 14px rgba(15,23,42,.14);z-index:9998;display:flex;',
       'align-items:center;justify-content:center;transition:transform .15s'

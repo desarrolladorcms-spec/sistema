@@ -31,7 +31,7 @@
   function inyectarEstilos() {
     if (document.getElementById(STYLE_ID)) return;
     var css = [
-      '#mc-cmd-fab{position:fixed;right:22px;bottom:22px;width:52px;height:52px;border-radius:50%;',
+      '#mc-cmd-fab{position:fixed;left:22px;bottom:22px;width:52px;height:52px;border-radius:50%;',
       'background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;border:none;font-size:22px;',
       'box-shadow:0 4px 14px rgba(124,58,237,.4);cursor:pointer;z-index:9999;display:flex;',
       'align-items:center;justify-content:center;transition:transform .15s}',
@@ -39,7 +39,7 @@
       '#mc-cmd-fab.jarvis-on{box-shadow:0 0 0 4px rgba(220,38,38,.25),0 4px 14px rgba(124,58,237,.4);',
       'animation:mcPulse 1.6s infinite}',
       '@keyframes mcPulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.35)}70%{box-shadow:0 0 0 10px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}',
-      '#mc-cmd-panel{position:fixed;right:22px;bottom:86px;width:320px;max-height:460px;background:#fff;',
+      '#mc-cmd-panel{position:fixed;left:22px;bottom:86px;width:320px;max-height:460px;background:#fff;',
       'border:1px solid #E8ECF0;border-radius:14px;box-shadow:0 12px 32px rgba(15,23,42,.18);',
       'display:none;flex-direction:column;overflow:hidden;z-index:9999;font-family:Inter,system-ui,sans-serif}',
       '#mc-cmd-panel.on{display:flex}',
@@ -194,7 +194,7 @@
         if (opts.porVoz) hablar(r.resumen);
         return;
       }
-      pendiente = { accion: r.accion, data: r.data, resumen: r.resumen };
+      pendiente = { accion: r.accion, data: r.data, resumen: r.resumen, esConsulta: r.esConsulta, pregunta: texto };
       mostrarMsg(
         '<div class="mc-cmd-confirm"><div class="r">' + r.resumen + '</div>' +
         '<div class="mc-cmd-btns">' +
@@ -219,10 +219,25 @@
     if (!pendiente) return;
     mostrarMsg('Ejecutando...');
     var accion = pendiente.accion, data = pendiente.data;
+    var esConsulta = pendiente.esConsulta, pregunta = pendiente.pregunta;
     pendiente = null;
     var nombre = nombreUsuario();
     MC_API.call(accion, data, function (r) {
       if (r && r.ok) {
+        // Si era una consulta (ver/contar/listar algo), pedimos que resuma el
+        // resultado real contestando la pregunta, en vez de un genérico "listo".
+        if (esConsulta && pregunta) {
+          MC_API.call('AI_RESUMIR_RESULTADO', { pregunta: pregunta, resultado: r }, function (rr) {
+            var respuesta = (rr && rr.ok && rr.respuesta) ? rr.respuesta : (r.msg || 'Listo, ya tengo la información.');
+            mostrarMsg('✅ ' + respuesta);
+            if (porVoz) hablar(respuesta, function () { if (jarvisActivo) reanudarEscuchaJarvis(); });
+          }, function () {
+            var fallback = r.msg || 'Listo, se completó la consulta.';
+            mostrarMsg('✅ ' + fallback);
+            if (porVoz) hablar(fallback, function () { if (jarvisActivo) reanudarEscuchaJarvis(); });
+          });
+          return;
+        }
         var msgVisual = '✅ Listo. ' + (r.msg || '');
         var msgHablado = 'Listo' + (nombre ? ', ' + nombre : '') + '. ' + (r.msg || 'Se completó la acción.');
         mostrarMsg(msgVisual);
