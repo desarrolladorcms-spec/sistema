@@ -54,6 +54,10 @@
       'top:2px;left:2px;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}',
       '#mc-cmd-jarvis-toggle.on{background:#059669}',
       '#mc-cmd-jarvis-toggle.on .dot{left:19px}',
+      '#mc-cmd-voz-row{padding:9px 14px;border-bottom:1px solid #E8ECF0;display:flex;align-items:center;',
+      'justify-content:space-between;font-size:11.5px;color:#334155;background:#FAFBFC;gap:8px}',
+      '#mc-cmd-voz{flex:1;max-width:190px;border:1px solid #E2E8F0;border-radius:7px;padding:4px 6px;',
+      'font-size:11px;font-family:inherit;background:#fff;color:#334155}',
       '#mc-cmd-body{padding:12px 14px;overflow-y:auto;flex:1;font-size:12.5px;color:#0F172A}',
       '#mc-cmd-msg{min-height:32px;margin-bottom:10px;color:#334155;line-height:1.4}',
       '.mc-cmd-confirm{background:#F1F5F9;border:1px solid #E2E8F0;border-radius:10px;padding:10px;margin-top:6px}',
@@ -87,6 +91,7 @@
       '<div id="mc-cmd-head"><span>🎙️ Dale una orden al sistema</span><span id="mc-cmd-close">✕</span></div>' +
       '<div id="mc-cmd-jarvis-row"><span>Modo manos libres ("Jarvis")</span>' +
         '<div id="mc-cmd-jarvis-toggle"><div class="dot"></div></div></div>' +
+      '<div id="mc-cmd-voz-row"><span>Voz</span><select id="mc-cmd-voz"></select></div>' +
       '<div id="mc-cmd-body"><div id="mc-cmd-msg">Escribe o habla una orden, por ejemplo: "crea una tarea para Camila de revisar el plugin de ETPOWER para mañana". O activa el modo manos libres y di "Jarvis" seguido de tu orden.</div></div>' +
       '<div id="mc-cmd-foot">' +
         '<textarea id="mc-cmd-input" rows="1" placeholder="Escribe tu orden..."></textarea>' +
@@ -115,9 +120,55 @@
       if (!window.speechSynthesis) { if (cb) cb(); return; }
       var u = new SpeechSynthesisUtterance(String(texto).replace(/[✅⚠️🤔🎙️🟢]/g, ''));
       u.lang = 'es-PE';
+      var vozElegida = mc_obtenerVozGuardada_();
+      if (vozElegida) u.voice = vozElegida;
       if (cb) u.onend = cb;
       window.speechSynthesis.speak(u);
     } catch (e) { if (cb) cb(); }
+  }
+
+  // ── Selector de voz ─────────────────────────────────────────────────────
+  var VOZ_KEY_ = 'mc_voz_jarvis';
+
+  function mc_obtenerVozGuardada_() {
+    var nombreGuardado = localStorage.getItem(VOZ_KEY_);
+    if (!nombreGuardado) return null;
+    var voces = window.speechSynthesis.getVoices();
+    var v = voces.filter(function (x) { return x.name === nombreGuardado; })[0];
+    return v || null;
+  }
+
+  function poblarSelectorVoces_() {
+    var sel = document.getElementById('mc-cmd-voz');
+    if (!sel || !window.speechSynthesis) return;
+    var voces = window.speechSynthesis.getVoices();
+    if (!voces.length) return; // a veces cargan async, se reintenta con el evento de abajo
+    // Poner primero las voces en español, pero dejar todas disponibles por si
+    // el navegador solo trae voces en inglés instaladas.
+    var enEspanol = voces.filter(function (v) { return /^es/i.test(v.lang); });
+    var otras = voces.filter(function (v) { return !/^es/i.test(v.lang); });
+    var ordenadas = enEspanol.concat(otras);
+    var guardada = localStorage.getItem(VOZ_KEY_);
+    sel.innerHTML = ordenadas.map(function (v) {
+      var sel_attr = (v.name === guardada) ? ' selected' : '';
+      return '<option value="' + v.name.replace(/"/g,'') + '"' + sel_attr + '>' + v.name + ' (' + v.lang + ')</option>';
+    }).join('');
+    if (!guardada && ordenadas[0]) localStorage.setItem(VOZ_KEY_, ordenadas[0].name);
+  }
+
+  function initSelectorVoces_() {
+    poblarSelectorVoces_();
+    // Chrome carga la lista de voces de forma asíncrona la primera vez.
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = poblarSelectorVoces_;
+    }
+    var sel = document.getElementById('mc-cmd-voz');
+    if (sel) {
+      sel.onchange = function () {
+        localStorage.setItem(VOZ_KEY_, sel.value);
+        hablar('Hola, así sueno yo ahora.');
+      };
+    }
   }
 
   // ── Flujo de UN comando (por texto o por el botón de mic normal) ──────────
@@ -318,7 +369,7 @@
     try { rec.start(); } catch (e) {}
   }
 
-  function init() { inyectarEstilos(); construirUI(); }
+  function init() { inyectarEstilos(); construirUI(); initSelectorVoces_(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
