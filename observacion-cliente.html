@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Mis observaciones</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--v:#7C3AED;--vl:#F5F3FF;--bg:#F8F9FF;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--green:#059669;--red:#DC2626}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;min-height:100vh;padding-bottom:40px}
+
+.hdr{background:linear-gradient(135deg,#1E1B4B 0%,#7C3AED 100%);color:#fff;padding:20px 18px 24px;text-align:center}
+.hdr-logo{font-size:28px;margin-bottom:8px}
+.hdr-agencia{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.6);margin-bottom:6px}
+.hdr-titulo{font-size:18px;font-weight:700;color:#FDE68A;line-height:1.3}
+.hdr-sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:5px;line-height:1.4}
+
+.content{padding:16px 14px;max-width:500px;margin:0 auto}
+
+.intro-card{background:var(--surface);border-radius:16px;border:1px solid var(--border);padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.intro-title{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.intro-text{font-size:13px;color:var(--muted);line-height:1.5}
+.intro-steps{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.step-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted)}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--v);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+.obs-card{background:var(--surface);border-radius:16px;border:2px solid var(--border);padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:.2s}
+.obs-card:focus-within{border-color:var(--v);box-shadow:0 4px 16px rgba(124,58,237,.12)}
+.obs-num{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--v);margin-bottom:10px}
+.f-label{font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px}
+.f-label span{font-weight:400;color:var(--muted)}
+.f-input,.f-textarea,.f-select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:inherit;color:var(--text);background:#FAFBFC;appearance:none;-webkit-appearance:none;transition:.15s;margin-bottom:12px}
+.f-input:focus,.f-textarea:focus,.f-select:focus{outline:none;border-color:var(--v);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.f-textarea{min-height:100px;resize:none;line-height:1.5}
+.f-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:-8px;margin-bottom:10px}
+
+.btn-add{width:100%;padding:14px;background:var(--v);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-add:hover{background:#5B21B6}
+.btn-add:active{transform:scale(.98)}
+.btn-add:disabled{opacity:.5;cursor:default}
+
+.obs-list{margin-bottom:14px}
+.obs-list-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.obs-badge{background:var(--green);color:#fff;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.obs-item{background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:12px;padding:12px 14px;margin-bottom:8px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.obs-item-page{font-size:11px;font-weight:700;color:#065F46;margin-bottom:4px}
+.obs-item-text{font-size:13px;color:#1A3A1A;line-height:1.4}
+.obs-item-time{font-size:10px;color:#6EE7B7;margin-top:4px}
+
+.final-card{background:linear-gradient(135deg,var(--vl),#EFF6FF);border-radius:16px;border:1px solid #DDD6FE;padding:18px;text-align:center;margin-bottom:16px;display:none}
+.final-icon{font-size:36px;margin-bottom:8px}
+.final-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.final-text{font-size:13px;color:var(--muted);line-height:1.5}
+.btn-more{margin-top:14px;padding:12px 24px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;color:var(--text)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A0A36;color:#FDE68A;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+.sin-link{max-width:420px;margin:60px auto;text-align:center;padding:24px;color:var(--muted);font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">🧪</div>
+  <div class="hdr-agencia">Agencia Monstruo Creativo</div>
+  <div class="hdr-titulo">Observaciones de tu sitio web</div>
+  <div class="hdr-sub">Cliente: <b id="marcaNombre">—</b></div>
+</div>
+
+<div class="content">
+  <div class="intro-card">
+    <div class="intro-title">¿Cómo funciona? 👇</div>
+    <div class="intro-text">Envía cada observación por separado. Así el equipo puede revisar y resolver cada punto de forma organizada.</div>
+    <div class="intro-steps">
+      <div class="step-item"><div class="step-num">1</div><div>Elige en qué sección o página está el cambio</div></div>
+      <div class="step-item"><div class="step-num">2</div><div>Describe con detalle qué necesita cambiar</div></div>
+      <div class="step-item"><div class="step-num">3</div><div>Toca "Enviar observación" — y listo ✓</div></div>
+    </div>
+  </div>
+
+  <div class="obs-list" id="obsList" style="display:none">
+    <div class="obs-list-title">Enviadas <span class="obs-badge" id="obsBadge">0</span></div>
+    <div id="obsItems"></div>
+  </div>
+
+  <div class="obs-card" id="obsForm">
+    <div class="obs-num">Observación <span id="obsNum">1</span></div>
+
+    <label class="f-label">¿En qué sección o página? <span>(requerido)</span></label>
+    <select class="f-select" id="pagina">
+      <option value="">— Selecciona —</option>
+      <option>Página de inicio</option>
+      <option>Sobre nosotros / quiénes somos</option>
+      <option>Servicios</option>
+      <option>Productos / catálogo</option>
+      <option>Contacto</option>
+      <option>Blog / noticias</option>
+      <option>Portafolio / proyectos</option>
+      <option>Header / menú superior</option>
+      <option>Footer / pie de página</option>
+      <option>General / varias páginas</option>
+      <option>Otra sección</option>
+    </select>
+    <input class="f-input" type="text" id="paginaCustom" placeholder="Especifica cuál..." style="display:none;margin-top:-6px">
+
+    <label class="f-label">¿Qué debe cambiar? <span>(descríbelo con detalle)</span></label>
+    <textarea class="f-textarea" id="descripcion" placeholder="Ej: El botón de WhatsApp no se ve bien en el celular. Está muy pegado al texto y el color debería ser verde..." oninput="updateCount()"></textarea>
+    <div class="char-count"><span id="charCount">0</span> caracteres</div>
+
+    <button class="btn-add" id="btnEnviar" onclick="enviarObs()">
+      <span>📤 Enviar observación</span>
+    </button>
+  </div>
+
+  <div class="final-card" id="finalCard">
+    <div class="final-icon">🎉</div>
+    <div class="final-title">¡Gracias por tus observaciones!</div>
+    <div class="final-text">El equipo ya las recibió y las revisará a la brevedad.<br>Te contactaremos cuando estén resueltas.</div>
+    <button class="btn-more" onclick="agregarMas()">＋ Agregar otra observación</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Única diferencia con el formulario original: DEMO_ID/TOKEN/MARCA vienen
+     de la URL (?demo=...&token=...&marca=...) en vez de venir del servidor,
+     y la URL del backend viene de config.js. Todo lo demás es idéntico. -->
+<script src="assets/config.js"></script>
+<script>
+var params = new URLSearchParams(location.search);
+var DEMO_ID = params.get('demo') || '';
+var TOKEN = params.get('token') || '';
+var MARCA = params.get('marca') || '';
+var WEB_APP_URL = window.MC_GAS_URL_PUBLICO;
+var obsCount=0, obsEnviadas=[];
+
+document.getElementById('marcaNombre').textContent = MARCA || '—';
+
+if (!DEMO_ID || !TOKEN) {
+  document.querySelector('.content').innerHTML =
+    '<div class="sin-link">Este link no tiene los datos necesarios. Pide a tu contacto en Monstruo Creativo que te reenvíe el link de observaciones correcto.</div>';
+} else {
+
+document.getElementById('pagina').addEventListener('change',function(){
+  document.getElementById('paginaCustom').style.display=this.value==='Otra sección'?'block':'none';
+});
+
+function updateCount(){
+  var txt=document.getElementById('descripcion').value;
+  document.getElementById('charCount').textContent=txt.length;
+}
+
+function toast(msg,ok){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=ok===false?'#DC2626':'#1A0A36';
+  t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+function enviarObs(){
+  var pagina=document.getElementById('pagina').value;
+  var paginaCustom=document.getElementById('paginaCustom').value.trim();
+  var descripcion=document.getElementById('descripcion').value.trim();
+
+  if(!pagina){toast('⚠️ Selecciona la sección o página',false);return;}
+  if(!descripcion||descripcion.length<10){toast('⚠️ Describe con más detalle el cambio',false);return;}
+
+  var paginaFinal=pagina==='Otra sección'?(paginaCustom||'Otra sección'):pagina;
+
+  var btn=document.getElementById('btnEnviar');
+  btn.disabled=true;btn.innerHTML='<span>Enviando...</span>';
+
+  var data={action:'OBS_CLIENTE',demoId:DEMO_ID,token:TOKEN,marca:MARCA,
+    pagina:paginaFinal,descripcion:descripcion};
+
+  fetch(WEB_APP_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify(data)
+  })
+  .then(function(r){return r.json();})
+  .then(function(r){
+    btn.disabled=false;btn.innerHTML='<span>📤 Enviar observación</span>';
+    if(r&&r.ok!==false){
+      obsCount++;obsEnviadas.push({pagina:paginaFinal,descripcion:descripcion,hora:new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})});
+      actualizarLista();
+      limpiarForm();
+      toast('✅ Observación '+obsCount+' enviada correctamente');
+      document.getElementById('finalCard').style.display='block';
+      document.getElementById('finalCard').scrollIntoView({behavior:'smooth'});
+    } else {
+      toast('Error: '+(r&&r.msg||'Intenta de nuevo'),false);
+    }
+  })
+  .catch(function(){
+    btn.disabled=false;btn.innerHTML='<span>📤 Enviar observación</span>';
+    toast('Error de conexión. Verifica tu internet.',false);
+  });
+}
+
+function actualizarLista(){
+  var list=document.getElementById('obsList');
+  var items=document.getElementById('obsItems');
+  document.getElementById('obsBadge').textContent=obsEnviadas.length;
+  list.style.display='block';
+  var html='';
+  obsEnviadas.forEach(function(o,i){
+    html='<div class="obs-item">'+
+      '<div class="obs-item-page">'+i+'→ 📍 '+esc(o.pagina)+'</div>'+
+      '<div class="obs-item-text">'+esc(o.descripcion)+'</div>'+
+      '<div class="obs-item-time">✓ Enviada a las '+esc(o.hora)+'</div>'+
+    '</div>'+html;
+  });
+  items.innerHTML=html;
+  document.getElementById('obsNum').textContent=obsEnviadas.length+1;
+}
+
+function limpiarForm(){
+  document.getElementById('pagina').value='';
+  document.getElementById('paginaCustom').value='';
+  document.getElementById('paginaCustom').style.display='none';
+  document.getElementById('descripcion').value='';
+  document.getElementById('charCount').textContent='0';
+}
+
+function agregarMas(){
+  document.getElementById('obsForm').scrollIntoView({behavior:'smooth'});
+  document.getElementById('pagina').focus();
+}
+
+function esc(x){return String(x||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})}
+
+}
+</script>
+</body>
+</html>
