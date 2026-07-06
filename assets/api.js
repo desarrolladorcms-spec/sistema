@@ -69,53 +69,26 @@
   // Intercepta llamadas a google.script.run.mc_pub_X(data) y las redirige a MC_API
   global.google = global.google || {};
   global.google.script = global.google.script || {};
-  global.google.script.run = new Proxy({}, {
-    get: function(_, fnName) {
-      // Ignorar propiedades internas de JS
-      if (typeof fnName !== 'string' || fnName.startsWith('__')) return undefined;
 
-      var _success = null, _error = null;
-
-      function execCall(rawArg) {
-        // Normalizar argumento: objetos pasan directo, primitivos se envuelven
-        var data;
-        if (rawArg === null || rawArg === undefined) {
-          data = {};
-        } else if (typeof rawArg === 'object' && !Array.isArray(rawArg)) {
-          data = rawArg;
-        } else {
-          // Primitivo (string, number, boolean) o array
-          // El dispatcher GAS lo detectará y extraerá como fnArg
-          data = { '0': rawArg };
-        }
-        call(fnName, data, _success, _error);
+  function mc_makeRunner_(successCb, failureCb) {
+    return new Proxy(function () {}, {
+      apply: function () { /* google.script.run() solo no se usa directo */ },
+      get: function (_, prop) {
+        if (prop === 'withSuccessHandler') return function (fn) { return mc_makeRunner_(fn, failureCb); };
+        if (prop === 'withFailureHandler') return function (fn) { return mc_makeRunner_(successCb, fn); };
+        if (typeof prop !== 'string' || prop.startsWith('__')) return undefined;
+        // Cualquier otro nombre es el de la función real del backend
+        return function (rawArg) {
+          var data;
+          if (rawArg === null || rawArg === undefined) data = {};
+          else if (typeof rawArg === 'object' && !Array.isArray(rawArg)) data = rawArg;
+          else data = { '0': rawArg };
+          call(prop, data, successCb, failureCb);
+        };
       }
-
-      // Builder con handlers
-      var builder = {
-        withSuccessHandler: function(fn) { _success = fn; return builder; },
-        withFailureHandler: function(fn) { _error = fn; return builder; },
-      };
-
-      // Devolver un objeto que funciona como builder Y como función
-      return new Proxy(builder, {
-        // Cuando se llama directamente: google.script.run.mc_pub_X(data)
-        apply: function(target, thisArg, args) {
-          execCall(args[0]);
-        },
-        get: function(target, prop) {
-          // Acceso a withSuccessHandler / withFailureHandler
-          if (prop in target) return target[prop];
-          // Acceso a la función misma: .withSuccessHandler(fn).mc_pub_X(data)
-          if (typeof prop === 'string' && prop === fnName) {
-            return function() { execCall(arguments[0]); };
-          }
-          // Cualquier otro nombre de función → llamada directa
-          return function() { execCall(arguments[0]); };
-        }
-      });
-    }
-  });
+    });
+  }
+  global.google.script.run = mc_makeRunner_(null, null);
 
   // google.script.host.close() — no hace nada fuera de GAS pero tampoco rompe
   global.google.script.host = { close: function() {

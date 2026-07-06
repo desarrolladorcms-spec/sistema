@@ -22,6 +22,9 @@
 (function () {
   var pipWindow = null;
   var pollTimer = null;
+  // Capturado AHORA porque document.currentScript deja de existir en cuanto
+  // el script termina de ejecutarse (no sirve dentro de un manejador de clic).
+  var MI_SCRIPT_URL_ = (document.currentScript && document.currentScript.src) || '';
 
   function prioridadClase(p) {
     p = String(p || '').toLowerCase();
@@ -123,7 +126,11 @@
   function abrirFallback() {
     var w = 300, h = 420;
     var left = screen.availWidth - w - 20, top = screen.availHeight - h - 20;
-    window.open('../widget.html', 'mc_widget', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
+    // Funciona sin importar si este script se cargó desde la raíz (index.html)
+    // o desde panels/ (AppShell.html), calculando la ruta a partir de dónde
+    // vive este mismo archivo.
+    var widgetUrl = MI_SCRIPT_URL_ ? new URL('../widget.html', MI_SCRIPT_URL_).href : 'widget.html';
+    window.open(widgetUrl, 'mc_widget', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
   }
 
   window.MC_abrirWidgetFlotante = function () {
