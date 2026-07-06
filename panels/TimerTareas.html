@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#1A0A36;color:#EDE9FE;
+  display:flex;flex-direction:column;align-items:center;padding:24px 20px;min-height:100vh}
+:root{--v:#9333EA;--gold:#FDE68A}
+.logo{font-size:11px;color:#6D28D9;margin-bottom:20px;letter-spacing:.1em;text-transform:uppercase}
+.timer-display{font-size:64px;font-weight:300;letter-spacing:.05em;color:#fff;
+  font-variant-numeric:tabular-nums;margin:10px 0;text-shadow:0 0 40px rgba(147,51,234,.4)}
+.timer-display.running{color:var(--gold);text-shadow:0 0 40px rgba(253,230,138,.3)}
+.timer-display.paused{color:#A78BFA}
+.estado-badge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;
+  margin-bottom:20px;letter-spacing:.06em}
+.estado-badge.idle{background:rgba(255,255,255,.08);color:#6D28D9}
+.estado-badge.running{background:rgba(253,230,138,.15);color:var(--gold)}
+.estado-badge.paused{background:rgba(167,139,250,.15);color:#A78BFA}
+.btns{display:flex;gap:10px;margin-bottom:24px}
+.btn{padding:10px 20px;border-radius:10px;border:none;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.btn-start{background:var(--v);color:#fff}
+.btn-start:hover{background:#7C3AED}
+.btn-pause{background:rgba(253,230,138,.2);color:var(--gold);border:1.5px solid rgba(253,230,138,.3)}
+.btn-pause:hover{background:rgba(253,230,138,.3)}
+.btn-stop{background:rgba(220,38,38,.2);color:#FCA5A5;border:1.5px solid rgba(220,38,38,.3)}
+.btn-stop:hover{background:rgba(220,38,38,.3)}
+.btn-reset{background:rgba(255,255,255,.08);color:#9CA3AF}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.card{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:14px;width:100%;max-width:420px;margin-bottom:12px}
+.card label{font-size:10px;font-weight:600;color:#6D28D9;letter-spacing:.08em;
+  text-transform:uppercase;display:block;margin-bottom:7px}
+.card select,.card input{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);
+  color:#EDE9FE;border-radius:8px;padding:8px 10px;font-size:13px;
+  font-family:inherit;width:100%}
+.card select option{background:#1A0A36;color:#EDE9FE}
+.save-btn{background:var(--v);color:#fff;border:none;border-radius:10px;
+  padding:12px;width:100%;font-size:14px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;max-width:420px}
+.save-btn:hover{background:#7C3AED}
+.save-btn:disabled{opacity:.4;cursor:not-allowed}
+.historial{width:100%;max-width:420px;margin-top:8px}
+.historial-title{font-size:10px;font-weight:700;color:#6D28D9;
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.hist-item{background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;
+  margin-bottom:4px;font-size:11px;display:flex;justify-content:space-between}
+.hist-tiempo{color:var(--gold);font-weight:600}
+
+.smart-card{background:rgba(255,255,255,.075);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:14px;width:100%;max-width:420px;margin-bottom:12px}
+.smart-title{font-size:12px;font-weight:900;color:#fff;margin-bottom:4px}
+.smart-meta{font-size:11px;color:#C4B5FD;line-height:1.45;white-space:pre-line}
+.review-pill{display:inline-flex;margin-top:8px;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:900;background:rgba(22,163,74,.18);color:#BBF7D0;border:1px solid rgba(34,197,94,.28)}
+.review-pill.yes{background:rgba(245,158,11,.18);color:#FDE68A;border-color:rgba(245,158,11,.32)}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;margin-bottom:12px}
+.action-btn{border:0;border-radius:12px;padding:12px 10px;font-weight:900;cursor:pointer;color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);font-size:12px}
+.action-btn:hover{background:rgba(255,255,255,.16)}
+.action-btn.primary{background:#7C3AED}
+.action-btn.done{background:#16A34A}
+.action-btn.warn{background:#D97706}
+.action-btn.danger{background:#DC2626}
+.action-btn:disabled{opacity:.45;cursor:not-allowed}
+.motive-box{width:100%;max-width:420px;margin-bottom:12px}
+.motive-box textarea{width:100%;min-height:64px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 10px;color:#EDE9FE;font-family:inherit;font-size:12px;resize:vertical}
+.motive-box textarea::placeholder{color:#A78BFA}
+
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  background:#D1FAE5;color:#065F46;border:1.5px solid #6EE7B7;
+  padding:10px 18px;border-radius:8px;font-weight:600;font-size:12px;
+  display:none;z-index:99;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="logo">⏱️ Timer de Tareas — CMS v3.0.24.24</div>
+
+<div class="timer-display idle" id="display">00:00:00</div>
+<div class="estado-badge idle" id="badge">DETENIDO</div>
+
+<div class="btns">
+  <button class="btn btn-start" id="btnStart" onclick="startTimer()">▶ Iniciar tiempo</button>
+  <button class="btn btn-pause" id="btnPause" onclick="pauseTimer()" disabled>⏸ Pausar tiempo</button>
+  <button class="btn btn-stop" id="btnStop" onclick="stopTimer()" disabled>⏹ Detener tiempo</button>
+  <button class="btn btn-reset" onclick="resetTimer()">↺</button>
+</div>
+
+<div class="card">
+  <label>Tarea activa</label>
+  <select id="tareaSelect">
+    <option value="">⏳ Cargando tareas...</option>
+  </select>
+</div>
+
+<div class="smart-card" id="taskInfoCard">
+  <div class="smart-title">Selecciona una tarea</div>
+  <div class="smart-meta">El sistema te dirá si al terminar se finaliza sola o pasa a revisión de Rossio.</div>
+</div>
+
+<div class="action-grid">
+  <button class="action-btn primary" id="actIniciar" onclick="accionTarea('iniciar')" disabled>▶ Empezar</button>
+  <button class="action-btn warn" id="actPausar" onclick="accionTarea('pausar')" disabled>⏸ Pausar tiempo</button>
+  <button class="action-btn warn" id="actBloquear" onclick="accionTarea('bloquear')" disabled>🚧 Estoy bloqueada</button>
+  <button class="action-btn done" id="actTerminar" onclick="accionTarea('terminar')" disabled>✅ Ya terminé</button>
+  <button class="action-btn danger" id="actCancelar" onclick="accionTarea('cancelar')" disabled>❌ Ya no se hará</button>
+  <button class="action-btn" id="actRevision" onclick="accionTarea('revision')" disabled>👀 Enviar a revisión</button>
+</div>
+
+<div class="motive-box">
+  <textarea id="motivoInput" placeholder="Motivo si está bloqueada o si ya no se hará. Ej: falta acceso, falta contenido, cliente no respondió..."></textarea>
+</div>
+
+<div class="card">
+  <label>Avance del día (qué hiciste)</label>
+  <input type="text" id="avanceInput" placeholder="Ej: Corregí el banner principal...">
+</div>
+
+<button class="save-btn" id="btnGuardar" onclick="guardarTiempo()" disabled>
+  💾 Guardar tiempo en la tarea
+</button>
+
+<div class="historial" id="historial" style="display:none">
+  <div class="historial-title">Guardado hoy</div>
+  <div id="histItems"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../assets/api.js"></script>
+<script>
+var segundos=0, intervalo=null, estado='idle';
+var historial=[];
+var tareasCache=[];
+
+function fmtTime(s){
+  var h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+}
+
+function updateDisplay(){
+  var d=document.getElementById('display');
+  d.textContent=fmtTime(segundos);
+  d.className='timer-display '+estado;
+  var b=document.getElementById('badge');
+  b.className='estado-badge '+estado;
+  b.textContent=estado==='running'?'▶ CORRIENDO':estado==='paused'?'⏸ EN PAUSA':'⏹ DETENIDO';
+}
+
+function startTimer(){
+  if(estado==='running') return;
+  estado='running';
+  intervalo=setInterval(function(){segundos++;updateDisplay();},1000);
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnPause').disabled=false;
+  document.getElementById('btnStop').disabled=false;
+  document.getElementById('btnGuardar').disabled=false;
+  updateDisplay();
+}
+
+function pauseTimer(){
+  if(estado!=='running') return;
+  clearInterval(intervalo); estado='paused';
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnPause').disabled=true;
+  updateDisplay();
+}
+
+function stopTimer(){
+  clearInterval(intervalo); estado='idle';
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnPause').disabled=true;
+  document.getElementById('btnStop').disabled=true;
+  updateDisplay();
+}
+
+function resetTimer(){
+  clearInterval(intervalo); estado='idle'; segundos=0;
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnPause').disabled=true;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnGuardar').disabled=true;
+  updateDisplay();
+}
+
+
+function getSelectedTask(){
+  var id=document.getElementById('tareaSelect').value;
+  return (tareasCache||[]).find(function(t){return String(t.id)===String(id);}) || null;
+}
+function setActionButtons(enabled){
+  ['actIniciar','actPausar','actBloquear','actTerminar','actCancelar','actRevision'].forEach(function(id){var b=document.getElementById(id); if(b)b.disabled=!enabled;});
+}
+function renderTaskInfo(){
+  var t=getSelectedTask();
+  var card=document.getElementById('taskInfoCard');
+  setActionButtons(!!t);
+  if(!card) return;
+  if(!t){
+    card.innerHTML='<div class="smart-title">Selecciona una tarea</div><div class="smart-meta">El sistema te dirá si al terminar se finaliza sola o pasa a revisión de Rossio.</div>';
+    return;
+  }
+  var rev=!!t.requiereRevision;
+  card.innerHTML='<div class="smart-title">['+escapeHtml(t.id)+'] '+escapeHtml(t.tarea||'Tarea')+'</div>'+
+    '<div class="smart-meta">'+escapeHtml([t.marca,t.proyecto,t.estado,t.prioridad].filter(Boolean).join(' · '))+'</div>'+
+    '<div class="review-pill '+(rev?'yes':'')+'">'+(rev?'👀 Al terminar pasa a revisión de Rossio':'✅ Al terminar se marca Finalizado')+'</div>'+
+    (t.motivoRevision?'<div class="smart-meta" style="margin-top:6px">'+escapeHtml(t.motivoRevision)+'</div>':'');
+}
+function escapeHtml(v){return String(v||'').replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
+function accionTarea(accion){
+  var t=getSelectedTask();
+  if(!t){toast('⚠️ Selecciona una tarea','warn');return;}
+  var motivo=document.getElementById('motivoInput').value.trim();
+  if((accion==='bloquear'||accion==='cancelar') && !motivo){toast('⚠️ Escribe el motivo primero','warn');document.getElementById('motivoInput').focus();return;}
+  var labels={iniciar:'Empezando...',pausar:'Pausando...',bloquear:'Marcando bloqueo...',terminar:'Finalizando...',cancelar:'Cancelando...',revision:'Enviando a revisión...'};
+  setActionButtons(false);
+  toast(labels[accion]||'Procesando...','warn');
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.ok){
+        toast('✅ '+(r.msg||'Estado actualizado'),'ok');
+        document.getElementById('motivoInput').value='';
+        cargarTareas();
+      } else {
+        toast('❌ '+(r?r.msg:'Error'),'err');
+        setActionButtons(true);
+      }
+    })
+    .withFailureHandler(function(e){toast('❌ '+e.message,'err');setActionButtons(true);})
+    .mc_tarea_accion_pub({tareaId:t.id,accion:accion,motivo:motivo});
+}
+
+function guardarTiempo(){
+  var minutos=Math.round(segundos/60);
+  if(minutos<1){toast('⚠️ Mínimo 1 minuto para guardar','warn');return;}
+  var tareaId=document.getElementById('tareaSelect').value;
+  var avance=document.getElementById('avanceInput').value.trim();
+  if(!tareaId){toast('⚠️ Selecciona una tarea','warn');return;}
+  var btn=document.getElementById('btnGuardar');
+  btn.disabled=true; btn.textContent='Guardando...';
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.ok){
+        var tareaLabel=document.getElementById('tareaSelect').selectedOptions[0].text;
+        historial.push({label:tareaLabel,min:minutos});
+        renderHistorial();
+        toast('✅ '+minutos+' min guardados en "'+tareaLabel.substring(0,25)+'"','ok');
+        resetTimer();
+        document.getElementById('avanceInput').value='';
+      } else {
+        toast('❌ '+(r?r.msg:'Error'),'err');
+      }
+      btn.disabled=false; btn.textContent='💾 Guardar tiempo en la tarea';
+    })
+    .withFailureHandler(function(e){
+      toast('❌ '+e.message,'err');
+      btn.disabled=false; btn.textContent='💾 Guardar tiempo en la tarea';
+    })
+    .mc_timer_guardar({tareaId:tareaId,minutos:minutos,avance:avance});
+}
+
+function renderHistorial(){
+  if(!historial.length) return;
+  document.getElementById('historial').style.display='block';
+  var el=document.getElementById('histItems'); el.innerHTML='';
+  historial.forEach(function(h){
+    var d=document.createElement('div'); d.className='hist-item';
+    d.innerHTML='<span>'+h.label.substring(0,28)+'</span>'+
+      '<span class="hist-tiempo">+'+h.min+' min</span>';
+    el.appendChild(d);
+  });
+}
+
+function toast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.display='block';
+  if(type==='ok'){t.style.background='#D1FAE5';t.style.color='#065F46';}
+  else if(type==='warn'){t.style.background='#FEF3C7';t.style.color='#92400E';}
+  else{t.style.background='#FEE2E2';t.style.color='#DC2626';}
+  setTimeout(function(){t.style.display='none';},2500);
+}
+
+function cargarTareas(){
+  google.script.run
+    .withSuccessHandler(function(tareas){
+      tareasCache=tareas||[];
+      var sel=document.getElementById('tareaSelect');
+      sel.innerHTML='<option value="">— Seleccionar tarea —</option>';
+      tareasCache.forEach(function(t){
+        var o=document.createElement('option');
+        o.value=t.id; o.textContent='['+t.id+'] '+String(t.tarea||'').substring(0,35)+(t.marca?' · '+t.marca:'');
+        sel.appendChild(o);
+      });
+      if(!tareasCache.length) sel.innerHTML='<option value="">Sin tareas activas</option>';
+      renderTaskInfo();
+    })
+    .withFailureHandler(function(e){toast('❌ No se pudieron cargar tareas: '+e.message,'err');})
+    .mc_timer_getTareas();
+}
+document.getElementById('tareaSelect').addEventListener('change', renderTaskInfo);
+cargarTareas();
+</script>
+
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+
+<script>
+// ===== v24.24 - Timer persistente: no pierde tarea/tiempo si el modal se refresca =====
+(function(){
+  if(window.__rossioTimerPersistV2424) return;
+  window.__rossioTimerPersistV2424 = true;
+
+  var timerStorageKey = 'ROSSIO_TIMER_V2424_FALLBACK';
+  var timerBaseSeconds = 0;
+  var timerStartedAt = null;
+  var pendingRestore = null;
+  var serverHeartbeat = null;
+  var loadingTasks = false;
+
+  function now(){ return Date.now ? Date.now() : (new Date()).getTime(); }
+  function safeParse(v){ try { return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+  function getSelect(){ return document.getElementById('tareaSelect'); }
+  function getAvance(){ var el=document.getElementById('avanceInput'); return el ? String(el.value||'') : ''; }
+  function setAvance(v){ var el=document.getElementById('avanceInput'); if(el && v) el.value = v; }
+
+  function syncElapsed(){
+    if(estado === 'running' && timerStartedAt){
+      segundos = Math.max(0, timerBaseSeconds + Math.floor((now() - timerStartedAt) / 1000));
+    }
+  }
+
+  function currentSession(){
+    syncElapsed();
+    var sel = getSelect();
+    return {
+      version:'24.24',
+      tareaId: sel ? String(sel.value||'') : '',
+      estado: estado || 'idle',
+      seconds: Math.max(0, Number(segundos)||0),
+      baseSeconds: Math.max(0, Number(timerBaseSeconds)||0),
+      startedAt: timerStartedAt || null,
+      avance: getAvance(),
+      savedAt: now()
+    };
+  }
+
+  function saveLocal(){
+    try { localStorage.setItem(timerStorageKey, JSON.stringify(currentSession())); } catch(e) {}
+  }
+  function loadLocal(){
+    try { return safeParse(localStorage.getItem(timerStorageKey)); } catch(e){ return null; }
+  }
+  function clearLocal(){
+    try { localStorage.removeItem(timerStorageKey); } catch(e) {}
+  }
+  function saveServer(){
+    try {
+      google.script.run
+        .withFailureHandler(function(){})
+        .mc_timer_session_set(currentSession());
+    } catch(e) {}
+  }
+  function clearServer(){
+    try {
+      google.script.run
+        .withFailureHandler(function(){})
+        .mc_timer_session_clear();
+    } catch(e) {}
+  }
+  function persist(immediate){
+    saveLocal();
+    if(immediate) saveServer();
+  }
+
+  function setButtonsByState(){
+    var hasTask = !!(getSelect() && getSelect().value);
+    var btnStart=document.getElementById('btnStart');
+    var btnPause=document.getElementById('btnPause');
+    var btnStop=document.getElementById('btnStop');
+    var btnGuardar=document.getElementById('btnGuardar');
+    if(btnStart) btnStart.disabled = (estado === 'running') || !hasTask;
+    if(btnPause) btnPause.disabled = (estado !== 'running');
+    if(btnStop) btnStop.disabled = (estado === 'idle' && !segundos);
+    if(btnGuardar) btnGuardar.disabled = !hasTask || (Number(segundos)||0) < 60;
+  }
+
+  var oldUpdateDisplay = window.updateDisplay;
+  window.updateDisplay = function(){
+    syncElapsed();
+    if(typeof oldUpdateDisplay === 'function') oldUpdateDisplay();
+    setButtonsByState();
+  };
+
+  function ensureInterval(){
+    if(intervalo) clearInterval(intervalo);
+    if(estado === 'running'){
+      intervalo = setInterval(function(){ syncElapsed(); updateDisplay(); saveLocal(); }, 1000);
+      if(serverHeartbeat) clearInterval(serverHeartbeat);
+      serverHeartbeat = setInterval(function(){ if(estado === 'running') saveServer(); }, 30000);
+    }
+  }
+
+  window.startTimer = function(){
+    var sel = getSelect();
+    if(!sel || !sel.value){ toast('⚠️ Selecciona una tarea primero','warn'); return; }
+    if(estado === 'running') return;
+    syncElapsed();
+    estado = 'running';
+    timerBaseSeconds = Math.max(0, Number(segundos)||0);
+    timerStartedAt = now();
+    ensureInterval();
+    updateDisplay();
+    persist(true);
+  };
+
+  window.pauseTimer = function(){
+    if(estado !== 'running') return;
+    syncElapsed();
+    if(intervalo) clearInterval(intervalo);
+    if(serverHeartbeat) clearInterval(serverHeartbeat);
+    estado = 'paused';
+    timerBaseSeconds = Math.max(0, Number(segundos)||0);
+    timerStartedAt = null;
+    updateDisplay();
+    persist(true);
+  };
+
+  window.stopTimer = function(){
+    syncElapsed();
+    if(intervalo) clearInterval(intervalo);
+    if(serverHeartbeat) clearInterval(serverHeartbeat);
+    estado = 'idle';
+    timerBaseSeconds = Math.max(0, Number(segundos)||0);
+    timerStartedAt = null;
+    updateDisplay();
+    persist(true);
+  };
+
+  window.resetTimer = function(){
+    if(intervalo) clearInterval(intervalo);
+    if(serverHeartbeat) clearInterval(serverHeartbeat);
+    estado = 'idle';
+    segundos = 0;
+    timerBaseSeconds = 0;
+    timerStartedAt = null;
+    updateDisplay();
+    persist(true);
+    clearLocal();
+    clearServer();
+  };
+
+  function applySession(sess){
+    if(!sess || typeof sess !== 'object') return;
+    var sel = getSelect();
+    if(sel && sess.tareaId){
+      var exists = Array.prototype.some.call(sel.options, function(o){ return String(o.value) === String(sess.tareaId); });
+      if(exists) sel.value = sess.tareaId;
+    }
+    setAvance(sess.avance || '');
+    estado = sess.estado || 'idle';
+    segundos = Math.max(0, Number(sess.seconds)||0);
+    timerBaseSeconds = Math.max(0, Number(sess.baseSeconds || sess.seconds)||0);
+    timerStartedAt = sess.startedAt || null;
+    if(estado === 'running'){
+      if(!timerStartedAt) timerStartedAt = now();
+      syncElapsed();
+    } else {
+      timerStartedAt = null;
+      timerBaseSeconds = Math.max(0, Number(segundos)||0);
+    }
+    ensureInterval();
+    renderTaskInfo();
+    updateDisplay();
+    persist(false);
+  }
+
+  window.cargarTareas = function(preserveId){
+    if(loadingTasks) return;
+    loadingTasks = true;
+    var desiredId = preserveId || (getSelect() && getSelect().value) || (pendingRestore && pendingRestore.tareaId) || (loadLocal() && loadLocal().tareaId) || '';
+    google.script.run
+      .withSuccessHandler(function(tareas){
+        loadingTasks = false;
+        tareasCache = tareas || [];
+        var sel = getSelect();
+        if(!sel) return;
+        sel.innerHTML = '<option value="">— Seleccionar tarea —</option>';
+        tareasCache.forEach(function(t){
+          var o = document.createElement('option');
+          o.value = t.id;
+          o.textContent = '[' + t.id + '] ' + String(t.tarea || '').substring(0,35) + (t.marca ? ' · ' + t.marca : '');
+          sel.appendChild(o);
+        });
+        if(!tareasCache.length) sel.innerHTML = '<option value="">Sin tareas activas</option>';
+        if(desiredId){
+          var exists = Array.prototype.some.call(sel.options, function(o){ return String(o.value) === String(desiredId); });
+          if(exists) sel.value = desiredId;
+        }
+        if(pendingRestore){ applySession(pendingRestore); pendingRestore = null; }
+        else { renderTaskInfo(); updateDisplay(); persist(false); }
+      })
+      .withFailureHandler(function(e){ loadingTasks=false; toast('❌ No se pudieron cargar tareas: ' + e.message, 'err'); })
+      .mc_timer_getTareas();
+  };
+
+  var oldRenderTaskInfo = window.renderTaskInfo;
+  window.renderTaskInfo = function(){
+    if(typeof oldRenderTaskInfo === 'function') oldRenderTaskInfo();
+    setButtonsByState();
+    persist(false);
+  };
+
+  var oldGuardar = window.guardarTiempo;
+  window.guardarTiempo = function(){
+    syncElapsed();
+    var minutos = Math.max(0, Math.round((Number(segundos)||0) / 60));
+    var tareaId = getSelect() ? getSelect().value : '';
+    var avance = getAvance().trim();
+    if(minutos < 1){ toast('⚠️ Mínimo 1 minuto para guardar','warn'); return; }
+    if(!tareaId){ toast('⚠️ Selecciona una tarea','warn'); return; }
+    var btn = document.getElementById('btnGuardar');
+    if(btn){ btn.disabled = true; btn.textContent = 'Guardando...'; }
+    persist(true);
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(r && r.ok){
+          var selected = getSelect();
+          var tareaLabel = selected && selected.selectedOptions && selected.selectedOptions[0] ? selected.selectedOptions[0].text : tareaId;
+          historial.push({label:tareaLabel, min:minutos});
+          renderHistorial();
+          toast('✅ ' + minutos + ' min guardados en "' + String(tareaLabel).substring(0,25) + '"', 'ok');
+          resetTimer();
+          var av=document.getElementById('avanceInput'); if(av) av.value='';
+          if(selected) selected.value = tareaId;
+          cargarTareas(tareaId);
+        } else {
+          toast('❌ ' + (r ? r.msg : 'Error'), 'err');
+          persist(true);
+        }
+        if(btn){ btn.disabled = false; btn.textContent = '💾 Guardar tiempo en la tarea'; }
+        updateDisplay();
+      })
+      .withFailureHandler(function(e){
+        toast('❌ ' + e.message, 'err');
+        if(btn){ btn.disabled = false; btn.textContent = '💾 Guardar tiempo en la tarea'; }
+        persist(true);
+        updateDisplay();
+      })
+      .mc_timer_guardar({tareaId:tareaId, minutos:minutos, avance:avance});
+  };
+
+  window.accionTarea = function(accion){
+    var t = getSelectedTask();
+    if(!t){ toast('⚠️ Selecciona una tarea','warn'); return; }
+    var motivo = document.getElementById('motivoInput').value.trim();
+    if((accion === 'bloquear' || accion === 'cancelar') && !motivo){
+      toast('⚠️ Escribe el motivo primero','warn');
+      document.getElementById('motivoInput').focus();
+      return;
+    }
+    if(accion === 'iniciar') startTimer();
+    if(accion === 'pausar') pauseTimer();
+    if(accion === 'terminar' || accion === 'cancelar' || accion === 'revision') stopTimer();
+    var labels = {iniciar:'Empezando...',pausar:'Pausando...',bloquear:'Marcando bloqueo...',terminar:'Finalizando...',cancelar:'Cancelando...',revision:'Enviando a revisión...'};
+    setActionButtons(false);
+    toast(labels[accion] || 'Procesando...', 'warn');
+    persist(true);
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(r && r.ok){
+          toast('✅ ' + (r.msg || 'Estado actualizado'), 'ok');
+          document.getElementById('motivoInput').value='';
+          cargarTareas(t.id);
+        } else {
+          toast('❌ ' + (r ? r.msg : 'Error'), 'err');
+          setActionButtons(true);
+        }
+        persist(true);
+      })
+      .withFailureHandler(function(e){
+        toast('❌ ' + e.message, 'err');
+        setActionButtons(true);
+        persist(true);
+      })
+      .mc_tarea_accion_pub({tareaId:t.id, accion:accion, motivo:motivo});
+  };
+
+  function boot(){
+    var sel=getSelect();
+    if(sel){
+      sel.addEventListener('change', function(){ renderTaskInfo(); persist(true); });
+    }
+    var av=document.getElementById('avanceInput');
+    if(av){ av.addEventListener('input', function(){ persist(false); }); }
+    try {
+      google.script.run
+        .withSuccessHandler(function(ctx){
+          if(ctx && ctx.key) timerStorageKey = 'ROSSIO_TIMER_V2424_' + ctx.key;
+          var local = loadLocal();
+          pendingRestore = local || (ctx && ctx.session) || null;
+          cargarTareas(pendingRestore && pendingRestore.tareaId);
+        })
+        .withFailureHandler(function(){
+          pendingRestore = loadLocal();
+          cargarTareas(pendingRestore && pendingRestore.tareaId);
+        })
+        .mc_timer_session_get();
+    } catch(e) {
+      pendingRestore = loadLocal();
+      cargarTareas(pendingRestore && pendingRestore.tareaId);
+    }
+    updateDisplay();
+  }
+
+  // Arranca despues de que el script original haya cargado el DOM.
+  setTimeout(boot, 150);
+})();
+</script>
+
+</body>
+</html>

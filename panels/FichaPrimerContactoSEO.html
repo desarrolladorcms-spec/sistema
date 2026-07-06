@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ficha SEO · Monstruo Creativo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --grn:#10b981;--grn-dk:#059669;--grn-xdk:#047857;
+  --grn-lt:#d1fae5;--grn-bg:#f0fdf4;--grn-bd:#6ee7b7;
+  --bg:#f8fafc;--card:#fff;--bdr:#e5e7eb;--bdr-lt:#f1f5f9;
+  --txt:#111827;--txts:#6b7280;--txtt:#9ca3af;
+  --sh:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.03);
+  --sh2:0 4px 16px rgba(0,0,0,.08);
+  --r:8px;--rl:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;color:var(--txt);background:var(--bg);line-height:1.55}
+
+/* ── Page ── */
+.page{display:flex;flex-direction:column;min-height:100vh}
+
+/* ── Header ── */
+.hd{height:56px;background:var(--card);border-bottom:1px solid var(--bdr-lt);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
+.hd-logo{width:32px;height:32px;border-radius:8px;background:var(--grn);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;letter-spacing:-.5px;flex-shrink:0}
+.hd-brand{font-size:14px;font-weight:600;color:var(--txt)}
+.hd-divider{width:1px;height:18px;background:var(--bdr);margin:0 2px}
+.hd-page{font-size:13px;color:var(--txts)}
+.hd-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.conn-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bdr-lt);color:var(--txts);border:1px solid var(--bdr);letter-spacing:.01em}
+.conn-chip.ok{background:var(--grn-bg);color:var(--grn-dk);border-color:var(--grn-bd)}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ── Body split ── */
+.body{display:flex;flex:1;min-height:0}
+
+/* ── Sidebar ── */
+.sidebar{width:228px;flex-shrink:0;background:var(--card);border-right:1px solid var(--bdr-lt);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;padding-bottom:20px}
+.sb-section{padding:20px 16px 8px}
+.sb-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txtt);padding:0 6px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r);cursor:pointer;transition:all .12s;color:var(--txts);font-size:13px;user-select:none;margin-bottom:1px}
+.nav-item:hover{background:var(--grn-bg);color:var(--grn-dk)}
+.nav-item.active{background:var(--grn-bg);color:var(--grn-dk);font-weight:600}
+.nav-num{width:22px;height:22px;border-radius:6px;background:var(--bdr-lt);color:var(--txtt);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.nav-item.active .nav-num,.nav-item:hover .nav-num{background:var(--grn);color:#fff}
+.nav-item.internal{color:var(--txts)}
+.nav-item.internal.active{background:#fefce8;color:#854d0e}
+.nav-item.internal .nav-num{background:#fef3c7;color:#b45309}
+.nav-item.internal.active .nav-num,.nav-item.internal:hover .nav-num{background:#f59e0b;color:#fff}
+.nav-item.internal:hover{background:#fefce8;color:#854d0e}
+.sb-divider{height:1px;background:var(--bdr-lt);margin:8px 16px}
+.sb-footer{padding:12px 16px;margin-top:auto;border-top:1px solid var(--bdr-lt)}
+.btn-save-sb{width:100%;padding:10px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--grn);color:#fff;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-save-sb:hover{background:var(--grn-dk)}
+.btn-save-sb:disabled{opacity:.5;cursor:not-allowed}
+#sb-status{font-size:11px;text-align:center;margin-top:6px;color:var(--txts);min-height:14px}
+
+/* ── Main ── */
+.main{flex:1;min-width:0;overflow:hidden}
+.main-scroll{padding:24px;max-width:720px;margin:0 auto}
+
+/* ── Config bar ── */
+.cfg-bar{display:flex;gap:8px;align-items:flex-start;padding:10px 14px;border-radius:var(--r);margin-bottom:18px;font-size:13px;line-height:1.5}
+.cfg-bar.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.cfg-bar.ok{background:var(--grn-bg);border:1px solid var(--grn-bd);color:var(--grn-dk)}
+
+/* ── Client selector ── */
+.sel-card{background:var(--card);border:1px solid var(--bdr-lt);border-radius:var(--rl);padding:18px 20px;margin-bottom:18px;box-shadow:var(--sh)}
+.sel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sel-title{font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:7px}
+.sel-dot{width:8px;height:8px;border-radius:50%;background:var(--grn)}
+.sel-row{display:flex;gap:8px}
+.sel-wrap{flex:1;position:relative}
+.sel-wrap::after{content:'';position:absolute;right:11px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--txtt);pointer-events:none}
+.sel-wrap select{width:100%;appearance:none;-webkit-appearance:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--txt);background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 30px 9px 12px;outline:none;cursor:pointer;transition:border-color .12s}
+.sel-wrap select:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(16,185,129,.08)}
+.sel-status{font-size:12px;color:var(--txts);margin-top:8px;min-height:18px;display:flex;align-items:center;gap:6px}
+
+/* ── Meta bar ── */
+.meta-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.meta-field{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr-lt);border-radius:var(--r);padding:8px 14px;box-shadow:var(--sh)}
+.meta-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txtt);white-space:nowrap}
+.meta-field input{font-family:inherit;font-size:13px;font-weight:500;color:var(--txt);border:none;background:transparent;outline:none;width:155px}
+
+/* ── Form blocks ── */
+.blk{background:var(--card);border:1px solid var(--bdr-lt);border-radius:var(--rl);box-shadow:var(--sh);margin-bottom:14px;overflow:hidden;scroll-margin-top:72px;transition:box-shadow .2s,border-color .2s}
+.blk:focus-within{box-shadow:var(--sh2);border-color:rgba(16,185,129,.3)}
+.blk-hd{padding:16px 20px;border-bottom:1px solid var(--bdr-lt);display:flex;align-items:center;gap:12px}
+.bnum{width:28px;height:28px;border-radius:8px;background:var(--grn);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bnum.int-num{background:#f59e0b}
+.blk-info{flex:1}
+.btitle{font-size:14px;font-weight:600;color:var(--txt)}
+.bsub{font-size:12px;color:var(--txts);margin-top:1px}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.01em}
+.badge.grn{background:var(--grn-bg);color:var(--grn-dk)}
+.badge.yel{background:#fef3c7;color:#92400e}
+.blk-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+
+/* ── Fields ── */
+.f{display:flex;flex-direction:column;gap:5px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:580px){.f2,.f3{grid-template-columns:1fr}}
+.fl{font-size:12px;font-weight:600;color:var(--txts);letter-spacing:.01em}
+.fh{font-size:11px;color:var(--txtt);margin-top:-3px}
+
+input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select{
+  font-family:inherit;font-size:13px;color:var(--txt);background:var(--bg);
+  border:1px solid var(--bdr);border-radius:var(--r);padding:9px 12px;
+  width:100%;outline:none;transition:all .15s}
+input::placeholder,textarea::placeholder{color:var(--txtt)}
+input:focus,textarea:focus,select:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(16,185,129,.08);background:#fff}
+textarea{resize:vertical;min-height:70px;line-height:1.55}
+select{appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer}
+
+/* ── Pills ── */
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.op input{display:none}
+.op label{display:inline-block;padding:6px 14px;border-radius:6px;border:1px solid var(--bdr);font-size:12px;font-weight:500;color:var(--txts);cursor:pointer;transition:all .12s;background:#fff;user-select:none;line-height:1.3}
+.op label:hover{border-color:var(--grn-bd);color:var(--grn-dk);background:var(--grn-bg)}
+.op input:checked+label{background:var(--grn-bg);border-color:var(--grn-bd);color:var(--grn-dk);font-weight:600}
+
+/* ── Conditional ── */
+.cond{display:none;flex-direction:column;gap:12px;padding:14px 16px;background:var(--bg);border:1px solid var(--bdr-lt);border-radius:var(--r);margin-top:2px}
+.cond.show{display:flex}
+
+/* ── Internal note ── */
+.int-note{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;background:#fefce8;border:1px solid #fde68a;border-radius:var(--r);font-size:12px;color:#854d0e}
+
+/* ── Field divider ── */
+.fdiv{height:1px;background:var(--bdr-lt)}
+
+/* ── Action bar ── */
+.action-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;padding:18px 20px;background:var(--card);border:1px solid var(--bdr-lt);border-radius:var(--rl);box-shadow:var(--sh)}
+.btn-prim{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--grn);color:#fff;border:none;transition:all .15s}
+.btn-prim:hover{background:var(--grn-dk)}
+.btn-prim:disabled{opacity:.5;cursor:not-allowed}
+.btn-sec{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;background:#fff;color:var(--txts);border:1px solid var(--bdr);transition:all .15s}
+.btn-sec:hover{border-color:#d1d5db;color:var(--txt)}
+.btn-ghost{padding:9px 14px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;background:transparent;color:var(--txts);border:none;transition:all .15s}
+.btn-ghost:hover{background:var(--bdr-lt);color:var(--txt)}
+#save-status{font-size:12px;margin-left:4px}
+
+/* ── Spinner ── */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--bdr);border-top-color:var(--grn);border-radius:50%;animation:spin .55s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Output ── */
+.out-card{margin-top:14px;background:var(--card);border:1px solid var(--bdr-lt);border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden;display:none}
+.out-hd{padding:14px 20px;background:var(--bg);border-bottom:1px solid var(--bdr-lt);display:flex;justify-content:space-between;align-items:center}
+.out-hd-left{font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:7px}
+.out-hd-dot{width:8px;height:8px;border-radius:50%;background:var(--grn)}
+.out-body{padding:18px 20px}
+.out-body pre{font-family:'Courier New',Courier,monospace;font-size:12px;color:var(--txts);white-space:pre-wrap;word-break:break-word;line-height:1.7;max-height:420px;overflow-y:auto}
+.copy-btn{padding:6px 14px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid var(--bdr);background:#fff;color:var(--txts);transition:all .15s}
+.copy-btn:hover{border-color:var(--grn-bd);color:var(--grn-dk);background:var(--grn-bg)}
+.copy-btn.ok{background:var(--grn-bg);border-color:var(--grn-bd);color:var(--grn-dk)}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#f9fafb;padding:10px 18px;border-radius:var(--r);font-size:13px;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;z-index:999;max-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+
+/* ── Foot ── */
+.foot{padding:12px 20px;font-size:11px;color:var(--txtt);line-height:1.6;margin-top:6px}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main-scroll{padding:16px}
+}
+
+/* ── Dark mode ── */
+@media(prefers-color-scheme:dark){
+  :root{--bg:#0f172a;--card:#1e293b;--bdr:#334155;--bdr-lt:#1e293b;--txt:#f1f5f9;--txts:#94a3b8;--txtt:#64748b;--grn-bg:rgba(16,185,129,.1);--grn-bd:rgba(110,231,183,.25);--sh:0 1px 3px rgba(0,0,0,.2);--sh2:0 4px 12px rgba(0,0,0,.3)}
+  .hd,.sidebar,.sel-card,.meta-field,.blk,.action-bar,.out-card{border-color:#334155}
+  .sel-wrap select,input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select,.op label{background:#0f172a;border-color:#334155}
+  input:focus,textarea:focus,select:focus{background:#1e293b}
+  .cond{background:#0f172a;border-color:#334155}
+  .btn-sec,.copy-btn{background:#1e293b;border-color:#334155}
+  .cfg-bar.warn{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.2);color:#fbbf24}
+  .int-note{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.2);color:#fbbf24}
+  .out-hd{background:#0f172a}
+  .nav-item:hover,.nav-item.active{background:rgba(16,185,129,.12)}
+  .nav-item.internal.active,.nav-item.internal:hover{background:rgba(245,158,11,.1)}
+}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="page">
+
+<!-- ══ HEADER ══ -->
+<header class="hd">
+  <div class="hd-logo">MC</div>
+  <span class="hd-brand">Monstruo Creativo</span>
+  <span class="hd-divider"></span>
+  <span class="hd-page">Ficha SEO 2.0 &middot; Primer contacto</span>
+  <div class="hd-right">
+    <div class="conn-chip" id="conn-chip"><span class="conn-dot"></span><span id="conn-text">Sin configurar</span></div>
+  </div>
+</header>
+
+<div class="body">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-section">
+    <div class="sb-section-lbl">Secciones del cliente</div>
+    <div id="nav-items"></div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-section-lbl">Evaluaci&oacute;n interna</div>
+    <div id="nav-internal"></div>
+  </div>
+  <div class="sb-footer">
+    <button class="btn-save-sb" id="btn-save-sb" onclick="guardarEnMaster()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Guardar en master
+    </button>
+    <div id="sb-status"></div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+<div class="main-scroll">
+
+<!-- Cfg bar -->
+<div class="cfg-bar warn" id="cfg-bar">
+  <span>&#9888;&#65039;</span>
+  <span id="cfg-msg">Edita la variable <strong>GAS_URL</strong> en el script de este archivo para conectar al master.</span>
+</div>
+
+<!-- Client selector -->
+<div class="sel-card">
+  <div class="sel-top">
+    <div class="sel-title"><span class="sel-dot"></span>Cliente</div>
+  </div>
+  <div class="sel-row">
+    <div class="sel-wrap">
+      <select id="cliente-select" onchange="cargarCliente(this.value)">
+        <option value="">&#8212; seleccionar cliente existente &#8212;</option>
+      </select>
+    </div>
+    <button class="btn-sec" onclick="recargarLista()" title="Actualizar lista" style="padding:9px 12px;font-size:13px">&#8635;</button>
+    <button class="btn-sec" onclick="nuevaFicha()">+ Nueva ficha</button>
+  </div>
+  <div class="sel-status" id="sel-status"></div>
+</div>
+
+<!-- Meta bar -->
+<div class="meta-bar">
+  <div class="meta-field"><span class="meta-lbl">Especialista</span><input type="text" id="m_esp" placeholder="Tu nombre"></div>
+  <div class="meta-field"><span class="meta-lbl">Fecha</span><input type="text" id="m_fecha" readonly></div>
+</div>
+
+<!-- ── Bloque 1 ── -->
+<div class="blk" id="sec1">
+  <div class="blk-hd">
+    <div class="bnum">1</div>
+    <div class="blk-info"><div class="btitle">Datos del contacto</div><div class="bsub">Empresa, persona y formas de contacto</div></div>
+    <div class="badge grn">Obligatorio</div>
+  </div>
+  <div class="blk-body">
+    <div class="f2">
+      <div class="f"><label class="fl">Empresa</label><input type="text" id="c_emp" placeholder="Nombre de la empresa"></div>
+      <div class="f"><label class="fl">Contacto</label><input type="text" id="c_nom" placeholder="Nombre completo"></div>
+    </div>
+    <div class="f3">
+      <div class="f"><label class="fl">Cargo</label><input type="text" id="c_car" placeholder="Gerente, due&ntilde;o..."></div>
+      <div class="f"><label class="fl">Tel&eacute;fono / WhatsApp</label><input type="tel" id="c_tel" placeholder="+51 999 999 999"></div>
+      <div class="f"><label class="fl">Correo electr&oacute;nico</label><input type="email" id="c_mail" placeholder="correo@empresa.com"></div>
+    </div>
+    <div class="f"><label class="fl">Sitio web</label><input type="url" id="c_web" placeholder="https://"></div>
+  </div>
+</div>
+
+<!-- ── Bloque 2 ── -->
+<div class="blk" id="sec2">
+  <div class="blk-hd">
+    <div class="bnum">2</div>
+    <div class="blk-info"><div class="btitle">El negocio</div><div class="bsub">Modelo, mercado y c&oacute;mo llegan sus clientes hoy</div></div>
+  </div>
+  <div class="blk-body">
+    <div class="f2">
+      <div class="f"><label class="fl">Rubro / industria</label>
+        <select id="n_rubro">
+          <option value="">&#8212; seleccionar &#8212;</option>
+          <option>Servicios de reparaci&oacute;n / t&eacute;cnico</option><option>Salud y bienestar</option>
+          <option>Educaci&oacute;n y capacitaci&oacute;n</option><option>Comercio electr&oacute;nico</option>
+          <option>Restaurantes y gastronom&iacute;a</option><option>Inmobiliaria y construcci&oacute;n</option>
+          <option>Legal y contabilidad</option><option>Turismo y hoster&iacute;a</option>
+          <option>Tecnolog&iacute;a y software</option><option>Retail / tienda f&iacute;sica</option>
+          <option>Manufactura e industria</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="f"><label class="fl">&iquest;A qui&eacute;n le venden?</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="n_quien" id="nq1" value="Personas (B2C)"><label for="nq1">Personas (B2C)</label></div>
+          <div class="op"><input type="radio" name="n_quien" id="nq2" value="Empresas (B2B)"><label for="nq2">Empresas (B2B)</label></div>
+          <div class="op"><input type="radio" name="n_quien" id="nq3" value="Ambos"><label for="nq3">Ambos</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="f"><label class="fl">&iquest;Qu&eacute; hacen exactamente?</label><textarea id="n_desc" placeholder="Servicio o producto, c&oacute;mo opera el negocio, qu&eacute; los diferencia..."></textarea></div>
+    <div class="f"><label class="fl">&iquest;D&oacute;nde operan?</label>
+      <div class="opts">
+        <div class="op"><input type="radio" name="n_donde" id="nd1" value="Solo Lima"><label for="nd1">Solo Lima</label></div>
+        <div class="op"><input type="radio" name="n_donde" id="nd2" value="Lima + otras ciudades"><label for="nd2">Lima + otras ciudades</label></div>
+        <div class="op"><input type="radio" name="n_donde" id="nd3" value="Todo Per&uacute;"><label for="nd3">Todo Per&uacute;</label></div>
+        <div class="op"><input type="radio" name="n_donde" id="nd4" value="Per&uacute; + internacional"><label for="nd4">Per&uacute; + internacional</label></div>
+        <div class="op"><input type="radio" name="n_donde" id="nd5" value="Solo online, sin local f&iacute;sico"><label for="nd5">Solo online</label></div>
+      </div>
+    </div>
+    <div class="f2">
+      <div class="f"><label class="fl">Ticket promedio por cliente</label>
+        <select id="n_ticket">
+          <option value="">&#8212; seleccionar &#8212;</option>
+          <option>Menos de S/ 100</option><option>S/ 100 &#8211; 500</option>
+          <option>S/ 500 &#8211; 2,000</option><option>S/ 2,000 &#8211; 10,000</option>
+          <option>M&aacute;s de S/ 10,000</option><option>Var&iacute;a mucho</option>
+        </select>
+      </div>
+      <div class="f"><label class="fl">&iquest;C&oacute;mo llegan sus clientes HOY?</label>
+        <div class="opts">
+          <div class="op"><input type="checkbox" id="nc1" value="Boca a boca"><label for="nc1">Boca a boca</label></div>
+          <div class="op"><input type="checkbox" id="nc2" value="Redes sociales (org&aacute;nico)"><label for="nc2">Redes sociales</label></div>
+          <div class="op"><input type="checkbox" id="nc3" value="Google (b&uacute;squeda org&aacute;nica)"><label for="nc3">Google org&aacute;nico</label></div>
+          <div class="op"><input type="checkbox" id="nc4" value="Directorio / referido"><label for="nc4">Directorio</label></div>
+          <div class="op"><input type="checkbox" id="nc5" value="Publicidad pagada (no SEO)"><label for="nc5">Publicidad pagada</label></div>
+          <div class="op"><input type="checkbox" id="nc6" value="No lo saben"><label for="nc6">No lo saben</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bloque 3 ── -->
+<div class="blk" id="sec3">
+  <div class="blk-hd">
+    <div class="bnum">3</div>
+    <div class="blk-info"><div class="btitle">Presencia digital actual</div><div class="bsub">Sitio web, herramientas de medici&oacute;n y accesos</div></div>
+  </div>
+  <div class="blk-body">
+    <div class="f2">
+      <div class="f"><label class="fl">Antig&uuml;edad del sitio</label>
+        <select id="d_edad">
+          <option value="">&#8212; seleccionar &#8212;</option>
+          <option>Menos de 6 meses</option><option>6 meses &#8211; 1 a&ntilde;o</option>
+          <option>1 &#8211; 3 a&ntilde;os</option><option>3 &#8211; 5 a&ntilde;os</option>
+          <option>M&aacute;s de 5 a&ntilde;os</option><option>No tienen sitio todav&iacute;a</option>
+        </select>
+      </div>
+      <div class="f"><label class="fl">Gesti&oacute;n del sitio</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="d_gest" id="dg1" value="El propio cliente"><label for="dg1">El cliente</label></div>
+          <div class="op"><input type="radio" name="d_gest" id="dg2" value="Otro proveedor o agencia"><label for="dg2">Otro proveedor</label></div>
+          <div class="op"><input type="radio" name="d_gest" id="dg3" value="Nadie actualmente"><label for="dg3">Nadie</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="f2">
+      <div class="f"><label class="fl">Acceso al backend</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="d_acc" id="da1" value="S&iacute;, acceso completo"><label for="da1">S&iacute;, completo</label></div>
+          <div class="op"><input type="radio" name="d_acc" id="da2" value="S&iacute;, acceso parcial"><label for="da2">Parcial</label></div>
+          <div class="op"><input type="radio" name="d_acc" id="da3" value="No tienen acceso"><label for="da3">No</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Tr&aacute;fico org&aacute;nico mensual</label>
+        <select id="d_traf">
+          <option value="">&#8212; seleccionar &#8212;</option>
+          <option>No lo saben</option><option>Menos de 100 visitas/mes</option>
+          <option>100 &#8211; 500 visitas/mes</option><option>500 &#8211; 2,000 visitas/mes</option>
+          <option>M&aacute;s de 2,000 visitas/mes</option>
+        </select>
+      </div>
+    </div>
+    <div class="f3">
+      <div class="f"><label class="fl">Google Search Console</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="d_gsc" id="gs1" value="S&iacute;"><label for="gs1">S&iacute;</label></div>
+          <div class="op"><input type="radio" name="d_gsc" id="gs2" value="No"><label for="gs2">No</label></div>
+          <div class="op"><input type="radio" name="d_gsc" id="gs3" value="No saben"><label for="gs3">No saben</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Google Analytics 4</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="d_ga4" id="ga1" value="S&iacute;"><label for="ga1">S&iacute;</label></div>
+          <div class="op"><input type="radio" name="d_ga4" id="ga2" value="No"><label for="ga2">No</label></div>
+          <div class="op"><input type="radio" name="d_ga4" id="ga3" value="No saben"><label for="ga3">No saben</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Google Business Profile</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="d_gbp" id="gb1" value="S&iacute;, completo"><label for="gb1">Completo</label></div>
+          <div class="op"><input type="radio" name="d_gbp" id="gb2" value="Incompleto"><label for="gb2">Incompleto</label></div>
+          <div class="op"><input type="radio" name="d_gbp" id="gb3" value="No tienen"><label for="gb3">No tienen</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bloque 4 ── -->
+<div class="blk" id="sec4">
+  <div class="blk-hd">
+    <div class="bnum">4</div>
+    <div class="blk-info"><div class="btitle">Historial SEO</div><div class="bsub">Experiencia previa, acciones propias y alertas cr&iacute;ticas</div></div>
+  </div>
+  <div class="blk-body">
+    <div class="f"><label class="fl">&iquest;Han trabajado con una agencia SEO antes?</label>
+      <div class="opts">
+        <div class="op"><input type="radio" name="h_ag" id="ha1" value="S&iacute;" onchange="tog('cag',true)"><label for="ha1">S&iacute;</label></div>
+        <div class="op"><input type="radio" name="h_ag" id="ha2" value="No" onchange="tog('cag',false)"><label for="ha2">No</label></div>
+      </div>
+      <div class="cond" id="cag">
+        <div class="f2">
+          <div class="f"><label class="fl">Tiempo que trabajaron</label><input type="text" id="h_at" placeholder="Ej: 6 meses, 2 a&ntilde;os"></div>
+          <div class="f"><label class="fl">Por qu&eacute; terminaron</label>
+            <select id="h_am">
+              <option value="">&#8212; seleccionar &#8212;</option>
+              <option>No hubo resultados</option><option>Mala comunicaci&oacute;n</option>
+              <option>Precio muy alto</option><option>Termin&oacute; el proyecto</option>
+              <option>Mala experiencia general</option><option>Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="f"><label class="fl">Resultados que tuvieron</label><textarea id="h_ar" placeholder="Lo que el cliente comenta sobre ese trabajo previo..."></textarea></div>
+      </div>
+    </div>
+    <div class="f"><label class="fl">&iquest;Han hecho acciones SEO por su cuenta?</label>
+      <div class="opts">
+        <div class="op"><input type="radio" name="h_prop" id="hp1" value="S&iacute;" onchange="tog('cprop',true)"><label for="hp1">S&iacute;</label></div>
+        <div class="op"><input type="radio" name="h_prop" id="hp2" value="No" onchange="tog('cprop',false)"><label for="hp2">No</label></div>
+        <div class="op"><input type="radio" name="h_prop" id="hp3" value="No saben qu&eacute; es el SEO" onchange="tog('cprop',false)"><label for="hp3">No saben qu&eacute; es SEO</label></div>
+      </div>
+      <div class="cond" id="cprop">
+        <label class="fl">&iquest;Qu&eacute; hicieron?</label>
+        <div class="opts">
+          <div class="op"><input type="checkbox" id="hpa1" value="Blog / art&iacute;culos"><label for="hpa1">Blog</label></div>
+          <div class="op"><input type="checkbox" id="hpa2" value="T&iacute;tulos y meta"><label for="hpa2">T&iacute;tulos / meta</label></div>
+          <div class="op"><input type="checkbox" id="hpa3" value="Compra de backlinks"><label for="hpa3">Compra de links</label></div>
+          <div class="op"><input type="checkbox" id="hpa4" value="Cambios de contenido"><label for="hpa4">Contenido</label></div>
+          <div class="op"><input type="checkbox" id="hpa5" value="Otro"><label for="hpa5">Otro</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="f2">
+      <div class="f"><label class="fl">Penalizaci&oacute;n manual de Google</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="h_pen" id="hpe1" value="S&iacute;"><label for="hpe1">S&iacute;</label></div>
+          <div class="op"><input type="radio" name="h_pen" id="hpe2" value="No"><label for="hpe2">No</label></div>
+          <div class="op"><input type="radio" name="h_pen" id="hpe3" value="No saben"><label for="hpe3">No saben</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Ca&iacute;da brusca de tr&aacute;fico</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="h_cai" id="hc1" value="S&iacute;"><label for="hc1">S&iacute;</label></div>
+          <div class="op"><input type="radio" name="h_cai" id="hc2" value="No"><label for="hc2">No</label></div>
+          <div class="op"><input type="radio" name="h_cai" id="hc3" value="Sin datos"><label for="hc3">Sin datos</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bloque 5 ── -->
+<div class="blk" id="sec5">
+  <div class="blk-hd">
+    <div class="bnum">5</div>
+    <div class="blk-info"><div class="btitle">Competidores</div><div class="bsub">Los que el cliente menciona durante la reuni&oacute;n</div></div>
+  </div>
+  <div class="blk-body">
+    <div class="f2"><div class="f"><label class="fl">Competidor 1</label><input type="text" id="cp1n" placeholder="Nombre de la empresa"></div><div class="f"><label class="fl">Sitio web</label><input type="url" id="cp1w" placeholder="https://"></div></div>
+    <div class="f2"><div class="f"><label class="fl">Competidor 2</label><input type="text" id="cp2n" placeholder="Nombre de la empresa"></div><div class="f"><label class="fl">Sitio web</label><input type="url" id="cp2w" placeholder="https://"></div></div>
+    <div class="f2"><div class="f"><label class="fl">Competidor 3</label><input type="text" id="cp3n" placeholder="Nombre de la empresa"></div><div class="f"><label class="fl">Sitio web</label><input type="url" id="cp3w" placeholder="https://"></div></div>
+    <div class="f"><label class="fl">Notas sobre competencia</label><textarea id="cpn" placeholder="Ej: 'ese siempre aparece primero que nosotros en Google'..."></textarea></div>
+  </div>
+</div>
+
+<!-- ── Bloque 6 ── -->
+<div class="blk" id="sec6">
+  <div class="blk-hd">
+    <div class="bnum">6</div>
+    <div class="blk-info"><div class="btitle">Lo que el cliente espera</div><div class="bsub">Captura de expectativas &mdash; la estrategia la define la agencia</div></div>
+  </div>
+  <div class="blk-body">
+    <div class="f"><label class="fl">Resultado esperado del SEO</label>
+      <div class="opts">
+        <div class="op"><input type="checkbox" id="ob1" value="M&aacute;s leads y consultas"><label for="ob1">M&aacute;s leads</label></div>
+        <div class="op"><input type="checkbox" id="ob2" value="M&aacute;s ventas online"><label for="ob2">M&aacute;s ventas online</label></div>
+        <div class="op"><input type="checkbox" id="ob3" value="Aparecer en Google para sus keywords clave"><label for="ob3">Aparecer en Google</label></div>
+        <div class="op"><input type="checkbox" id="ob4" value="Mayor visibilidad de marca"><label for="ob4">Visibilidad de marca</label></div>
+        <div class="op"><input type="checkbox" id="ob5" value="Superar a un competidor"><label for="ob5">Superar competidor</label></div>
+        <div class="op"><input type="checkbox" id="ob6" value="M&aacute;s tr&aacute;fico org&aacute;nico en general"><label for="ob6">M&aacute;s tr&aacute;fico</label></div>
+      </div>
+    </div>
+    <div class="f">
+      <label class="fl">Keywords que menciona el cliente</label>
+      <div class="fh">Lo que ellos dicen &mdash; la selecci&oacute;n definitiva la hace el especialista</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+        <input type="text" id="kw1" placeholder="Keyword"><input type="text" id="kw2" placeholder="Keyword">
+        <input type="text" id="kw3" placeholder="Keyword"><input type="text" id="kw4" placeholder="Opcional">
+        <input type="text" id="kw5" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="f"><label class="fl">Plazo en que esperan ver resultados</label>
+      <div class="fh">SEO org&aacute;nico toma entre 3 y 6 meses &mdash; importante alinear expectativas</div>
+      <div class="opts" style="margin-top:4px">
+        <div class="op"><input type="radio" name="o_plazo" id="op1" value="1-2 meses (expectativa muy baja)"><label for="op1">1-2 meses</label></div>
+        <div class="op"><input type="radio" name="o_plazo" id="op2" value="3-4 meses"><label for="op2">3-4 meses</label></div>
+        <div class="op"><input type="radio" name="o_plazo" id="op3" value="6+ meses"><label for="op3">6+ meses</label></div>
+        <div class="op"><input type="radio" name="o_plazo" id="op4" value="Sin plazo definido"><label for="op4">Sin prisa</label></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bloque 7 ── -->
+<div class="blk" id="sec7">
+  <div class="blk-hd">
+    <div class="bnum">7</div>
+    <div class="blk-info"><div class="btitle">Operativo</div><div class="bsub">Qui&eacute;n decide, contenido y equipo interno</div></div>
+  </div>
+  <div class="blk-body">
+    <div class="f2">
+      <div class="f"><label class="fl">Qui&eacute;n aprueba cambios en el sitio</label><input type="text" id="op_apr" placeholder="Nombre y cargo de quien decide"></div>
+      <div class="f"><label class="fl">Fecha l&iacute;mite o evento importante</label><input type="text" id="op_fec" placeholder="Ej: lanzamiento en marzo"></div>
+    </div>
+    <div class="f2">
+      <div class="f"><label class="fl">Generaci&oacute;n de contenido</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="op_red" id="or1" value="S&iacute;, tienen redactor o equipo de contenido"><label for="or1">S&iacute;, interno</label></div>
+          <div class="op"><input type="radio" name="op_red" id="or2" value="No, necesitan que la agencia lo haga"><label for="or2">La agencia lo har&iacute;a</label></div>
+          <div class="op"><input type="radio" name="op_red" id="or3" value="El equipo lo hace ellos mismos"><label for="or3">Lo hacen ellos</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Equipo interno</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="op_int" id="oi1" value="S&iacute;, marketing interno"><label for="oi1">Marketing</label></div>
+          <div class="op"><input type="radio" name="op_int" id="oi2" value="S&iacute;, desarrollador interno"><label for="oi2">Desarrollador</label></div>
+          <div class="op"><input type="radio" name="op_int" id="oi3" value="No, somos su &uacute;nico proveedor digital"><label for="oi3">Solo nosotros</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bloque 8 ── -->
+<div class="blk" id="sec8">
+  <div class="blk-hd">
+    <div class="bnum int-num">8</div>
+    <div class="blk-info"><div class="btitle">Evaluaci&oacute;n del especialista</div><div class="bsub">Notas internas del equipo de la agencia</div></div>
+    <div class="badge yel">Solo interno</div>
+  </div>
+  <div class="blk-body">
+    <div class="int-note">&#128274; Solo para uso interno. El cliente no ve esta informaci&oacute;n.</div>
+    <div class="f"><label class="fl">Notas libres de la reuni&oacute;n</label><textarea id="e_notas" placeholder="Actitud del cliente, contexto, cosas entre l&iacute;neas, oportunidades..."></textarea></div>
+    <div class="f2">
+      <div class="f"><label class="fl">Perfil del cliente</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="e_tipo" id="et1" value="Involucrado y entiende el proceso"><label for="et1">Involucrado</label></div>
+          <div class="op"><input type="radio" name="e_tipo" id="et2" value="Quiere resultados, delega todo"><label for="et2">Delega todo</label></div>
+          <div class="op"><input type="radio" name="e_tipo" id="et3" value="Necesita educaci&oacute;n sobre SEO"><label for="et3">Necesita educaci&oacute;n</label></div>
+          <div class="op"><input type="radio" name="e_tipo" id="et4" value="Expectativas irreales o cliente dif&iacute;cil"><label for="et4">Dif&iacute;cil</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Calidad del lead</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="e_cal" id="ec1" value="Alta"><label for="ec1">Alta</label></div>
+          <div class="op"><input type="radio" name="e_cal" id="ec2" value="Media"><label for="ec2">Media</label></div>
+          <div class="op"><input type="radio" name="e_cal" id="ec3" value="Baja"><label for="ec3">Baja</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="f2">
+      <div class="f"><label class="fl">Tier recomendado</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="e_tier" id="etier1" value="SEO Base"><label for="etier1">SEO Base</label></div>
+          <div class="op"><input type="radio" name="e_tier" id="etier2" value="SEO Crecimiento"><label for="etier2">Crecimiento</label></div>
+          <div class="op"><input type="radio" name="e_tier" id="etier3" value="SEO + AI/GEO"><label for="etier3">SEO + AI/GEO</label></div>
+        </div>
+      </div>
+      <div class="f"><label class="fl">Prioridad de cierre</label>
+        <div class="opts">
+          <div class="op"><input type="radio" name="e_pri" id="ep1" value="Alta — propuesta esta semana"><label for="ep1">Alta</label></div>
+          <div class="op"><input type="radio" name="e_pri" id="ep2" value="Media — 1-2 semanas"><label for="ep2">Media</label></div>
+          <div class="op"><input type="radio" name="e_pri" id="ep3" value="Baja — sin urgencia"><label for="ep3">Baja</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="f"><label class="fl">Se&ntilde;ales de alerta</label><textarea id="e_alert" placeholder="Penalizaci&oacute;n posible, expectativas en 1 mes, sin acceso al sitio..."></textarea></div>
+  </div>
+</div>
+
+<!-- Action bar -->
+<div class="action-bar">
+  <button class="btn-prim" id="btn-save" onclick="guardarEnMaster()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Guardar en master
+  </button>
+  <button class="btn-sec" onclick="generar()">Generar resumen</button>
+  <button class="btn-ghost" onclick="nuevaFicha()">Nueva ficha</button>
+  <span id="save-status"></span>
+</div>
+
+<!-- Output -->
+<div class="out-card" id="outbox">
+  <div class="out-hd">
+    <div class="out-hd-left"><span class="out-hd-dot"></span>Resumen &mdash; copiar al CRM</div>
+    <button class="copy-btn" id="copybtn" onclick="copiar()">Copiar</button>
+  </div>
+  <div class="out-body"><pre id="res"></pre></div>
+</div>
+
+<div class="foot">
+  <strong>Guardado:</strong> Los datos se guardan en la hoja <strong>🧾 SEO 2.0 Primer Contacto</strong> del master. Si usas este HTML fuera del CMS, configura <strong>GAS_URL</strong> con la URL del Web App.
+</div>
+
+</div><!-- /main-scroll -->
+</main>
+</div><!-- /body -->
+</div><!-- /page -->
+
+<script src="../assets/api.js"></script>
+<script>
+// ================================================================
+// ⚙️ Conexión al Master
+// Si esta ficha se abre desde el menú ROSSIO, no debes configurar nada.
+// Si la usas como HTML externo, pega aquí la URL del Web App del Master.
+var GAS_URL = ''; // v23.72: se usa google.script.run desde el panel; opcionalmente acepta ?gas=...
+try {
+  var _gasParam = new URLSearchParams(location.search).get('gas');
+  if (_gasParam) GAS_URL = _gasParam;
+  if (!GAS_URL && location.href.indexOf('/macros/s/') >= 0) GAS_URL = location.href.split('?')[0];
+} catch(e) {}
+// ================================================================
+
+/* ── Sidebar nav ── */
+var SECTIONS = [
+  {id:'sec1',label:'Datos del contacto'},{id:'sec2',label:'El negocio'},
+  {id:'sec3',label:'Presencia digital'},{id:'sec4',label:'Historial SEO'},
+  {id:'sec5',label:'Competidores'},{id:'sec6',label:'Expectativas'},
+  {id:'sec7',label:'Operativo'}
+];
+var INTERNAL = [{id:'sec8',label:'Evaluaci\u00f3n interna'}];
+
+function buildNav(){
+  function makeItem(sec,i,isInt){
+    var el=document.createElement('div');
+    el.className='nav-item'+(isInt?' internal':'');
+    el.id='nav_'+sec.id;
+    var num=isInt?'&#9733;':(i+1);
+    el.innerHTML='<span class="nav-num">'+num+'</span><span>'+sec.label+'</span>';
+    el.addEventListener('click',function(){
+      document.getElementById(sec.id).scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    return el;
+  }
+  var ni=document.getElementById('nav-items');
+  SECTIONS.forEach(function(s,i){ni.appendChild(makeItem(s,i,false));});
+  var nint=document.getElementById('nav-internal');
+  INTERNAL.forEach(function(s,i){nint.appendChild(makeItem(s,i,true));});
+
+  if('IntersectionObserver' in window){
+    var obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var nb=document.getElementById('nav_'+e.target.id);
+        if(nb) nb.classList.toggle('active',e.isIntersecting);
+      });
+    },{rootMargin:'-56px 0px -65% 0px',threshold:0});
+    SECTIONS.concat(INTERNAL).forEach(function(s){
+      var el=document.getElementById(s.id);
+      if(el)obs.observe(el);
+    });
+  }
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('m_fecha').value=new Date().toLocaleDateString('es-PE',{year:'numeric',month:'long',day:'numeric'});
+  buildNav();
+  checkConfig();
+  if(masterDisponible()) cargarLista();
+});
+
+function usaGoogleRun(){
+  return !!(window.google && google.script && google.script.run);
+}
+function masterDisponible(){
+  return usaGoogleRun() || !!GAS_URL;
+}
+function fichaApiCall(action, data, onOk, onErr){
+  data = data || {};
+  if (usaGoogleRun()) {
+    var runner = google.script.run
+      .withSuccessHandler(function(res){ onOk(res || {}); })
+      .withFailureHandler(function(err){ onErr(new Error(err && err.message ? err.message : String(err))); });
+    if (action === 'getFichas') runner.fichas_getList_pub();
+    else if (action === 'getFicha') runner.fichas_getData_pub(data.empresa || '');
+    else if (action === 'saveFicha') runner.fichas_save_pub(data);
+    else onErr(new Error('Acción no reconocida: '+action));
+    return;
+  }
+  if (!GAS_URL) { onErr(new Error('Configura GAS_URL')); return; }
+  if (action === 'saveFicha') {
+    fetch(GAS_URL+'?action=saveFicha', {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(data)})
+      .then(function(r){return r.json();}).then(onOk).catch(onErr);
+  } else {
+    var url = GAS_URL+'?action='+encodeURIComponent(action);
+    if (data.empresa) url += '&empresa='+encodeURIComponent(data.empresa);
+    fetch(url).then(function(r){return r.json();}).then(onOk).catch(onErr);
+  }
+}
+function checkConfig(){
+  var ok=masterDisponible();
+  var chip=document.getElementById('conn-chip');
+  var bar=document.getElementById('cfg-bar');
+  var msg=document.getElementById('cfg-msg');
+  chip.className='conn-chip'+(ok?' ok':'');
+  document.getElementById('conn-text').textContent=ok?'Conectado al master':'Sin configurar';
+  bar.className='cfg-bar '+(ok?'ok':'warn');
+  msg.innerHTML=ok?'&#10003; Conectado. Los datos se guardan en <strong>🧾 SEO 2.0 Primer Contacto</strong> del master.':'Abre esta ficha desde el men&uacute; ROSSIO o configura <strong>GAS_URL</strong> con la URL del Web App del Master.';
+}
+
+/* ── Client list ── */
+function cargarLista(){
+  var st=document.getElementById('sel-status');
+  st.innerHTML='<span class="spin"></span>&nbsp;Cargando clientes...';
+  fichaApiCall('getFichas', {}, function(res){
+    st.innerHTML='';
+    if(res.error){st.textContent='Error: '+res.error;return;}
+    var sel=document.getElementById('cliente-select');
+    while(sel.options.length>1)sel.remove(1);
+    var fichas=res.fichas||[];
+    fichas.forEach(function(f){
+      var opt=document.createElement('option');
+      opt.value=f.empresa;
+      var fecha=(f.actualizado||'').slice(0,10)||f.fecha||'';
+      opt.textContent=f.empresa+(f.especialista?' · '+f.especialista:'')+(fecha?' ('+fecha+')':'');
+      sel.appendChild(opt);
+    });
+    st.textContent=fichas.length?fichas.length+' cliente'+(fichas.length>1?'s':'')+' en el master':'Sin fichas guardadas todav\u00eda';
+  }, function(e){st.innerHTML='';st.textContent='Sin conexi\u00f3n: '+e.message;});
+}
+
+function recargarLista(){if(!masterDisponible()){toast('Conecta la ficha al master');return;}cargarLista();}
+
+function cargarCliente(empresa){
+  if(!empresa)return;
+  if(!masterDisponible()){toast('Conecta la ficha al master');return;}
+  var st=document.getElementById('sel-status');
+  st.innerHTML='<span class="spin"></span>&nbsp;Cargando ficha de '+empresa+'...';
+  fichaApiCall('getFicha', {empresa:empresa}, function(res){
+    st.innerHTML='';
+    if(res.error){st.textContent='Error: '+res.error;return;}
+    setFormData(res.data);
+    st.textContent='\u2713 Ficha cargada: '+empresa;
+    toast('Ficha cargada: '+empresa);
+  }, function(e){st.innerHTML='';st.textContent='Error: '+e.message;});
+}
+
+/* ── Save ── */
+function guardarEnMaster(){
+  if(!masterDisponible()){toast('Conecta la ficha al master');return;}
+  var empresa=(document.getElementById('c_emp').value||'').trim();
+  if(!empresa){toast('Completa el nombre de la empresa en la sección 1');document.getElementById('c_emp').focus();return;}
+  var setSaving=function(saving){
+    var btns=[document.getElementById('btn-save'),document.getElementById('btn-save-sb')];
+    btns.forEach(function(b){if(!b)return;b.disabled=saving;b.innerHTML=saving?'<span class="spin" style="border-top-color:#fff"></span>&nbsp;Guardando...':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>&nbsp;Guardar en master';});
+  };
+  setSaving(true);
+  document.getElementById('save-status').textContent='';
+  document.getElementById('sb-status').textContent='';
+  fichaApiCall('saveFicha', getFormData(), function(res){
+    setSaving(false);
+    if(res.ok){
+      var a=res.action==='created'?'creada':'actualizada';
+      document.getElementById('save-status').innerHTML='<span style="color:var(--grn)">\u2713 '+empresa+' '+a+'</span>';
+      document.getElementById('sb-status').innerHTML='<span style="color:var(--grn)">\u2713 Guardado</span>';
+      toast('\u2713 Guardado: '+empresa);
+      cargarLista();
+    }else{
+      document.getElementById('save-status').innerHTML='<span style="color:#dc2626">Error: '+(res.error||'inesperado')+'</span>';
+    }
+  }, function(e){setSaving(false);document.getElementById('save-status').innerHTML='<span style="color:#dc2626">Error: '+e.message+'</span>';});
+}
+
+/* ── Form ── */
+function getFormData(){
+  var d={};
+  document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select').forEach(function(el){if(el.id&&el.id!=='m_fecha')d[el.id]=el.value;});
+  document.querySelectorAll('input[type=radio]:checked').forEach(function(el){d['_r_'+el.name]=el.value;});
+  document.querySelectorAll('input[type=checkbox]').forEach(function(el){if(el.id)d['_cb_'+el.id]=el.checked;});
+  return d;
+}
+function setFormData(d){
+  if(!d)return;
+  Object.keys(d).forEach(function(k){
+    var v=d[k];
+    if(k.startsWith('_r_')){
+      var el=document.querySelector('input[name="'+k.slice(3)+'"][value="'+String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"]');
+      if(el){el.checked=true;el.dispatchEvent(new Event('change'));}
+    }else if(k.startsWith('_cb_')){
+      var el2=document.getElementById(k.slice(4));if(el2)el2.checked=v;
+    }else{var el3=document.getElementById(k);if(el3)el3.value=v;}
+  });
+  refreshCond();
+}
+function tog(id,show){var el=document.getElementById(id);if(el)el.classList.toggle('show',show);}
+function refreshCond(){
+  var ag=document.querySelector('input[name="h_ag"]:checked');
+  tog('cag',!!(ag&&ag.value.charAt(0)==='S'));
+  var pr=document.querySelector('input[name="h_prop"]:checked');
+  tog('cprop',!!(pr&&pr.value.charAt(0)==='S'));
+}
+function nuevaFicha(){
+  if(!confirm('Limpiar el formulario para una nueva ficha?'))return;
+  document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=url],textarea').forEach(function(el){if(el.id!=='m_fecha')el.value='';});
+  document.querySelectorAll('select').forEach(function(el){el.selectedIndex=0;});
+  document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(function(el){el.checked=false;});
+  document.querySelectorAll('.cond').forEach(function(el){el.classList.remove('show');});
+  document.getElementById('outbox').style.display='none';
+  document.getElementById('save-status').textContent='';
+  document.getElementById('sb-status').textContent='';
+  document.getElementById('cliente-select').value='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── Helpers ── */
+function v(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function r(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:'\u2014';}
+function chk(ids){return ids.map(function(id){var el=document.getElementById(id);return el&&el.checked?el.value:null;}).filter(Boolean).join(', ')||'\u2014';}
+
+/* ── Generate ── */
+function generar(){
+  var kws=[v('kw1'),v('kw2'),v('kw3'),v('kw4'),v('kw5')].filter(Boolean).join(' / ')||'\u2014';
+  var can=chk(['nc1','nc2','nc3','nc4','nc5','nc6']);
+  var obj=chk(['ob1','ob2','ob3','ob4','ob5','ob6']);
+  var acc=chk(['hpa1','hpa2','hpa3','hpa4','hpa5']);
+  var cops=[[v('cp1n'),v('cp1w')],[v('cp2n'),v('cp2w')],[v('cp3n'),v('cp3w')]].filter(function(c){return c[0];}).map(function(c,i){return '  '+(i+1)+'. '+c[0]+(c[1]?' \u2014 '+c[1]:'');}).join('\n')||'  No mencionaron';
+  var ag=r('h_ag');var agX=(ag.charAt(0)==='S'?((v('h_at')?' \u2014 '+v('h_at'):'')+(v('h_am')?' \u2014 motivo: '+v('h_am'):'')+'\n'+(v('h_ar')?'  Resultado: '+v('h_ar')+'\n':'')):'');
+  var D='\u2550'.repeat(48);
+  var txt=[D,'FICHA DE PRIMER CONTACTO \u00b7 SEO ORG\u00c1NICO','Fecha: '+v('m_fecha')+' | Especialista: '+(v('m_esp')||'\u2014'),D,'','\u258c DATOS DEL CLIENTE','  Empresa:   '+(v('c_emp')||'\u2014'),'  Contacto:  '+(v('c_nom')||'\u2014')+' \u00b7 '+(v('c_car')||'\u2014'),'  Email:     '+(v('c_mail')||'\u2014'),'  Tel\u00e9fono:  '+(v('c_tel')||'\u2014'),'  Web:       '+(v('c_web')||'\u2014'),'','\u258c EL NEGOCIO','  Rubro:       '+(v('n_rubro')||'\u2014'),'  Descripci\u00f3n: '+(v('n_desc')||'\u2014'),'  Opera en:   '+r('n_donde'),'  Vende a:    '+r('n_quien'),'  Ticket:     '+(v('n_ticket')||'\u2014'),'  Clientes llegan por: '+can,'','\u258c PRESENCIA DIGITAL','  Sitio tiene: '+(v('d_edad')||'\u2014'),'  Gesti\u00f3n:     '+r('d_gest'),'  Backend:     '+r('d_acc'),'  Tr\u00e1fico:     '+(v('d_traf')||'\u2014'),'  GSC: '+r('d_gsc')+' | GA4: '+r('d_ga4')+' | GBP: '+r('d_gbp'),'','\u258c HISTORIAL SEO','  Agencia previa: '+ag+agX,'  Acciones propias: '+r('h_prop')+(r('h_prop').charAt(0)==='S'?' \u2014 '+acc:''),'  Penalizaci\u00f3n: '+r('h_pen'),'  Ca\u00edda tr\u00e1fico: '+r('h_cai'),'','\u258c COMPETIDORES',cops,(v('cpn')?'  Notas: '+v('cpn'):''),'','\u258c EXPECTATIVAS','  Objetivos: '+obj,'  Keywords: '+kws,'  Plazo: '+r('o_plazo'),'','\u258c OPERATIVO','  Aprueba: '+(v('op_apr')||'\u2014'),'  Fecha l\u00edmite: '+(v('op_fec')||'Ninguna'),'  Contenido: '+r('op_red'),'  Equipo: '+r('op_int'),'','\u2500'.repeat(17)+' USO INTERNO '+'\u2500'.repeat(18),'\u258c EVALUACI\u00d3N DEL ESPECIALISTA','  Perfil: '+r('e_tipo'),'  Lead:   '+r('e_cal'),'  Tier:   '+r('e_tier'),'  Cierre: '+r('e_pri'),(v('e_alert')?'\n  Alertas:\n  '+v('e_alert').replace(/\n/g,'\n  '):''),
+  (v('e_notas')?'\n  Notas:\n  '+v('e_notas').replace(/\n/g,'\n  '):''),(D)].join('\n');
+  document.getElementById('res').textContent=txt;
+  document.getElementById('outbox').style.display='block';
+  document.getElementById('outbox').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copiar(){
+  var txt=document.getElementById('res').textContent;var b=document.getElementById('copybtn');
+  var ok=function(){b.textContent='\u2713 Copiado';b.classList.add('ok');setTimeout(function(){b.textContent='Copiar';b.classList.remove('ok');},2000);};
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(ok).catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();});
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();}
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateY(0)';
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateY(8px)';},2800);
+}
+</script>
+
+<script>
+// V23.73 — Ficha primer contacto conectada a Clientes + plan/duracion/GSC.
+(function(){
+  var prevCall = window.fichaApiCall;
+  window.fichaApiCall = function(action,data,onOk,onErr){
+    data=data||{};
+    if(action==='seo2_clientes_buscar'){
+      if(usaGoogleRun()){
+        google.script.run.withSuccessHandler(function(res){onOk(res||{});}).withFailureHandler(function(err){onErr(new Error(err&&err.message?err.message:String(err)));}).mc_seo2_clientesBuscar_pub(data);
+        return;
+      }
+      if(!GAS_URL){onErr(new Error('Configura GAS_URL'));return;}
+      fetch(GAS_URL+'?action=seo2_clientes_buscar&q='+encodeURIComponent(data.q||'')+'&limite='+(data.limite||30)).then(function(r){return r.json();}).then(onOk).catch(onErr);return;
+    }
+    if(action==='gsc_properties'){
+      if(usaGoogleRun()){
+        google.script.run.withSuccessHandler(function(res){onOk(res||{});}).withFailureHandler(function(err){onErr(new Error(err&&err.message?err.message:String(err)));}).mc_seo2_listGscProperties_pub(data);
+        return;
+      }
+      if(!GAS_URL){onErr(new Error('Configura GAS_URL'));return;}
+      fetch(GAS_URL+'?action=gsc_properties&web='+encodeURIComponent(data.web||'')).then(function(r){return r.json();}).then(onOk).catch(onErr);return;
+    }
+    return prevCall(action,data,onOk,onErr);
+  };
+  function injectSeoOps(){
+    if(document.getElementById('seo_extra_v2373')) return;
+    var cfg=document.getElementById('cfg-bar');
+    if(!cfg) return;
+    var card=document.createElement('div');
+    card.id='seo_extra_v2373';
+    card.className='sel-card';
+    card.innerHTML='<div class="sel-top"><div class="sel-title"><span class="sel-dot"></span>Conectar con Clientes + SEO activo</div></div>'+
+      '<div class="f"><label class="fl">Buscar cliente en la tabla Clientes</label><input type="text" id="seo_cliente_q" placeholder="Escribe marca, contacto, web o servicio..." oninput="seoBuscarClientes()"><div id="seo_cliente_results" class="sel-status"></div></div>'+
+      '<input type="hidden" id="seo_master_id"><input type="hidden" id="seo_master_row"><input type="hidden" id="seo_master_servicio">'+
+      '<div class="f3"><div class="f"><label class="fl">Plan SEO</label><select id="seo_plan"><option>SEO Base</option><option>SEO Crecimiento</option><option>SEO + IA/GEO</option><option>SEO Local</option><option>SEO Técnico</option></select></div><div class="f"><label class="fl">Duración del SEO activo</label><select id="seo_duracion" onchange="seoCalcFin()"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option><option value="24">24 meses</option><option value="0">Mensual / continuo</option></select></div><div class="f"><label class="fl">Responsable SEO</label><select id="seo_resp"><option>Rossio</option><option>Camila</option><option>Lucy</option></select></div></div>'+
+      '<div class="f3"><div class="f"><label class="fl">Inicio SEO</label><input type="date" id="seo_inicio" onchange="seoCalcFin()"></div><div class="f"><label class="fl">Fin / renovación</label><input type="date" id="seo_fin"></div><div class="f"><label class="fl">Manejo renovación</label><select id="seo_renovacion"><option>Revisar renovación 15 días antes</option><option>Renovación automática mensual</option><option>Renovación 3 meses</option><option>Renovación 6 meses</option><option>Renovación 12 meses</option><option>Sin renovación</option></select></div></div>'+
+      '<div class="f"><label class="fl">Propiedad GSC</label><div style="display:flex;gap:8px"><select id="seo_gsc_prop" style="flex:1"><option value="">— seleccionar propiedad Search Console —</option></select><button type="button" class="btn-sec" onclick="seoCargarGsc()">Traer GSC</button><button type="button" class="btn-sec" onclick="seoAutoGsc()">Auto</button></div><div id="seo_gsc_status" class="sel-status"></div></div>'+
+      '<div class="int-note">Este bloque no crea hojas viejas. Guarda la ficha y actualiza el cliente SEO 2.0 conectado a la tabla general Clientes.</div>';
+    cfg.parentNode.insertBefore(card,cfg.nextSibling);
+    var today=new Date(); var iso=today.toISOString().slice(0,10); var ini=document.getElementById('seo_inicio'); if(ini&&!ini.value)ini.value=iso; seoCalcFin();
+  }
+  window.seoCalcFin=function(){var i=document.getElementById('seo_inicio'), d=document.getElementById('seo_duracion'), f=document.getElementById('seo_fin'); if(!i||!d||!f||!i.value)return; var m=Number(d.value||0); if(!m){f.value='';return;} var dt=new Date(i.value+'T12:00:00'); dt.setMonth(dt.getMonth()+m); f.value=dt.toISOString().slice(0,10);};
+  var buscarTimer=null;
+  window.seoBuscarClientes=function(){clearTimeout(buscarTimer); buscarTimer=setTimeout(function(){var q=(document.getElementById('seo_cliente_q')||{}).value||''; var box=document.getElementById('seo_cliente_results'); if(!box)return; if(q.trim().length<2){box.textContent='Escribe al menos 2 letras para buscar en Clientes.';return;} box.innerHTML='<span class="spin"></span>&nbsp;Buscando...'; fichaApiCall('seo2_clientes_buscar',{q:q,limite:8},function(res){var arr=res.items||[]; if(!arr.length){box.textContent='Sin coincidencias en Clientes. Puedes llenar la ficha como cliente nuevo.';return;} box.innerHTML=arr.map(function(c){var data=encodeURIComponent(JSON.stringify(c)); return '<button type="button" class="btn-sec" style="margin:3px 4px 3px 0" onclick="seoUsarCliente(decodeURIComponent(\''+data+'\'))">'+(c.marca||c.cliente)+' '+(c.servicio?'· '+c.servicio:'')+'</button>';}).join('');},function(e){box.textContent='Error: '+e.message;});},300);};
+  window.seoUsarCliente=function(raw){var c=JSON.parse(raw); function set(id,v){var el=document.getElementById(id); if(el&&!el.value)el.value=v||'';} document.getElementById('seo_master_id').value=c.id||''; document.getElementById('seo_master_row').value=c.row||''; document.getElementById('seo_master_servicio').value=c.servicio||''; document.getElementById('seo_cliente_q').value=c.marca||c.cliente||''; set('c_emp',c.marca||c.cliente); set('c_web',c.web); set('c_nom',c.contacto); set('c_tel',c.telefono); set('c_mail',c.email||c.correo); var r=document.getElementById('seo_cliente_results'); if(r)r.textContent='✓ Conectado a Clientes: '+(c.marca||c.cliente); seoAutoGsc();};
+  window.seoCargarGsc=function(cb){var st=document.getElementById('seo_gsc_status'), sel=document.getElementById('seo_gsc_prop'), web=(document.getElementById('c_web')||{}).value||''; if(st)st.innerHTML='<span class="spin"></span>&nbsp;Leyendo propiedades GSC...'; fichaApiCall('gsc_properties',{web:web},function(res){if(st)st.textContent=res.ok?'Propiedades encontradas: '+(res.total||0):(res.msg||'No se pudieron leer propiedades'); if(sel){while(sel.options.length>1)sel.remove(1); (res.items||[]).forEach(function(p){var o=document.createElement('option'); o.value=p.siteUrl; o.textContent=p.siteUrl+(p.permissionLevel?' · '+p.permissionLevel:''); sel.appendChild(o);}); if(res.guess) sel.value=res.guess;} if(typeof cb==='function')cb(res);},function(e){if(st)st.textContent='Error: '+e.message;});};
+  window.seoAutoGsc=function(){seoCargarGsc(function(res){var st=document.getElementById('seo_gsc_status'); if(st&&res.guess)st.textContent='✓ Propiedad sugerida: '+res.guess;});};
+  var prevGet=window.getFormData;
+  window.getFormData=function(){var d=prevGet?prevGet():{}; ['seo_master_id','seo_master_row','seo_master_servicio','seo_plan','seo_duracion','seo_resp','seo_inicio','seo_fin','seo_renovacion','seo_gsc_prop'].forEach(function(id){var el=document.getElementById(id); if(el)d[id]=el.value||'';}); return d;};
+  var prevSet=window.setFormData;
+  window.setFormData=function(d){if(prevSet)prevSet(d||{}); setTimeout(function(){['seo_master_id','seo_master_row','seo_master_servicio','seo_plan','seo_duracion','seo_resp','seo_inicio','seo_fin','seo_renovacion','seo_gsc_prop'].forEach(function(id){var el=document.getElementById(id); if(el&&d&&d[id]!=null)el.value=d[id];});},50);};
+  document.addEventListener('DOMContentLoaded',function(){injectSeoOps();});
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F1F5F9;color:#0F172A;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Stepper ── */
+.stepper{background:#fff;border-bottom:1px solid #E2E8F0;padding:14px 24px;display:flex;align-items:center;gap:0;flex-shrink:0}
+.step{display:flex;align-items:center;gap:8px;cursor:pointer;position:relative}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:.2s;flex-shrink:0}
+.step.done .step-num{background:#7C3AED;color:#fff}
+.step.active .step-num{background:#7C3AED;color:#fff;box-shadow:0 0 0 4px rgba(124,58,237,.15)}
+.step.idle .step-num{background:#F1F5F9;color:#94A3B8;border:1.5px solid #E2E8F0}
+.step-label{font-size:11px;font-weight:600;color:#94A3B8;white-space:nowrap}
+.step.active .step-label{color:#7C3AED}
+.step.done .step-label{color:#0F172A}
+.step-line{flex:1;height:2px;background:#E2E8F0;min-width:20px;max-width:60px}
+.step.done+.step-line,.step.active+.step-line{background:#7C3AED}
+
+/* ── Contenido ── */
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* Paneles de pasos */
+.step-panel{display:none;animation:fadeIn .25s ease}
+.step-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Sección de cards */
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:12px}
+.card{background:#fff;border-radius:14px;border:1px solid #E8ECF0;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-row{display:grid;gap:14px}
+.card-row.cols2{grid-template-columns:1fr 1fr}
+
+/* Fields */
+.field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;display:block;margin-bottom:6px}
+.field select,.field input,.field textarea{width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;color:#0F172A;background:#FAFBFC;transition:.15s}
+.field select:focus,.field input:focus,.field textarea:focus{outline:none;border-color:#7C3AED;background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.08)}
+
+/* Chips interactivos */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{padding:7px 14px;border-radius:99px;border:1.5px solid #E2E8F0;background:#fff;font-size:12px;font-weight:500;color:#64748B;cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF}
+.chip.sel{background:#7C3AED;border-color:#7C3AED;color:#fff;box-shadow:0 2px 8px rgba(124,58,237,.25)}
+
+/* Pendientes */
+.pend-item{display:grid;grid-template-columns:1fr 140px 32px;gap:8px;align-items:center;background:#FAFBFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:8px 12px;margin-bottom:8px}
+.pend-item input{border:none;background:transparent;font-size:12px;font-family:inherit;color:#0F172A;width:100%}
+.pend-item input:focus{outline:none}
+.pend-item input[type=date]{font-size:11px;color:#64748B}
+.btn-del-pend{background:none;border:none;cursor:pointer;color:#CBD5E1;font-size:18px;line-height:1;transition:.15s}
+.btn-del-pend:hover{color:#EF4444}
+.btn-add-pend{width:100%;padding:9px;border:1.5px dashed #CBD5E1;border-radius:10px;background:none;cursor:pointer;font-size:12px;color:#94A3B8;transition:.15s;text-align:center}
+.btn-add-pend:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF}
+
+/* Preview WA */
+.wa-preview{background:#E9F5E9;border-radius:12px;padding:14px 16px;font-size:11px;line-height:1.6;font-family:'Courier New',monospace;color:#1A3A1A;white-space:pre-wrap;max-height:220px;overflow-y:auto;border:1px solid #C8E6C9}
+.wa-preview-label{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+
+/* Footer */
+.footer{background:#fff;border-top:1px solid #E2E8F0;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.footer-info{font-size:11px;color:#94A3B8}
+.btn-group{display:flex;gap:8px}
+.btn-back{padding:9px 18px;background:#F1F5F9;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:#64748B}
+.btn-back:hover{background:#E2E8F0}
+.btn-next{padding:9px 22px;background:#7C3AED;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-next:hover{background:#6D28D9;box-shadow:0 4px 12px rgba(124,58,237,.3)}
+.btn-next:disabled{opacity:.5;cursor:default;box-shadow:none}
+.btn-save{padding:9px 22px;background:#059669;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-save:hover{background:#047857;box-shadow:0 4px 12px rgba(5,150,105,.3)}
+.btn-save:disabled{opacity:.5}
+
+/* Modal WA */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:99;backdrop-filter:blur(2px);align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal-card{background:#fff;border-radius:18px;padding:22px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-card h3{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.btn-copy{width:100%;padding:11px;background:#25D366;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;margin-top:12px;transition:.15s}
+.btn-copy:hover{background:#128C7E}
+.btn-close-modal{width:100%;padding:9px;background:#F1F5F9;border:none;border-radius:10px;cursor:pointer;font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+
+<!-- Stepper -->
+<div class="stepper" id="stepperBar">
+  <div class="step active" onclick="goStep(0)">
+    <div class="step-num">1</div>
+    <div class="step-label">Proyecto</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step idle" onclick="goStep(1)">
+    <div class="step-num">2</div>
+    <div class="step-label">Objetivo</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step idle" onclick="goStep(2)">
+    <div class="step-num">3</div>
+    <div class="step-label">Contenido</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step idle" onclick="goStep(3)">
+    <div class="step-num">4</div>
+    <div class="step-label">Identidad</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step idle" onclick="goStep(4)">
+    <div class="step-num">5</div>
+    <div class="step-label">Pendientes</div>
+  </div>
+</div>
+
+<div class="content" id="content">
+
+<!-- PASO 1: Proyecto -->
+<div class="step-panel active" id="panel0">
+  <div class="sec-label">¿Con quién y en qué proyecto?</div>
+  <div class="card">
+    <div class="card-row cols2">
+      <div class="field"><label>Cliente / Marca *</label>
+        <select id="marca" onchange="cargarProyectos()"><option value="">— Seleccionar —</option></select>
+      </div>
+      <div class="field"><label>Proyecto vinculado *</label>
+        <select id="proyecto"><option value="">— Selecciona marca primero —</option></select>
+      </div>
+      <div class="field"><label>Conduce la reunión</label>
+        <select id="responsable"><option>Rossio</option><option>Camila</option><option>Lucy</option></select>
+      </div>
+      <div class="field"><label>Fecha límite esperada</label>
+        <input type="date" id="fechaLimite">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASO 2: Objetivo -->
+<div class="step-panel" id="panel1">
+  <div class="sec-label">¿Para qué es el sitio y a quién va dirigido?</div>
+  <div class="card">
+    <div class="field" style="margin-bottom:16px"><label>Objetivo principal del sitio *</label>
+      <div class="chip-grid" id="chkObjetivo">
+        <div class="chip" data-v="Captación de leads">Captación de leads</div>
+        <div class="chip" data-v="Ventas online">Ventas online</div>
+        <div class="chip" data-v="Portafolio / presencia">Portafolio / presencia</div>
+        <div class="chip" data-v="Tienda WooCommerce">Tienda WooCommerce</div>
+        <div class="chip" data-v="Catálogo de productos">Catálogo de productos</div>
+        <div class="chip" data-v="Blog / contenido">Blog / contenido</div>
+        <div class="chip" data-v="Branding institucional">Branding institucional</div>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:16px"><label>Tipo de sitio</label>
+      <div class="chip-grid" id="chkTipoSitio">
+        <div class="chip" data-v="Landing page">Landing page</div>
+        <div class="chip" data-v="Sitio corporativo">Sitio corporativo</div>
+        <div class="chip" data-v="Tienda WooCommerce">Tienda WooCommerce</div>
+        <div class="chip" data-v="Catálogo sin carrito">Catálogo sin carrito</div>
+        <div class="chip" data-v="Blog / revista">Blog / revista</div>
+      </div>
+    </div>
+    <div class="field"><label>Público objetivo</label>
+      <div class="chip-grid" id="chkPublico">
+        <div class="chip" data-v="B2B (empresas)">B2B · Empresas</div>
+        <div class="chip" data-v="B2C (personas)">B2C · Personas</div>
+        <div class="chip" data-v="18–25 años">18–25 años</div>
+        <div class="chip" data-v="25–40 años">25–40 años</div>
+        <div class="chip" data-v="40+ años">40+ años</div>
+        <div class="chip" data-v="Lima">Lima</div>
+        <div class="chip" data-v="Nacional Perú">Nacional Perú</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="field"><label>Referencias / webs que le gustan</label>
+      <input type="text" id="referencias" placeholder="https://ref1.com · https://ref2.com · ...">
+    </div>
+  </div>
+</div>
+
+<!-- PASO 3: Contenido -->
+<div class="step-panel" id="panel2">
+  <div class="sec-label">¿Qué páginas tendrá y quién pone los textos?</div>
+  <div class="card">
+    <div class="field" style="margin-bottom:16px"><label>¿Quién redacta los textos? *</label>
+      <div class="chip-grid" id="chkCopy">
+        <div class="chip" data-v="El cliente los envía">El cliente los envía</div>
+        <div class="chip" data-v="Nosotras los redactamos">Nosotras los redactamos</div>
+        <div class="chip" data-v="Mixto">Mixto</div>
+      </div>
+    </div>
+    <div class="field"><label>Páginas / secciones</label>
+      <div class="chip-grid" id="chkPaginas">
+        <div class="chip" data-v="Inicio">Inicio</div>
+        <div class="chip" data-v="Sobre nosotros">Sobre nosotros</div>
+        <div class="chip" data-v="Servicios">Servicios</div>
+        <div class="chip" data-v="Productos">Productos</div>
+        <div class="chip" data-v="Portafolio">Portafolio</div>
+        <div class="chip" data-v="Blog">Blog</div>
+        <div class="chip" data-v="Galería">Galería</div>
+        <div class="chip" data-v="Contacto">Contacto</div>
+        <div class="chip" data-v="Testimonios">Testimonios</div>
+        <div class="chip" data-v="FAQ">FAQ</div>
+        <div class="chip" data-v="Tienda">Tienda</div>
+        <div class="chip" data-v="Ficha técnica">Ficha técnica</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASO 4: Identidad -->
+<div class="step-panel" id="panel3">
+  <div class="sec-label">¿Qué tiene el cliente y qué hay que crear?</div>
+  <div class="card">
+    <div class="field" style="margin-bottom:16px"><label>Identidad de marca — ¿qué tiene listo?</label>
+      <div class="chip-grid" id="chkIdentidad">
+        <div class="chip" data-v="Logo listo">✅ Logo listo</div>
+        <div class="chip" data-v="Colores definidos">✅ Colores definidos</div>
+        <div class="chip" data-v="Tipografía definida">✅ Tipografía definida</div>
+        <div class="chip" data-v="Sin identidad — diseño desde cero">❌ Sin identidad (crear todo)</div>
+      </div>
+    </div>
+    <div class="field"><label>Materiales disponibles</label>
+      <div class="chip-grid" id="chkMateriales">
+        <div class="chip" data-v="Fotos reales">📷 Fotos reales</div>
+        <div class="chip" data-v="Videos">🎬 Videos</div>
+        <div class="chip" data-v="Textos redactados">📝 Textos ya escritos</div>
+        <div class="chip" data-v="Logo en vectores">🎨 Logo en vectores</div>
+        <div class="chip" data-v="Nada — todo por hacer">❌ Nada — todo por hacer</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="field"><label>Notas adicionales de la reunión</label>
+      <input type="text" id="notas" placeholder="Ej: prefieren estilo minimalista, sin animaciones, base de colores fríos...">
+    </div>
+  </div>
+</div>
+
+<!-- PASO 5: Pendientes -->
+<div class="step-panel" id="panel4">
+  <div class="sec-label">¿Qué debe enviarnos el cliente?</div>
+  <div class="card">
+    <div style="font-size:12px;color:#64748B;margin-bottom:14px;line-height:1.5">
+      Cada pendiente debe tener una <strong>fecha de compromiso</strong>. El sistema avisará al equipo antes de que venza.
+    </div>
+    <div id="pendList"></div>
+    <button class="btn-add-pend" onclick="addPend()">＋ Agregar pendiente del cliente</button>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="wa-preview-label">Vista previa del mensaje WA</div>
+    <div class="wa-preview" id="waPreview">Completa los datos para ver el mensaje...</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-info" id="footerInfo">Paso 1 de 5</div>
+  <div class="btn-group">
+    <button class="btn-back" id="btnBack" onclick="prevStep()" style="display:none">← Anterior</button>
+    <button class="btn-next" id="btnNext" onclick="nextStep()">Siguiente →</button>
+    <button class="btn-save" id="btnSave" style="display:none" onclick="guardar()">💾 Guardar y copiar WA</button>
+  </div>
+</div>
+
+<!-- Modal WA -->
+<div class="modal-bg" id="modalWA">
+  <div class="modal-card">
+    <h3>📲 Mensaje listo para WhatsApp</h3>
+    <div class="wa-preview" id="waFinal" style="max-height:280px"></div>
+    <button class="btn-copy" onclick="copiarWA()">📋 Copiar mensaje</button>
+    <button class="btn-close-modal" onclick="document.getElementById('modalWA').classList.remove('show');google.script.host.close()">Cerrar y terminar</button>
+  </div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+var MARCAS=[], STEP=0, MAX=5;
+
+// Cargar marcas desde el backend
+MC_API.call('mc_proyectos_getMarcas',{},function(lista){
+  MARCAS=Array.isArray(lista)?lista:[];
+  var sel=document.getElementById('marca');
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  MARCAS.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+});
+document.getElementById('fechaLimite').min=new Date().toISOString().split('T')[0];
+initChips();
+addPend(); // pendiente inicial vacío
+
+function initChips(){
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      var parent=c.closest('.chip-grid');
+      var single=['chkObjetivo','chkTipoSitio','chkCopy'].includes(parent.id);
+      if(single) parent.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});
+      c.classList.toggle('sel');
+      if(STEP===4) updatePreview();
+    });
+  });
+}
+
+function getChips(id){return Array.from(document.querySelectorAll('#'+id+' .chip.sel')).map(function(c){return c.dataset.v;});}
+
+// Navegación
+function goStep(n){
+  if(n>STEP) return; // solo ir atrás
+  setStep(n);
+}
+
+function nextStep(){
+  if(!validateStep()) return;
+  if(STEP<MAX-1){setStep(STEP+1);}
+}
+function prevStep(){if(STEP>0) setStep(STEP-1);}
+
+function setStep(n){
+  document.querySelectorAll('.step-panel').forEach(function(p,i){p.classList.toggle('active',i===n);});
+  var steps=document.querySelectorAll('.step');
+  steps.forEach(function(s,i){s.classList.remove('active','done','idle');s.classList.add(i<n?'done':i===n?'active':'idle');});
+  STEP=n;
+  document.getElementById('btnBack').style.display=n>0?'':'none';
+  document.getElementById('btnNext').style.display=n<MAX-1?'':'none';
+  document.getElementById('btnSave').style.display=n===MAX-1?'':'none';
+  document.getElementById('footerInfo').textContent='Paso '+(n+1)+' de '+MAX;
+  if(n===MAX-1) updatePreview();
+}
+
+function validateStep(){
+  if(STEP===0){
+    if(!document.getElementById('marca').value){alert('Selecciona el cliente.');return false;}
+    if(!document.getElementById('proyecto').value){alert('Selecciona el proyecto.');return false;}
+  }
+  if(STEP===1&&!getChips('chkObjetivo').length){alert('Selecciona al menos un objetivo.');return false;}
+  if(STEP===2&&!getChips('chkCopy').length){alert('Indica quién redacta los textos.');return false;}
+  return true;
+}
+
+function cargarProyectos(){
+  var m=document.getElementById('marca').value;
+  var sel=document.getElementById('proyecto');
+  sel.innerHTML='<option value="">— Cargando... —</option>';
+  if(!m){sel.innerHTML='<option value="">— Selecciona marca —</option>';return;}
+  google.script.run.withSuccessHandler(function(p){
+    sel.innerHTML='<option value="">— Seleccionar —</option>';
+    (p||[]).forEach(function(x){var o=document.createElement('option');o.value=x;o.textContent=x;sel.appendChild(o);});
+  }).mc_pub_v2436_getProyectosPorMarca(m);
+}
+
+// Pendientes
+var pendN=0;
+function addPend(){
+  var list=document.getElementById('pendList');
+  var id='pnd-'+pendN++;
+  var div=document.createElement('div');div.className='pend-item';div.id=id;
+  var hoy=new Date().toISOString().split('T')[0];
+  div.innerHTML='<input type="text" placeholder="Ej: Enviar fotos del equipo" class="pnd-d" oninput="updatePreview()">'+
+    '<input type="date" class="pnd-f" min="'+hoy+'" oninput="updatePreview()">'+
+    '<button class="btn-del-pend" onclick="document.getElementById(\''+id+'\').remove();updatePreview()">×</button>';
+  list.appendChild(div);
+  updatePreview();
+}
+
+function getPendientes(){
+  return Array.from(document.querySelectorAll('.pend-item')).map(function(r){
+    return{descripcion:r.querySelector('.pnd-d').value.trim(),fecha:r.querySelector('.pnd-f').value};
+  }).filter(function(p){return p.descripcion;});
+}
+
+function updatePreview(){
+  var marca=document.getElementById('marca').value||'[Cliente]';
+  var proyecto=document.getElementById('proyecto').value||'[Proyecto]';
+  var nl='\n';
+  var fecha=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+  var msg='*Resumen de la reunión '+fecha+'*'+nl+'🏷️ '+marca+' — '+proyecto+nl+nl;
+  var obj=getChips('chkObjetivo');if(obj.length) msg+='✅ Objetivo: '+obj.join(', ')+nl;
+  var tipo=getChips('chkTipoSitio');if(tipo.length) msg+='✅ Tipo: '+tipo.join(', ')+nl;
+  var pub=getChips('chkPublico');if(pub.length) msg+='✅ Público: '+pub.join(', ')+nl;
+  var copy=getChips('chkCopy');if(copy.length) msg+='✅ Textos: '+copy[0]+nl;
+  var pags=getChips('chkPaginas');if(pags.length) msg+='✅ Páginas: '+pags.join(', ')+nl;
+  var ident=getChips('chkIdentidad');if(ident.length) msg+='✅ Identidad: '+ident.join(', ')+nl;
+  var mat=getChips('chkMateriales');if(mat.length) msg+='✅ Materiales: '+mat.join(', ')+nl;
+  var ref=document.getElementById('referencias')&&document.getElementById('referencias').value;if(ref) msg+='✅ Referencias: '+ref+nl;
+  var notas=document.getElementById('notas')&&document.getElementById('notas').value;if(notas) msg+='✅ '+notas+nl;
+  var pend=getPendientes();
+  if(pend.length){msg+=nl+'*Pendientes — necesitamos que nos envíes:*'+nl;pend.forEach(function(p){msg+='🚀 '+p.descripcion+(p.fecha?' · Fecha: '+p.fecha:'')+nl;});}
+  document.getElementById('waPreview').textContent=msg;
+}
+
+function guardar(){
+  if(!validateStep()) return;
+  var btn=document.getElementById('btnSave');btn.disabled=true;btn.textContent='Guardando...';
+  var data={
+    marca:document.getElementById('marca').value,
+    proyecto:document.getElementById('proyecto').value,
+    responsable:document.getElementById('responsable').value,
+    fechaLimite:document.getElementById('fechaLimite').value,
+    objetivo:getChips('chkObjetivo').join(', '),
+    tipoSitio:getChips('chkTipoSitio').join(', '),
+    publico:getChips('chkPublico').join(', '),
+    copy:getChips('chkCopy').join(', '),
+    paginas:getChips('chkPaginas'),
+    identidad:getChips('chkIdentidad'),
+    materiales:getChips('chkMateriales'),
+    referencias:document.getElementById('referencias')?document.getElementById('referencias').value:'',
+    notas:document.getElementById('notas')?document.getElementById('notas').value:'',
+    pendientes:getPendientes()
+  };
+  google.script.run
+    .withSuccessHandler(function(r){
+      btn.disabled=false;btn.textContent='💾 Guardar y copiar WA';
+      if(r&&r.ok!==false){
+        document.getElementById('waFinal').textContent=r.waMsg||document.getElementById('waPreview').textContent;
+        document.getElementById('modalWA').classList.add('show');
+      } else alert('Error: '+(r&&r.msg||'?'));
+    })
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='💾 Guardar y copiar WA';alert('Error: '+e.message);})
+    .mc_pub_guardarBriefingWeb(data);
+}
+
+function copiarWA(){
+  var txt=document.getElementById('waFinal').textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    var b=document.querySelector('.btn-copy');b.textContent='✅ ¡Copiado!';
+    setTimeout(function(){b.textContent='📋 Copiar mensaje';},2500);
+  });
+}
+</script>
+</body>
+</html>

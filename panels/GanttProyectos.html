@@ -1,0 +1,79 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#111827}
+header{background:linear-gradient(120deg,#1A0A36,#4c1d95,#9333EA);color:#fff;padding:18px 22px}
+.title{font-size:20px;font-weight:950}.sub{font-size:12px;opacity:.8;margin-top:3px}
+.toolbar{padding:10px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:8px 14px;background:#9333EA;color:#fff;font-weight:800;cursor:pointer;font-size:12px}
+.select{border:1px solid #e5e7eb;border-radius:10px;padding:7px 10px;font-size:12px;background:#fff}
+.content{padding:14px 16px 24px;overflow-x:auto}
+.gantt{width:100%;min-width:600px}
+.gantt-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;position:relative}
+.row-label{width:170px;flex-shrink:0;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
+.row-label .marca{font-weight:800;font-size:13px}.row-label .resp{font-size:11px;color:#94a3b8}
+.row-track{flex:1;height:28px;background:#f1f5f9;border-radius:6px;position:relative;overflow:hidden}
+.row-bar{position:absolute;height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:width .4s ease}
+.pct-label{font-size:11px;color:#94a3b8;width:36px;text-align:right;flex-shrink:0}
+.today-line{position:absolute;top:0;width:2px;background:#ef4444;height:100%;z-index:10;opacity:.7}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#64748b;padding:10px 16px;background:#f8fafc;border-top:1px solid #eee}
+.leg{display:flex;align-items:center;gap:4px}.leg-dot{width:10px;height:10px;border-radius:3px}
+.section{font-size:12px;font-weight:700;color:#6b7280;padding:8px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+.empty{padding:30px;text-align:center;color:#94a3b8;font-size:13px}
+.loading{padding:30px;text-align:center;color:#667085}
+</style></head><body>
+<header><div class="title">📊 Gantt de Proyectos</div><div class="sub">Vista de línea de tiempo por proyecto activo</div></header>
+<div class="toolbar">
+  <select id="filtroArea" class="select" onchange="renderGantt()"><option value="">— Todas las áreas —</option><option>Web</option><option>SEO</option><option>Campañas</option><option>Admin</option></select>
+  <button class="btn" onclick="loadData()">↻ Actualizar</button>
+</div>
+<div class="content" id="app"><div class="loading">Cargando proyectos...</div></div>
+<div class="legend"><div class="leg"><div class="leg-dot" style="background:#059669"></div> Completado</div><div class="leg"><div class="leg-dot" style="background:#7c3aed"></div> En proceso</div><div class="leg"><div class="leg-dot" style="background:#f97316"></div> Pendiente</div><div class="leg"><div class="leg-dot" style="background:#dc2626"></div> Atrasado/Bloqueado</div></div>
+<script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+var allProyectos=[],hoyISO='';
+var estadoColor={'Completado':'#059669','Completo':'#059669','Entregado':'#059669','En proceso':'#7c3aed','Planificación':'#f97316','Pendiente':'#f97316','Bloqueado':'#dc2626','Pausa':'#94a3b8','QA':'#0284c7','Diseño':'#ec4899'};
+function getColor(est,pct){if(pct>=100||/complet|entreg/i.test(est)) return '#059669';if(/bloqueado|pausa/i.test(est)) return '#dc2626';if(/en proceso/i.test(est)) return '#7c3aed';return '#f97316';}
+function renderGantt(){
+  var fa=document.getElementById('filtroArea').value;
+  var proy=fa?allProyectos.filter(p=>p.area===fa):allProyectos;
+  if(!proy.length){document.getElementById('app').innerHTML='<div class="empty">Sin proyectos para mostrar</div>';return;}
+  // Compute date range
+  var dates=proy.flatMap(p=>[p.inicio,p.fin]).filter(Boolean).sort();
+  var minD=new Date(dates[0]||hoyISO); var maxD=new Date(dates[dates.length-1]||hoyISO);
+  if(maxD<=minD) maxD=new Date(minD.getTime()+90*86400000);
+  var range=maxD-minD; var hoy=new Date(hoyISO||new Date().toISOString().split('T')[0]);
+  var todayPct=Math.max(0,Math.min(100,((hoy-minD)/range)*100));
+  var html='<div class="gantt">';
+  // Header dates
+  html+='<div class="gantt-row"><div class="row-label" style="font-size:10px;color:#94a3b8">'+minD.toLocaleDateString('es-PE',{month:'short',year:'2-digit'})+'</div><div class="row-track" style="background:transparent;display:flex;justify-content:space-between;padding:0 4px"><span style="font-size:10px;color:#94a3b8">↑ hoy '+hoy.toLocaleDateString('es-PE',{day:'2-digit',month:'short'})+'</span><span style="font-size:10px;color:#94a3b8">'+maxD.toLocaleDateString('es-PE',{month:'short',year:'2-digit'})+'</span></div><div class="pct-label"></div></div>';
+  // Area grouping
+  var areas=[...new Set(proy.map(p=>p.area))].sort();
+  areas.forEach(function(area){
+    html+='<div class="section">📁 '+esc(area)+'</div>';
+    proy.filter(p=>p.area===area).forEach(function(p){
+      var start=p.inicio?new Date(p.inicio):minD;
+      var end=p.fin?new Date(p.fin):new Date(start.getTime()+30*86400000);
+      var left=Math.max(0,((start-minD)/range)*100);
+      var width=Math.max(3,((end-start)/range)*100);
+      if(left+width>100) width=100-left;
+      var color=getColor(p.estado,p.pct);
+      var isLate=p.fin&&new Date(p.fin)<hoy&&!/complet|entreg/i.test(p.estado);
+      var borderStr=isLate?'box-shadow:inset 0 0 0 2px #dc2626':'';
+      html+='<div class="gantt-row"><div class="row-label"><div class="marca">'+esc(p.marca)+'</div><div class="resp">'+esc(p.etapa)+'·'+esc(p.resp)+'</div></div>';
+      html+='<div class="row-track"><div class="today-line" style="left:'+todayPct+'%"></div>';
+      html+='<div class="row-bar" style="left:'+left+'%;width:'+width+'%;background:'+color+';opacity:0.88;'+borderStr+'">'+esc(p.nombre||p.marca)+'</div></div>';
+      html+='<div class="pct-label">'+p.pct+'%</div></div>';
+    });
+  });
+  html+='</div>';
+  document.getElementById('app').innerHTML=html;
+}
+function loadData(){
+  document.getElementById('app').innerHTML='<div class="loading">Cargando...</div>';
+  google.script.run.withSuccessHandler(function(d){
+    allProyectos=d.proyectos||[]; hoyISO=d.hoy||'';
+    renderGantt();
+  }).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>'}).mc_v23_gantt_getData_pub();
+}
+loadData();
+</script></body></html>

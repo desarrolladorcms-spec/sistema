@@ -1,0 +1,45 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#25324b}header{background:linear-gradient(120deg,#1A0A36,#334155);color:#fff;padding:18px 22px}.title{font-size:22px;font-weight:950}.sub{font-size:13px;opacity:.85}.toolbar{padding:12px 18px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;gap:10px}.toolbar select{padding:9px 10px;border:1px solid #e5e7eb;border-radius:10px}.btn{border:0;border-radius:10px;padding:9px 12px;background:#9333EA;color:#fff;font-weight:900;cursor:pointer}.content{padding:16px 18px}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}.card{background:#fff;border:1px solid #e5e7eb;border-left:5px solid #9333EA;border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(15,23,42,.05)}.card.hot{border-left-color:#dc2626;background:#fff7f7}.name{font-weight:900}.meta{font-size:12px;color:#667085;line-height:1.5;margin-top:4px}.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;background:#f1f5f9;margin:2px}.red{background:#fee2e2;color:#b91c1c}.yellow{background:#fef3c7;color:#92400e}.blue{background:#dbeafe;color:#1d4ed8}.empty,.loading{padding:20px;text-align:center;color:#94a3b8;background:#fff;border-radius:14px;border:1px dashed #cbd5e1}
+</style></head><body><header><div class="title">🕘 Tareas sin movimiento</div><div class="sub">Detecta tareas activas que no registran avance o movimiento desde hace varios días.</div></header><div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button><select id="resp"><option value="">Todas</option><option>Rossio</option><option>Cami</option><option>Lucy</option></select></div><div class="content" id="app"><div class="loading">Cargando...</div></div><script src="../assets/api.js"></script>
+<script>
+let DATA={items:[]};function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function pill(t,c){return '<span class="pill '+(c||'')+'">'+esc(t)+'</span>'}function loadData(){document.getElementById('app').innerHTML='<div class="loading">Cargando...</div>';google.script.run.withSuccessHandler(r=>{DATA=r||{items:[]};render();}).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message||e)+'</div>';}).mc_mov_getData_pub();}
+function render(){let r=document.getElementById('resp').value;let arr=(DATA.items||[]).filter(x=>!r||x.responsable===r);if(!arr.length){document.getElementById('app').innerHTML='<div class="empty">Sin tareas estancadas con este filtro.</div>';return;}document.getElementById('app').innerHTML='<div class="cards">'+arr.map(x=>'<div class="card '+(x.diasSinMov>=5?'hot':'')+'"><div class="name">'+esc(x.marca||'Sin marca')+'</div><div>'+pill(x.responsable,'blue')+pill(x.diasSinMov+' días sin movimiento',x.diasSinMov>=5?'red':'yellow')+pill(x.estado||'-')+'</div><div class="meta"><b>'+esc(x.tarea||'-')+'</b><br>Proyecto: '+esc(x.proyecto||'-')+'<br>Últ. movimiento: '+esc(x.ultimo||'-')+' · Límite: '+esc(x.limite||'-')+'</div></div>').join('')+'</div>';}
+document.getElementById('resp').addEventListener('change',render);loadData();
+</script>
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body></html>

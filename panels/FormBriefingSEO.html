@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F1F5F9;color:#0F172A;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.stepper{background:#fff;border-bottom:1px solid #E2E8F0;padding:14px 24px;display:flex;align-items:center;gap:0;flex-shrink:0}
+.step{display:flex;align-items:center;gap:8px;cursor:pointer}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:.2s;flex-shrink:0}
+.step.done .step-num{background:#059669;color:#fff}
+.step.active .step-num{background:#059669;color:#fff;box-shadow:0 0 0 4px rgba(5,150,105,.15)}
+.step.idle .step-num{background:#F1F5F9;color:#94A3B8;border:1.5px solid #E2E8F0}
+.step-label{font-size:11px;font-weight:600;color:#94A3B8;white-space:nowrap}
+.step.active .step-label{color:#059669}
+.step.done .step-label{color:#0F172A}
+.step-line{flex:1;height:2px;background:#E2E8F0;min-width:20px;max-width:50px}
+.step.done+.step-line{background:#059669}
+
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+.step-panel{display:none;animation:fadeIn .25s ease}
+.step-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:12px}
+.card{background:#fff;border-radius:14px;border:1px solid #E8ECF0;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-row{display:grid;gap:14px}
+.cols2{grid-template-columns:1fr 1fr}
+
+.field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;display:block;margin-bottom:6px}
+.field select,.field input,.field textarea{width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;color:#0F172A;background:#FAFBFC;transition:.15s}
+.field select:focus,.field input:focus,.field textarea:focus{outline:none;border-color:#059669;background:#fff;box-shadow:0 0 0 3px rgba(5,150,105,.08)}
+
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{padding:7px 14px;border-radius:99px;border:1.5px solid #E2E8F0;background:#fff;font-size:12px;font-weight:500;color:#64748B;cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:#059669;color:#059669;background:#F0FDF4}
+.chip.sel{background:#059669;border-color:#059669;color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.25)}
+
+/* Status selector */
+.status-row{display:flex;gap:8px;flex-wrap:wrap}
+.status-opt{padding:8px 14px;border-radius:10px;border:1.5px solid #E2E8F0;background:#fff;font-size:12px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+.status-opt:hover{border-color:#059669}
+.status-opt.si{background:#ECFDF5;border-color:#059669;color:#065F46}
+.status-opt.pend{background:#FFFBEB;border-color:#D97706;color:#92400E}
+.status-opt.no{background:#FEF2F2;border-color:#EF4444;color:#991B1B}
+
+/* Competidores */
+.comp-inputs{display:flex;flex-direction:column;gap:8px}
+.comp-inputs input{padding:9px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:12px;font-family:inherit;background:#FAFBFC;width:100%}
+.comp-inputs input:focus{outline:none;border-color:#059669;background:#fff}
+
+.wa-preview{background:#E8F5E9;border-radius:12px;padding:14px 16px;font-size:11px;line-height:1.6;font-family:'Courier New',monospace;color:#1B5E20;white-space:pre-wrap;max-height:220px;overflow-y:auto;border:1px solid #C8E6C9}
+.wa-preview-label{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+
+.footer{background:#fff;border-top:1px solid #E2E8F0;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.footer-info{font-size:11px;color:#94A3B8}
+.btn-group{display:flex;gap:8px}
+.btn-back{padding:9px 18px;background:#F1F5F9;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:#64748B}
+.btn-next{padding:9px 22px;background:#059669;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-next:hover{background:#047857}
+.btn-save{padding:9px 22px;background:#059669;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-save:disabled,.btn-next:disabled{opacity:.5}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:99;backdrop-filter:blur(2px);align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal-card{background:#fff;border-radius:18px;padding:22px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-card h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.btn-copy{width:100%;padding:11px;background:#25D366;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;margin-top:12px}
+.btn-close-modal{width:100%;padding:9px;background:#F1F5F9;border:none;border-radius:10px;cursor:pointer;font-size:12px;margin-top:6px}
+
+/* Acceso badge */
+.acc-row{display:flex;gap:8px}
+.acc-opt{flex:1;padding:10px;border:1.5px solid #E2E8F0;border-radius:10px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;transition:.15s}
+.acc-opt.ok{background:#ECFDF5;border-color:#059669;color:#065F46}
+.acc-opt.pend{background:#FFFBEB;border-color:#D97706;color:#92400E}
+.acc-opt.no{background:#FEF2F2;border-color:#EF4444;color:#991B1B}
+</style>
+</head>
+<body>
+
+<div class="stepper">
+  <div class="step active"><div class="step-num">1</div><div class="step-label">Cliente</div></div>
+  <div class="step-line"></div>
+  <div class="step idle"><div class="step-num">2</div><div class="step-label">Alcance</div></div>
+  <div class="step-line"></div>
+  <div class="step idle"><div class="step-num">3</div><div class="step-label">Keywords</div></div>
+  <div class="step-line"></div>
+  <div class="step idle"><div class="step-num">4</div><div class="step-label">Estado</div></div>
+</div>
+
+<div class="content">
+
+<!-- PASO 1 -->
+<div class="step-panel active" id="panel0">
+  <div class="sec-label">¿Con quién?</div>
+  <div class="card"><div class="card-row cols2">
+    <div class="field"><label>Cliente / Marca *</label>
+      <select id="marca"><option value="">— Seleccionar —</option></select></div>
+    <div class="field"><label>Dominio del sitio *</label>
+      <input type="url" id="dominio" placeholder="https://voltwell.com"></div>
+    <div class="field"><label>Conduce la reunión</label>
+      <select id="responsable"><option>Rossio</option><option>Camila</option><option>Lucy</option></select></div>
+    <div class="field"><label>Plan / servicio</label>
+      <select id="plan"><option>SEO Mensual</option><option>SEO Local</option><option>SEO + ADS</option></select></div>
+  </div></div>
+</div>
+
+<!-- PASO 2 -->
+<div class="step-panel" id="panel1">
+  <div class="sec-label">¿Qué queremos posicionar y dónde?</div>
+  <div class="card">
+    <div class="field" style="margin-bottom:16px"><label>Tipo de alcance *</label>
+      <div class="chip-grid" id="chkTipoSEO">
+        <div class="chip" data-v="Local — una sola ciudad">📍 Local — una ciudad</div>
+        <div class="chip" data-v="Nacional — todo Perú">🇵🇪 Nacional — todo Perú</div>
+        <div class="chip" data-v="Ambos — local + nacional">🌐 Ambos</div>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:16px"><label>Ciudad objetivo (si es local)</label>
+      <div class="chip-grid" id="chkCiudad">
+        <div class="chip" data-v="Lima">Lima</div>
+        <div class="chip" data-v="Arequipa">Arequipa</div>
+        <div class="chip" data-v="Trujillo">Trujillo</div>
+        <div class="chip" data-v="Cusco">Cusco</div>
+        <div class="chip" data-v="Piura">Piura</div>
+        <div class="chip" data-v="Chiclayo">Chiclayo</div>
+        <div class="chip" data-v="Ica">Ica</div>
+        <div class="chip" data-v="Tacna">Tacna</div>
+        <div class="chip" data-v="Otra">Otra</div>
+      </div>
+    </div>
+    <div class="field"><label>Servicios / productos a posicionar</label>
+      <input type="text" id="servicios" placeholder="Ej: electricista Lima, tableros eléctricos industriales, UPS..."></div>
+  </div>
+</div>
+
+<!-- PASO 3 -->
+<div class="step-panel" id="panel2">
+  <div class="sec-label">¿Qué keywords y quiénes son su competencia?</div>
+  <div class="card">
+    <div class="field" style="margin-bottom:14px"><label>Keywords que menciona el cliente</label>
+      <textarea id="keywords" rows="3" style="resize:none" placeholder="Ej: electricista Lima, servicio eléctrico industrial, tableros eléctricos, instalaciones eléctricas Lima..."></textarea>
+    </div>
+    <div class="field"><label>Competidores en Google (URLs)</label>
+      <div class="comp-inputs">
+        <input type="url" id="comp1" placeholder="https://competidor1.com">
+        <input type="url" id="comp2" placeholder="https://competidor2.com">
+        <input type="url" id="comp3" placeholder="https://competidor3.com">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASO 4 -->
+<div class="step-panel" id="panel3">
+  <div class="sec-label">¿Cómo viene el cliente?</div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="field" style="margin-bottom:16px"><label>Historial SEO</label>
+      <div class="chip-grid" id="chkHistorial">
+        <div class="chip" data-v="Sin historial SEO">🆕 Sin historial — nuevo</div>
+        <div class="chip" data-v="Con agencia anterior">🔄 Trabajó con otra agencia</div>
+        <div class="chip" data-v="Lo hizo él mismo">🧑‍💻 Lo intentó solo</div>
+        <div class="chip" data-v="Posible penalización">⚠️ Posible penalización</div>
+      </div>
+    </div>
+    <div class="field"><label>Contenido existente</label>
+      <div class="chip-grid" id="chkContenido">
+        <div class="chip" data-v="Sin contenido">❌ Sin contenido</div>
+        <div class="chip" data-v="Blog con artículos">📰 Blog con artículos</div>
+        <div class="chip" data-v="Páginas de servicios trabajadas">📄 Páginas de servicios</div>
+        <div class="chip" data-v="Fichas de productos">🛍️ Fichas de productos</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;margin-bottom:10px">Acceso a Google Search Console (GSC)</div>
+    <div class="acc-row" id="gscRow">
+      <div class="acc-opt" onclick="selAcc(this,'gsc','ok')" data-v="✅ Ya tenemos acceso">✅ Ya tenemos acceso</div>
+      <div class="acc-opt" onclick="selAcc(this,'gsc','pend')" data-v="⏳ Pendiente solicitar">⏳ Pendiente solicitar</div>
+      <div class="acc-opt" onclick="selAcc(this,'gsc','no')" data-v="❌ No tiene GSC">❌ No tiene GSC</div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;margin-bottom:10px">Acceso a Google Analytics 4 (GA4)</div>
+    <div class="acc-row" id="ga4Row">
+      <div class="acc-opt" onclick="selAcc(this,'ga4','ok')" data-v="✅ Ya tenemos acceso">✅ Ya tenemos acceso</div>
+      <div class="acc-opt" onclick="selAcc(this,'ga4','pend')" data-v="⏳ Pendiente solicitar">⏳ Pendiente solicitar</div>
+      <div class="acc-opt" onclick="selAcc(this,'ga4','no')" data-v="❌ No tiene GA4">❌ No tiene GA4</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="field"><label>Notas de la reunión</label>
+      <input type="text" id="notas" placeholder="Ej: cliente quiere resultados en 3 meses, competencia fuerte en Lima norte..."></div>
+    <div style="margin-top:14px">
+      <div class="wa-preview-label">Vista previa del mensaje WA</div>
+      <div class="wa-preview" id="waPreview">Completa los datos para ver el mensaje...</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-info" id="footerInfo">Paso 1 de 4</div>
+  <div class="btn-group">
+    <button class="btn-back" id="btnBack" style="display:none" onclick="prevStep()">← Anterior</button>
+    <button class="btn-next" id="btnNext" onclick="nextStep()">Siguiente →</button>
+    <button class="btn-save" id="btnSave" style="display:none" onclick="guardar()">💾 Guardar y generar WA</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalWA">
+  <div class="modal-card">
+    <h3>📲 Resumen SEO listo para WhatsApp</h3>
+    <div class="wa-preview" id="waFinal" style="max-height:280px;background:#E8F5E9;color:#1B5E20"></div>
+    <button class="btn-copy" onclick="copiarWA()">📋 Copiar mensaje</button>
+    <button class="btn-close-modal" onclick="document.getElementById('modalWA').classList.remove('show');google.script.host.close()">Cerrar y terminar</button>
+  </div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+var MARCAS=[], STEP=0, MAX=4;
+var ACC={gsc:'',ga4:''};
+// Cargar marcas desde el backend
+MC_API.call('mc_proyectos_getMarcas',{},function(lista){
+  MARCAS=Array.isArray(lista)?lista:[];
+  var sel=document.getElementById('marca');
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  MARCAS.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+});
+initChips();
+
+function initChips(){
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      var p=c.closest('.chip-grid');
+      var single=['chkTipoSEO','chkHistorial'].includes(p.id);
+      if(single) p.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});
+      c.classList.toggle('sel');
+      if(STEP===3) updatePreview();
+    });
+  });
+}
+function getChips(id){return Array.from(document.querySelectorAll('#'+id+' .chip.sel')).map(function(c){return c.dataset.v;});}
+
+function selAcc(el,type,cls){
+  el.closest('.acc-row').querySelectorAll('.acc-opt').forEach(function(x){x.className='acc-opt';});
+  el.classList.add(cls); ACC[type]=el.dataset.v; updatePreview();
+}
+
+function nextStep(){if(!validate()) return; if(STEP<MAX-1) setStep(STEP+1);}
+function prevStep(){if(STEP>0) setStep(STEP-1);}
+function setStep(n){
+  document.querySelectorAll('.step-panel').forEach(function(p,i){p.classList.toggle('active',i===n);});
+  var steps=document.querySelectorAll('.step');
+  steps.forEach(function(s,i){s.classList.remove('active','done','idle');s.classList.add(i<n?'done':i===n?'active':'idle');});
+  STEP=n;
+  document.getElementById('btnBack').style.display=n>0?'':'none';
+  document.getElementById('btnNext').style.display=n<MAX-1?'':'none';
+  document.getElementById('btnSave').style.display=n===MAX-1?'':'none';
+  document.getElementById('footerInfo').textContent='Paso '+(n+1)+' de '+MAX;
+  if(n===MAX-1) updatePreview();
+}
+function validate(){
+  if(STEP===0&&!document.getElementById('marca').value){alert('Selecciona el cliente.');return false;}
+  if(STEP===0&&!document.getElementById('dominio').value){alert('Ingresa el dominio.');return false;}
+  if(STEP===1&&!getChips('chkTipoSEO').length){alert('Selecciona el alcance.');return false;}
+  return true;
+}
+
+function updatePreview(){
+  var nl='\n', fecha=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+  var m=document.getElementById('marca').value||'[Cliente]';
+  var d=document.getElementById('dominio').value||'[dominio]';
+  var msg='*Resumen reunión inicio SEO — '+fecha+'*'+nl+'🏷️ '+m+nl+'🌐 '+d+nl+nl;
+  var tipo=getChips('chkTipoSEO');if(tipo.length) msg+='✅ Alcance: '+tipo[0]+nl;
+  var ciudad=getChips('chkCiudad');if(ciudad.length) msg+='✅ Ciudad objetivo: '+ciudad.join(', ')+nl;
+  var serv=document.getElementById('servicios').value;if(serv) msg+='✅ Servicios: '+serv+nl;
+  var kw=document.getElementById('keywords').value;if(kw) msg+='✅ Keywords clave: '+kw.substring(0,100)+nl;
+  var c1=document.getElementById('comp1').value,c2=document.getElementById('comp2').value,c3=document.getElementById('comp3').value;
+  var comps=[c1,c2,c3].filter(Boolean).join(' · ');if(comps) msg+='✅ Competidores: '+comps+nl;
+  var hist=getChips('chkHistorial');if(hist.length) msg+='✅ Historial SEO: '+hist[0]+nl;
+  if(ACC.gsc) msg+='✅ GSC: '+ACC.gsc+nl;
+  if(ACC.ga4) msg+='✅ GA4: '+ACC.ga4+nl;
+  var notas=document.getElementById('notas').value;if(notas) msg+='✅ '+notas+nl;
+  document.getElementById('waPreview').textContent=msg;
+}
+
+function guardar(){
+  var btn=document.getElementById('btnSave');btn.disabled=true;btn.textContent='Guardando...';
+  var comp=[document.getElementById('comp1').value,document.getElementById('comp2').value,document.getElementById('comp3').value].filter(Boolean).join(' · ');
+  var data={
+    marca:document.getElementById('marca').value,
+    dominio:document.getElementById('dominio').value,
+    responsable:document.getElementById('responsable').value,
+    plan:document.getElementById('plan').value,
+    tipoSEO:getChips('chkTipoSEO').join(', '),
+    ciudad:getChips('chkCiudad').join(', '),
+    servicios:document.getElementById('servicios').value,
+    keywords:document.getElementById('keywords').value,
+    competidores:comp,
+    historialSEO:getChips('chkHistorial').join(', '),
+    contenido:getChips('chkContenido').join(', '),
+    gsc:ACC.gsc||'Sin definir',ga4:ACC.ga4||'Sin definir',
+    notas:document.getElementById('notas').value
+  };
+  google.script.run
+    .withSuccessHandler(function(r){
+      btn.disabled=false;btn.textContent='💾 Guardar y generar WA';
+      if(r&&r.ok!==false){document.getElementById('waFinal').textContent=r.waMsg||document.getElementById('waPreview').textContent;document.getElementById('modalWA').classList.add('show');}
+      else alert('Error: '+(r&&r.msg||'?'));
+    })
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='💾 Guardar y generar WA';alert('Error: '+e.message);})
+    .mc_pub_guardarBriefingSEO(data);
+}
+function copiarWA(){
+  navigator.clipboard.writeText(document.getElementById('waFinal').textContent).then(function(){
+    var b=document.querySelector('.btn-copy');b.textContent='✅ ¡Copiado!';
+    setTimeout(function(){b.textContent='📋 Copiar mensaje';},2500);
+  });
+}
+</script>
+</body>
+</html>

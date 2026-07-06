@@ -1,0 +1,164 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--green:#059669;--red:#DC2626;--amber:#D97706;--blue:#0284C7}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.wrap{padding:0 0 20px}
+/* Header */
+.hdr{background:linear-gradient(120deg,#1E1B4B,#4C1D95);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hdr-title{font-size:15px;font-weight:700;color:#FDE68A}
+.hdr-actions{display:flex;gap:6px}
+.btn-hdr{padding:5px 11px;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600}
+.btn-refresh{background:rgba(255,255,255,.15);color:rgba(255,255,255,.9)}
+.btn-refresh:hover{background:rgba(255,255,255,.25)}
+/* Kpis */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kpi{background:rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;text-align:center}
+.kpi-n{font-size:20px;font-weight:800;color:#FDE68A;line-height:1}
+.kpi-l{font-size:9px;color:rgba(255,255,255,.6);margin-top:2px}
+/* Lista */
+.list{padding:10px 10px 0}
+.sec-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);padding:12px 6px 6px}
+/* Solicitud card */
+.sol-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.sol-card.urgente{border-left:3px solid var(--red)}
+.sol-card.alta{border-left:3px solid var(--amber)}
+.sol-card.media{border-left:3px solid var(--blue)}
+.sol-card.baja{border-left:3px solid var(--green)}
+.sol-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sol-marca{font-size:13px;font-weight:700;color:var(--text)}
+.sol-badge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:999px}
+.sol-badge.urgente{background:#FEE2E2;color:var(--red)}
+.sol-badge.alta{background:#FEF9C3;color:var(--amber)}
+.sol-badge.media{background:#DBEAFE;color:var(--blue)}
+.sol-badge.baja{background:#D1FAE5;color:var(--green)}
+.sol-tarea{font-size:12px;color:var(--text);margin-bottom:6px;line-height:1.4}
+.sol-meta{font-size:10px;color:var(--faint);margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap}
+.sol-actions{display:flex;gap:6px;flex-wrap:wrap}
+.act-btn{padding:5px 10px;border:none;border-radius:7px;cursor:pointer;font-size:10px;font-weight:700}
+.act-asig{background:#EDE9FE;color:#5B21B6}
+.act-asig:hover{background:#DDD6FE}
+.act-desc{background:#FEF9C3;color:#92400E}
+.act-desc:hover{background:#FDE68A}
+.act-new{background:#D1FAE5;color:#065F46}
+/* Loading / empty */
+.loading{text-align:center;padding:30px;color:var(--faint);font-size:12px}
+.empty{text-align:center;padding:24px;color:var(--faint);font-size:12px;border:1px dashed var(--border);border-radius:12px;margin:10px}
+/* Modal asignación rápida */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;backdrop-filter:blur(2px);align-items:flex-end;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal-card{background:var(--surface);border-radius:18px 18px 14px 14px;width:100%;max-width:420px;padding:18px}
+.modal-card h3{font-size:14px;font-weight:700;margin-bottom:12px}
+.modal-card select,.modal-card input{width:100%;margin-bottom:10px;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit}
+.modal-card select:focus,.modal-card input:focus{outline:none;border-color:var(--v)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn-modal-cancel{padding:8px 14px;background:var(--bg);border:none;border-radius:9px;cursor:pointer;font-size:12px}
+.btn-modal-ok{padding:8px 16px;background:var(--v);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-modal-ok:disabled{opacity:.5}
+</style></head><body>
+<div class="wrap">
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-title">🔔 Solicitudes Pendientes</div>
+    <div class="hdr-actions">
+      <button class="btn-hdr btn-refresh" onclick="cargar()">↻ Actualizar</button>
+      <button class="btn-hdr" style="background:#FDE68A;color:#1E1B4B" onclick="google.script.run.mc_pub_nuevoSoporte()">＋ Nuevo</button>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-n" id="kTotal">—</div><div class="kpi-l">Pendientes</div></div>
+    <div class="kpi"><div class="kpi-n" id="kUrgentes">—</div><div class="kpi-l">Urgentes</div></div>
+    <div class="kpi"><div class="kpi-n" id="kDemos">—</div><div class="kpi-l">Demos</div></div>
+  </div>
+</div>
+<div class="list" id="list"><div class="loading">Cargando solicitudes...</div></div>
+</div>
+
+<div class="modal-bg" id="modalAsig">
+<div class="modal-card">
+  <h3>📋 Asignar solicitud</h3>
+  <div style="font-size:11px;color:var(--muted);margin-bottom:10px" id="modalTitulo"></div>
+  <select id="modalPara"><option>Rossio</option><option>Camila</option><option>Lucy</option></select>
+  <select id="modalPrio"><option>Urgente</option><option>Alta</option><option value="Media" selected>Media</option><option>Baja</option></select>
+  <input type="date" id="modalFecha">
+  <div class="modal-btns">
+    <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
+    <button class="btn-modal-ok" id="btnModalOk" onclick="confirmarAsignacion()">Asignar ✓</button>
+  </div>
+</div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+var DATA=[], ID_ASIG='';
+
+function render(d){
+  var sols=d.solicitudes||[], demos=d.demos||[];
+  document.getElementById('kTotal').textContent=sols.length;
+  document.getElementById('kUrgentes').textContent=sols.filter(function(s){return /urgente|alta/i.test(s.prioridad||'');}).length;
+  document.getElementById('kDemos').textContent=demos.length;
+  var html='';
+  if(!sols.length&&!demos.length){
+    html='<div class="empty">✅ Sin solicitudes pendientes<br>Todo al día</div>';
+  } else {
+    if(demos.length){
+      html+='<div class="sec-title">🧪 Demos para revisar</div>';
+      demos.forEach(function(d){
+        html+=renderCard({id:d.id,marca:d.marca||d.proyecto,tarea:'Demo: '+esc(d.tipo||'Avance'),
+          prioridad:'alta',meta:'Enviada por: '+esc(d.responsable||'—'),tipo:'demo'});
+      });
+    }
+    if(sols.length){
+      html+='<div class="sec-title">🔔 Solicitudes de soporte</div>';
+      sols.forEach(function(s){
+        html+=renderCard({id:s.id,marca:s.marcaRecibida||s.marca,tarea:s.tarea,
+          prioridad:(s.prioridad||'media').toLowerCase(),meta:'#'+s.id+' · '+esc(s.solicitante||'—'),tipo:'sol'});
+      });
+    }
+  }
+  document.getElementById('list').innerHTML=html;
+}
+
+function renderCard(s){
+  return '<div class="sol-card '+s.prioridad+'">'+
+    '<div class="sol-row1">'+
+      '<div class="sol-marca">'+esc(s.marca||'Sin cliente')+'</div>'+
+      '<span class="sol-badge '+s.prioridad+'">'+s.prioridad.charAt(0).toUpperCase()+s.prioridad.slice(1)+'</span>'+
+    '</div>'+
+    '<div class="sol-tarea">'+esc((s.tarea||'').substring(0,100))+'</div>'+
+    '<div class="sol-meta"><span>'+esc(s.meta||'')+'</span></div>'+
+    '<div class="sol-actions">'+
+      '<button class="act-btn act-asig" onclick="abrirAsig(\''+s.id+'\',\''+esc(s.marca)+' · '+esc((s.tarea||'').substring(0,40))+'\')">📋 Asignar</button>'+
+      (s.tipo==='demo'?'<button class="act-btn act-new" onclick="google.script.run.mc_pub_abrirPanelRevisionDemos()">👀 Revisar demo</button>':''+
+      '<button class="act-btn act-desc" onclick="">↘ Descartar</button>')+
+    '</div>'+
+  '</div>';
+}
+
+function abrirAsig(id,titulo){
+  ID_ASIG=id;
+  document.getElementById('modalTitulo').textContent=titulo;
+  document.getElementById('modalFecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modalAsig').classList.add('show');
+}
+function cerrarModal(){document.getElementById('modalAsig').classList.remove('show');ID_ASIG='';}
+function confirmarAsignacion(){
+  if(!ID_ASIG) return;
+  var btn=document.getElementById('btnModalOk');btn.disabled=true;btn.textContent='...';
+  google.script.run
+    .withSuccessHandler(function(r){btn.disabled=false;btn.textContent='Asignar ✓';cerrarModal();cargar();})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='Asignar ✓';alert(e.message);})
+    .mc_pub_asignarSolicitud({id:ID_ASIG,para:document.getElementById('modalPara').value,
+      prioridad:document.getElementById('modalPrio').value,
+      limite:document.getElementById('modalFecha').value});
+}
+function cargar(){
+  document.getElementById('list').innerHTML='<div class="loading">Actualizando...</div>';
+  google.script.run.withSuccessHandler(render)
+    .withFailureHandler(function(e){document.getElementById('list').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>';})
+    .mc_pub_panelCentral_getData();
+}
+cargar();
+</script></body></html>

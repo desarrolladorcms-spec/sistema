@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MC CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--green:#059669;--amber:#D97706;--red:#DC2626;--sw:210px}
+html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;font-size:13px;background:var(--bg);color:var(--text)}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.logo{padding:16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7C3AED,#A855F7);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(124,58,237,.25)}
+.logo-text .ln{font-size:12px;font-weight:700;color:var(--text)}
+.logo-text .ls{font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+.nav-scroll{flex:1;overflow-y:auto;padding:6px 8px 14px;scrollbar-width:none}
+.nav-scroll::-webkit-scrollbar{display:none}
+.ns{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);padding:12px 6px 4px}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:.13s;margin-bottom:1px}
+.ni:hover{background:var(--bg);color:var(--text)}
+.ni.on{background:var(--vl);color:var(--v);font-weight:600}
+.ni-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:transparent;transition:.13s}
+.ni:hover .ni-icon{background:var(--border)}
+.ni.on .ni-icon{background:var(--vl)}
+.sep{height:1px;background:var(--border);margin:5px 4px}
+.su{border-top:1px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:9px;flex-shrink:0}
+.u-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.u-n{font-size:12px;font-weight:600;color:var(--text)}
+.u-r{font-size:9px;color:var(--faint)}
+.main{position:fixed;top:0;left:var(--sw);right:0;bottom:0;display:flex;flex-direction:column;overflow:hidden}
+.tb{background:var(--surface);border-bottom:1px solid var(--border);height:50px;padding:0 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mb{display:none;width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;align-items:center;justify-content:center;font-size:17px}
+.tb-ic{width:26px;height:26px;border-radius:7px;background:var(--vl);color:var(--v);display:flex;align-items:center;justify-content:center;font-size:14px}
+.tb-title{font-size:13px;font-weight:600;flex:1}
+.btn{height:32px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:.13s}
+.btn:hover{border-color:var(--v);color:var(--v);background:var(--vl)}
+.btn.v{background:var(--v);color:#fff;border-color:var(--v)}
+.btn.v:hover{background:var(--vd)}
+.fw{flex:1;position:relative;overflow:hidden}
+.pf{width:100%;height:100%;border:none;display:block}
+.ld{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;transition:opacity .2s}
+.ld.off{opacity:0;pointer-events:none}
+.sp{width:26px;height:26px;border:2.5px solid var(--border);border-top-color:var(--v);border-radius:50%;animation:spin .65s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ov{display:none;position:fixed;inset:0;background:rgba(15,18,42,.35);z-index:199;backdrop-filter:blur(3px)}
+.ov.on{display:block}
+@media(max-width:600px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{left:0}.mb{display:flex}}
+</style>
+</head>
+<body>
+<div class="ov" id="ov" onclick="cs()"></div>
+<nav class="sidebar" id="sb">
+  <div class="logo">
+    <div class="logo-icon">🧩</div>
+    <div class="logo-text"><div class="ln" id="logoN">CMS</div><div class="ls">Monstruo Creativo</div></div>
+  </div>
+  <div class="nav-scroll">
+    <div class="ns">Inicio</div>
+    <div class="ni on" id="n-PanelMiDia" onclick="go('PanelMiDia','☀️','Mi Día')"><div class="ni-icon">☀️</div> Mi Día</div>
+    <div class="ni" id="n-PanelProyectosOp" onclick="go('PanelProyectosOp','📦','Proyectos')"><div class="ni-icon">📦</div> Mis Proyectos</div>
+    <div class="sep"></div>
+    <div class="ns">Tareas</div>
+    <div class="ni" id="n-FormNuevaTarea" onclick="go('FormNuevaTarea','✅','Nueva Tarea')"><div class="ni-icon">✅</div> Nueva Tarea</div>
+    <div class="ni" id="n-FormNuevoSoporte" onclick="go('FormNuevoSoporte','🛠️','Soporte')"><div class="ni-icon">🛠️</div> Nuevo Ticket</div>
+    <div class="sep"></div>
+    <div class="ns">Demos</div>
+    <div class="ni" id="n-FormEnviarDemoRevision" onclick="go('FormEnviarDemoRevision','🧪','Enviar Demo')"><div class="ni-icon">🧪</div> Enviar Demo</div>
+    <div class="ni" id="n-PanelRevisionDemos" onclick="go('PanelRevisionDemos','👀','Ver Demos')"><div class="ni-icon">👀</div> Ver Demos</div>
+    <div class="sep"></div>
+    <div class="ns">Agenda</div>
+    <div class="ni" id="n-CalendarioReuniones" onclick="go('CalendarioReuniones','📅','Reuniones')"><div class="ni-icon">📅</div> Reuniones</div>
+    <div class="ni" id="n-CalendarioEntregas" onclick="go('CalendarioEntregas','🗓️','Entregas')"><div class="ni-icon">🗓️</div> Entregas</div>
+    <div class="sep"></div>
+    <div class="ns">SEO</div>
+    <div class="ni" id="n-ReporteSEO" onclick="go('ReporteSEO','📈','SEO')"><div class="ni-icon">📈</div> Reporte SEO</div>
+    <div class="ni" id="n-FormBriefingSEO" onclick="go('FormBriefingSEO','📋','Briefing SEO')"><div class="ni-icon">📋</div> Briefing SEO</div>
+  </div>
+  <div class="su">
+    <div class="u-av" id="uAv">?</div>
+    <div><div class="u-n" id="uN">...</div><div class="u-r">Especialista</div></div>
+  </div>
+</nav>
+<div class="main">
+  <div class="tb">
+    <button class="mb" onclick="ts()">≡</button>
+    <div class="tb-ic" id="tbIc">☀️</div>
+    <span class="tb-title" id="tbT">Mi Día</span>
+    <button class="btn" onclick="rf()">↻</button>
+    <button class="btn v" onclick="go('FormNuevaTarea','✅','Nueva Tarea')">＋ Tarea</button>
+  </div>
+  <div class="fw">
+    <div class="ld" id="ld"><div class="sp"></div></div>
+    <iframe class="pf" id="pf" onload="document.getElementById('ld').classList.add('off')"></iframe>
+  </div>
+</div>
+<script src="../assets/api.js"></script>
+<script src="../assets/comando.js"></script>
+<script src="../assets/widget-flotante.js"></script>
+<script>
+var U={};var BASE='''';var CURR='';
+var grad={Rossio:'linear-gradient(135deg,#7C3AED,#A855F7)',Camila:'linear-gradient(135deg,#0284C7,#38BDF8)',Lucy:'linear-gradient(135deg,#059669,#34D399)'};
+document.getElementById('uAv').style.background=grad[U.nombre]||'#64748B';
+document.getElementById('uAv').textContent=(U.nombre||'?').charAt(0).toUpperCase();
+document.getElementById('uN').textContent=U.nombre||'Yo';
+document.getElementById('logoN').textContent=U.nombre||'CMS';
+function go(p,icon,title){
+  CURR=p;
+  document.querySelectorAll('.ni').forEach(function(e){e.classList.remove('on');});
+  var el=document.getElementById('n-'+p);if(el)el.classList.add('on');
+  document.getElementById('tbIc').textContent=icon||'';
+  document.getElementById('tbT').textContent=title||p;
+  document.getElementById('ld').classList.remove('off');
+  document.getElementById('pf').src=BASE+'?panel='+p;
+  document.title=title+' — MC CMS';cs();
+}
+function rf(){document.getElementById('ld').classList.remove('off');document.getElementById('pf').src=document.getElementById('pf').src;}
+function ts(){document.getElementById('sb').classList.toggle('open');document.getElementById('ov').classList.toggle('on');}
+function cs(){document.getElementById('sb').classList.remove('open');document.getElementById('ov').classList.remove('on');}
+window.addEventListener('load',function(){go('PanelMiDia','☀️','Mi Día');});
+</script>
+</body>
+</html>

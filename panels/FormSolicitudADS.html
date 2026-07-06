@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+:root{--accent:#2563EB;--accent-ring:rgba(37,99,235,.12);--accent-grad:linear-gradient(135deg,#2563EB,#4F46E5)}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,'Segoe UI',sans-serif;background:#EFF6FF;color:#0F172A;font-size:13px;line-height:1.5}.wrap{padding:18px}.header{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1.5px solid #BFDBFE}.icon-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--accent-grad);color:#fff}.h2{font-size:15px;font-weight:800;color:#0F172A}.sub{font-size:11px;color:#1D4ED8;margin-top:2px}.aviso{background:#DBEAFE;border:1px solid #93C5FD;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1E40AF;line-height:1.5}.aviso strong{display:block;margin-bottom:2px}.pending-box{display:none;background:#FFFFFF;border:1.5px solid #BFDBFE;border-left:4px solid #2563EB;border-radius:10px;padding:12px;margin-bottom:14px}.pending-box .id{font-weight:900;color:#1E3A8A;margin-bottom:4px}.meta{font-size:11px;color:#475569;line-height:1.45}.section{font-size:10px;font-weight:800;color:#1D4ED8;letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px;padding-left:4px;border-left:3px solid var(--accent)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.field{display:flex;flex-direction:column;gap:4px}label{font-size:11px;font-weight:700;color:#64748B}.req{color:#DC2626}input,select,textarea{padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;color:#0F172A;font-family:inherit;background:#fff;width:100%;transition:border-color .15s,box-shadow .15s}input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring)}textarea{resize:vertical;min-height:70px}.responsables{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.resp-btn{border:1.5px solid #D7E3F7;border-radius:10px;background:#fff;padding:12px 8px;cursor:pointer;font-weight:800;color:#475569;text-align:center}.resp-btn .icon{display:block;font-size:22px;margin-bottom:4px}.resp-btn.active{border-color:#2563EB;background:#DBEAFE;color:#1E40AF;box-shadow:0 0 0 3px rgba(37,99,235,.10)}.footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:14px;border-top:1.5px solid #BFDBFE;position:sticky;bottom:0;background:#EFF6FF;padding-bottom:4px}.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;gap:6px}.btn-ghost{background:#E2E8F0;color:#475569}.btn-primary{background:var(--accent-grad);color:#fff}.btn-primary:disabled{opacity:.55;cursor:default}.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:8px;font-weight:800;font-size:12px;display:none;z-index:999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.15)}.toast.ok{background:#16A34A;color:#fff}.toast.err{background:#DC2626;color:#fff}.hidden{display:none!important}.help{font-size:10px;color:#94A3B8;line-height:1.35}@media(max-width:640px){.grid,.responsables{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header"><div class="icon-box" id="formIcon">📨</div><div><div class="h2" id="tituloForm">Nueva solicitud ADS / Web</div><div class="sub" id="subForm">Registra o revisa una solicitud para asignarla a una responsable.</div></div></div>
+
+  <div class="pending-box" id="pendingBox"><div class="id" id="pendingId">Solicitud pendiente</div><div class="meta" id="pendingMeta"></div></div>
+
+  <div id="boxResponsable" class="hidden">
+    <div class="section">👩 Responsable / asignación</div>
+    <div class="responsables">
+      <button type="button" class="resp-btn" id="btn-rossio" onclick="selResponsable('Rossio')"><span class="icon">💜</span>Rossio</button>
+      <button type="button" class="resp-btn" id="btn-camila" onclick="selResponsable('Camila')"><span class="icon">💚</span>Cami</button>
+      <button type="button" class="resp-btn" id="btn-lucy" onclick="selResponsable('Lucy')"><span class="icon">💙</span>Lucy</button>
+    </div>
+  </div>
+
+  <div class="section">👤 Contacto y cliente</div>
+  <div class="grid">
+    <div class="field"><label>Contacto</label><input id="contacto" placeholder="Nombre de cliente o ADS"></div>
+    <div class="field"><label>WhatsApp de aviso</label><input id="telefono" placeholder="987654321"></div>
+    <div class="field full"><label>Marca / cliente <span class="req">*</span></label><select id="marca"><option value="">— Cargando clientes… —</option></select></div>
+  </div>
+
+  <div class="section">🧭 Tipo de solicitud</div>
+  <div class="grid">
+    <div class="field"><label>Categoría</label><select id="categoriaSolicitud" onchange="actualizarTipoSolicitud()"><option value="Soporte">Soporte</option><option value="Crear">Crear</option></select></div>
+    <div class="field"><label>Detalle</label><select id="tipoSolicitud"></select></div>
+    <div class="field"><label>Área MASTER</label><select id="area"><option value="">— Área —</option></select></div>
+    <div class="field"><label>Tipo de tarea MASTER</label><select id="tipo"><option value="">— Tipo —</option></select></div>
+  </div>
+
+  <div class="section">🔗 Links</div>
+  <div class="grid">
+    <div class="field full"><label>Link de página para soporte</label><input type="url" id="linkPagina" placeholder="https://cliente.com/pagina"></div>
+    <div class="field full"><label>Link de referencia / Miro / web ejemplo</label><input type="url" id="linkReferencia" placeholder="https://miro.com/... / https://web-ejemplo.com"></div>
+  </div>
+
+  <div class="section">📝 Solicitud</div>
+  <div class="grid">
+    <div class="field full"><label>Proyecto / campaña relacionada</label><input type="text" id="proyecto" placeholder="Ej: Campaña verano / Home / Formulario contacto"></div>
+    <div class="field full"><label>Tarea recibida <span class="req">*</span></label><textarea id="tarea" placeholder="Qué pidió el cliente o ADS"></textarea></div>
+    <div class="field full"><label>Resultado esperado / criterio de listo</label><textarea id="resultadoEsperado" placeholder="Qué debe quedar listo para considerar esta solicitud terminada"></textarea></div>
+    <div class="field"><label>Estado del material</label><select id="materialesDisponibles"><option value="">— Selecciona —</option><option>Material completo en el link</option><option>Falta copy/textos</option><option>Faltan imágenes/artes</option><option>Falta acceso o permiso</option><option>No aplica / solo revisión</option><option>No tengo material todavía</option></select></div>
+    <div class="field"><label>¿Qué falta para avanzar?</label><select id="bloqueo"><option value="">— Selecciona si aplica —</option><option>Nada, se puede avanzar</option><option>Falta confirmación del cliente</option><option>Falta contenido/copy</option><option>Falta arte/imagen/video</option><option>Falta acceso</option><option>No estoy segura, revisar</option></select></div>
+    <div class="field"><label>Fecha de lanzamiento / publicación</label><input type="date" id="fechaLanzamiento"></div>
+    <div class="field"><label>Impacto si es urgente</label><input type="text" id="impactoSiNo" placeholder="Ej: campaña inicia mañana / cliente pagó pauta"></div>
+    <div class="field full"><label>Contexto visible para la responsable</label><textarea id="contexto" placeholder="Contexto, referencias, notas para resolver la tarea"></textarea></div>
+    <input type="hidden" id="descripcionRaw">
+  </div>
+
+  <div class="section">⚙️ Configuración de asignación</div>
+  <div class="grid">
+    <div class="field"><label>Prioridad</label><select id="prioridad"><option value="">— Prioridad —</option></select></div>
+    <div class="field"><label>Fecha límite</label><input type="date" id="limite"></div>
+    <div class="field"><label>Estimado (minutos)</label><input type="number" id="estimado" min="0" placeholder="Ej: 60"></div>
+    <div class="field"><label>Entregable esperado</label><input type="text" id="entregable" placeholder="Qué debe quedar entregado"></div>
+  </div>
+
+  <div class="footer"><button class="btn btn-ghost" onclick="google.script.host.close()">Cancelar</button><button class="btn btn-primary" id="btnGuardar" onclick="guardar()" disabled><span class="btn-label">📨 Guardar solicitud</span></button></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="../assets/api.js"></script>
+<script>
+var PENDING_ROW = Number('<?= MC_PENDING_ROW ?>') || 0;
+var MODE = String('<?= MC_MODE ?>' || 'nuevo');
+var PENDING_DATA = <?!= MC_PENDING_JSON || '{}' ?>;
+var IS_PENDING = PENDING_ROW > 0;
+var responsableSel = '';
+var SOPORTE=['Revisar funciones, formularios o web','Agregar función / cambiar imágenes / ajustes web','Revisar correo del cliente','Reunión con el cliente para soporte o asesoría','Dar acceso a una web','Otro soporte'];
+var CREAR=['Crear landing','Crear una sección dentro de la web','Otro crear'];
+function esc(s){return String(s||'').replace(/[&<>\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c];});}
+function opt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t||v;sel.appendChild(o)}
+function fillSelect(id,items,ph){var sel=document.getElementById(id);sel.innerHTML='';opt(sel,'',ph||'— Selecciona —');(items||[]).forEach(function(v){if(v)opt(sel,v,v);});}
+function setSelectValue(id,value){var sel=document.getElementById(id);value=String(value||'');if(!value){sel.value='';return;}var exists=Array.prototype.some.call(sel.options,function(o){return o.value===value});if(!exists)opt(sel,value,value);sel.value=value;}
+function toast(msg,tipo){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(tipo||'ok');t.style.display='block';setTimeout(function(){t.style.display='none'},3500)}
+function actualizarTipoSolicitud(){var cat=document.getElementById('categoriaSolicitud').value||'Soporte';var sel=document.getElementById('tipoSolicitud');var actual=sel.value;sel.innerHTML='';(cat==='Crear'?CREAR:SOPORTE).forEach(function(v){opt(sel,v,v)});if(actual)setSelectValue('tipoSolicitud',actual)}
+function selResponsable(v){responsableSel=v;['rossio','camila','lucy'].forEach(function(n){var el=document.getElementById('btn-'+n);if(el)el.classList.toggle('active',el.id==='btn-'+v.toLowerCase())});checkBtn()}
+function checkBtn(){var ok=document.getElementById('marca').value!==''&&document.getElementById('tarea').value.trim()!=='';if(IS_PENDING)ok=ok&&responsableSel!=='';document.getElementById('btnGuardar').disabled=!ok;}
+function initMode(){actualizarTipoSolicitud();if(IS_PENDING){document.getElementById('formIcon').textContent='🔔';document.getElementById('tituloForm').textContent='Revisar y asignar solicitud';document.getElementById('subForm').textContent='Datos recibidos desde cliente/ADS. Elige responsable: Rossio, Cami o Lucy.';document.getElementById('boxResponsable').classList.remove('hidden');document.querySelector('#btnGuardar .btn-label').textContent='✅ Asignar solicitud';}else{document.getElementById('tituloForm').textContent='Nueva solicitud interna ADS / Web';document.getElementById('subForm').textContent='Crea una solicitud pendiente para que Rossio la asigne después.';}}
+function loadCatalogos(){google.script.run.withSuccessHandler(function(d){fillSelect('marca',(d&&d.marcas)||[],'— Selecciona cliente —');fillSelect('area',(d&&d.areas)||['Web','SEO','Campañas','Soporte Técnico','Admin'],'— Área —');fillSelect('tipo',(d&&d.tipos)||['Desarrollo','Diseño','Contenido','Reunión','Consultoría','Soporte','Admin'],'— Tipo —');fillSelect('prioridad',(d&&d.prioridades)||['Urgente','Alta','Media','Baja'],'— Prioridad —');setSelectValue('prioridad','Media');if(IS_PENDING)applyPending(PENDING_DATA);}).withFailureHandler(function(){if(IS_PENDING)applyPending(PENDING_DATA);}).mc_asignacion_getDatos_pub();}
+function applyPending(r){if(!r||!r.ok){toast((r&&r.msg)||'No se encontró la solicitud','err');return;}document.getElementById('pendingBox').style.display='block';document.getElementById('pendingId').textContent='Solicitud '+(r.id||'')+' pendiente';document.getElementById('pendingMeta').innerHTML=(r.fecha?'<b>Fecha:</b> '+esc(r.fecha)+'<br>':'')+(r.origen?'<b>Origen:</b> '+esc(r.origen)+'<br>':'')+(r.contacto?'<b>Contacto:</b> '+esc(r.contacto)+'<br>':'')+(r.telefono?'<b>WhatsApp aviso:</b> '+esc(r.telefono)+'<br>':'')+(r.marcaRecibida?'<b>Marca recibida:</b> <span style=\'color:#c2410c;font-weight:800\'>'+esc(r.marcaRecibida)+'</span><br>':'')+(r.camposFaltantes?'<b>Campos faltantes:</b> <span style=\'color:#b91c1c;font-weight:800\'>'+esc(r.camposFaltantes)+'</span><br>':'')+(r.notificarA?'<b>Notificar a:</b> '+esc(r.notificarA):'');document.getElementById('contacto').value=r.contacto||'';document.getElementById('telefono').value=r.telefono||'';setSelectValue('marca',r.marca||'');setSelectValue('area',r.area||'');setSelectValue('tipo',r.tipo||'');document.getElementById('categoriaSolicitud').value=r.categoriaSolicitud||'Soporte';actualizarTipoSolicitud();setSelectValue('tipoSolicitud',r.tipoSolicitud||r.tipo||'');document.getElementById('linkPagina').value=r.linkPagina||'';document.getElementById('linkReferencia').value=r.linkReferencia||'';document.getElementById('proyecto').value=r.proyecto||'';document.getElementById('tarea').value=r.tarea||'';document.getElementById('resultadoEsperado').value=r.resultadoEsperado||r.entregable||'';setSelectValue('materialesDisponibles',r.materialesDisponibles||'');setSelectValue('bloqueo',r.bloqueo||'');document.getElementById('fechaLanzamiento').value=r.fechaLanzamiento||'';document.getElementById('impactoSiNo').value=r.impactoSiNo||'';document.getElementById('contexto').value=r.contexto||'';document.getElementById('descripcionRaw').value=r.descripcion||'';setSelectValue('prioridad',r.prioridad||'Media');document.getElementById('limite').value=r.limite||'';document.getElementById('estimado').value=r.estimado||'';document.getElementById('entregable').value=r.entregable||r.resultadoEsperado||'';checkBtn();}
+['marca','tarea'].forEach(function(id){document.getElementById(id).addEventListener(id==='marca'?'change':'input',checkBtn)});
+function setLoading(on){var b=document.getElementById('btnGuardar');b.disabled=on;b.querySelector('.btn-label').textContent=on?'Guardando…':(IS_PENDING?'✅ Asignar solicitud':'📨 Guardar solicitud')}
+function guardar(){if(IS_PENDING&&!responsableSel){toast('Selecciona responsable','err');return;}if(!document.getElementById('marca').value){toast('Selecciona cliente','err');return;}if(!document.getElementById('tarea').value.trim()){toast('Completa la tarea','err');return;}var descRaw=document.getElementById('descripcionRaw').value||'';var contexto=document.getElementById('contexto').value||'';var resultado=document.getElementById('resultadoEsperado').value||'';var materiales=document.getElementById('materialesDisponibles').value||'';var bloqueo=document.getElementById('bloqueo').value||'';var fechaLanz=document.getElementById('fechaLanzamiento').value||'';var impacto=document.getElementById('impactoSiNo').value||'';var links=[];if(document.getElementById('linkPagina').value)links.push('Página soporte: '+document.getElementById('linkPagina').value);if(document.getElementById('linkReferencia').value)links.push('Referencia: '+document.getElementById('linkReferencia').value);var contextoVisible=[];if(resultado)contextoVisible.push('Resultado esperado: '+resultado);if(materiales)contextoVisible.push('Estado del material: '+materiales);if(bloqueo)contextoVisible.push('Bloqueo o faltante: '+bloqueo);if(fechaLanz)contextoVisible.push('Fecha de lanzamiento: '+fechaLanz);if(impacto)contextoVisible.push('Impacto urgencia: '+impacto);if(contexto)contextoVisible.push(contexto);if(links.length)contextoVisible.push(links.join('\n'));var data={fila:PENDING_ROW,para:responsableSel,contacto:document.getElementById('contacto').value,telefono:document.getElementById('telefono').value,marca:document.getElementById('marca').value,categoriaSolicitud:document.getElementById('categoriaSolicitud').value,tipoSolicitud:document.getElementById('tipoSolicitud').value,area:document.getElementById('area').value,tipo:document.getElementById('tipo').value,proyecto:document.getElementById('proyecto').value,solicitud:document.getElementById('tarea').value.trim(),tarea:document.getElementById('tarea').value.trim(),descripcion:descRaw||contextoVisible.join('\n'),resultadoEsperado:resultado,materialesDisponibles:materiales,bloqueo:bloqueo,fechaLanzamiento:fechaLanz,impactoSiNo:impacto,entregable:document.getElementById('entregable').value||resultado,prioridad:document.getElementById('prioridad').value||'Media',limite:document.getElementById('limite').value,estimado:document.getElementById('estimado').value,link:document.getElementById('linkPagina').value||document.getElementById('linkReferencia').value,linkPagina:document.getElementById('linkPagina').value,linkReferencia:document.getElementById('linkReferencia').value,contexto:contextoVisible.join('\n').trim()};setLoading(true);var runner=google.script.run.withSuccessHandler(function(r){if(r&&r.ok){toast('✅ '+String(r.msg||'Guardado').split('\n')[0],'ok');setTimeout(function(){google.script.host.close()},1500)}else{toast('❌ '+((r&&r.msg)||'No se pudo guardar'),'err');setLoading(false)}}).withFailureHandler(function(err){toast('❌ '+err.message,'err');setLoading(false)});if(IS_PENDING)runner.mc_form_asignarSolicitud(data);else runner.mc_form_guardarSolicitudADS(data);}
+initMode();loadCatalogos();
+</script>
+
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+<!-- V24.20: seleccionar automáticamente el personal que abrió el formulario -->
+<script>
+(function(){
+  if (window.__cmsV2420OwnerDefaults) return;
+  window.__cmsV2420OwnerDefaults = true;
+  function norm(v){ return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function matchOwner(txt, owner){
+    var a=norm(txt), b=norm(owner);
+    if(!a||!b) return false;
+    if(a===b) return true;
+    if(b==='camila' && (a==='cami'||a==='camila')) return true;
+    if(b==='lucy' && a==='lucy') return true;
+    if(b==='rossio' && a==='rossio') return true;
+    return false;
+  }
+  function setSelect(sel, owner){
+    if(!sel || !owner) return;
+    var found=false;
+    Array.prototype.forEach.call(sel.options||[], function(o){
+      if(matchOwner(o.value || o.textContent, owner)){ o.selected=true; found=true; }
+    });
+    if(found){ try{ sel.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} }
+  }
+  function applyOwner(ctx){
+    ctx = ctx || {};
+    var owner = ctx.nombre || ctx.responsable || ctx.user || ctx.usuario || 'Rossio';
+    var keys = ['para','responsable','asignada_por','asignado_a','resp','encargado','owner','persona'];
+    keys.forEach(function(k){
+      Array.prototype.forEach.call(document.querySelectorAll('[name="'+k+'"], #'+k), function(el){
+        if(!el) return;
+        if(el.tagName && el.tagName.toLowerCase()==='select') setSelect(el, owner);
+        else if(('value' in el) && !String(el.value||'').trim()) el.value = owner;
+      });
+    });
+    try { if (typeof selPara === 'function') selPara(owner); } catch(e) {}
+    try { if (typeof seleccionarPara === 'function') seleccionarPara(owner); } catch(e2) {}
+    document.body.setAttribute('data-owner-default', owner);
+  }
+  function boot(){
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run.withSuccessHandler(function(ctx){
+        applyOwner(ctx || {});
+        setTimeout(function(){ applyOwner(ctx || {}); }, 250);
+      }).withFailureHandler(function(){ applyOwner({nombre:'Rossio'}); }).mc_getContexto_pub();
+    } else {
+      applyOwner({nombre:'Rossio'});
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
+</body>
+</html>

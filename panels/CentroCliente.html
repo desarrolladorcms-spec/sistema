@@ -1,0 +1,171 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--vl:#F5F3FF;--green:#059669;--amber:#D97706;--red:#DC2626;--blue:#0284C7}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.hdr{background:linear-gradient(120deg,#1E1B4B,#4C1D95);color:#fff;padding:14px 18px}
+.hdr-title{font-size:16px;font-weight:700;color:#FDE68A;margin-bottom:8px}
+/* Buscador */
+.search-wrap{position:relative}
+.search-input{width:100%;padding:10px 14px 10px 38px;border:none;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-size:13px;font-family:inherit}
+.search-input::placeholder{color:rgba(255,255,255,.5)}
+.search-input:focus{outline:none;background:rgba(255,255,255,.25)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.6}
+.autocomplete{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:99;max-height:200px;overflow-y:auto;display:none}
+.autocomplete.open{display:block}
+.ac-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:10px;font-size:12px;transition:.1s}
+.ac-item:hover{background:var(--bg)}
+.ac-item:last-child{border-bottom:none}
+.ac-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#7C3AED,#9333EA);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:#fff}
+.ac-info{flex:1}
+.ac-nombre{font-weight:700;color:var(--text)}
+.ac-meta{font-size:10px;color:var(--muted)}
+/* Estado vacío */
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+/* Perfil del cliente */
+.perfil{padding:14px}
+.client-card{background:var(--surface);border-radius:16px;border:1px solid var(--border);padding:16px 18px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.client-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
+.client-avatar{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--v),#9333EA);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:#fff}
+.client-nombre{font-size:16px;font-weight:800;margin-bottom:3px}
+.client-meta{display:flex;flex-wrap:wrap;gap:6px}
+.badge{padding:2px 9px;border-radius:999px;font-size:10px;font-weight:600}
+.badge-activo{background:#D1FAE5;color:#065F46}
+.badge-pausa{background:#FEF9C3;color:#92400E}
+.badge-tipo{background:var(--vl);color:#5B21B6}
+.badge-prio{background:#DBEAFE;color:#1E40AF}
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.info-item{background:var(--bg);border-radius:9px;padding:8px 10px}
+.info-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:2px}
+.info-val{font-size:12px;font-weight:600;color:var(--text)}
+.info-val a{color:var(--blue);text-decoration:none;font-size:11px}
+/* Secciones */
+.section{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:13px 15px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.section-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.row-item{padding:6px 0;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:8px;font-size:12px}
+.row-item:last-child{border-bottom:none}
+.row-badge{font-size:9px;padding:2px 7px;border-radius:999px;font-weight:600}
+.row-badge.open{background:#DBEAFE;color:#1E40AF}
+.row-badge.done{background:#D1FAE5;color:#065F46}
+.row-badge.pend{background:#FEF9C3;color:#92400E}
+/* Acciones */
+.actions-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.act-btn{padding:7px 13px;border:none;border-radius:9px;cursor:pointer;font-size:11px;font-weight:600;transition:.15s}
+.act-btn:hover{opacity:.85}
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:12px}
+</style></head><body>
+<div class="hdr">
+  <div class="hdr-title">👤 Centro de Cliente</div>
+  <div class="search-wrap" id="searchWrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="Buscar cliente por nombre, marca o correo..." oninput="buscar(this.value)" autocomplete="off">
+    <div class="autocomplete" id="autoComplete"></div>
+  </div>
+</div>
+<div id="body">
+  <div class="empty-state">
+    <div class="empty-icon">👥</div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:6px">Busca un cliente</div>
+    <div style="font-size:12px">Escribe el nombre de la marca o contacto arriba</div>
+  </div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+var CLIENTES=[], TIMER=null;
+
+google.script.run.withSuccessHandler(function(data){CLIENTES=data||[];}).mc_pub_getClientesCompletos();
+
+function buscar(q){
+  clearTimeout(TIMER);
+  var ac=document.getElementById('autoComplete');
+  if(!q.trim()){ac.classList.remove('open');return;}
+  TIMER=setTimeout(function(){
+    var r=CLIENTES.filter(function(c){
+      var texto=(c.marca||'')+' '+(c.contacto||'')+' '+(c.correo||'');
+      return texto.toLowerCase().includes(q.toLowerCase());
+    }).slice(0,8);
+    if(!r.length){ac.classList.remove('open');return;}
+    ac.innerHTML=r.map(function(c){
+      return '<div class="ac-item" onclick="selCliente(\''+esc(c.id||c.marca)+'\')">'+
+        '<div class="ac-icon">'+( c.marca||'?').charAt(0).toUpperCase()+'</div>'+
+        '<div class="ac-info"><div class="ac-nombre">'+esc(c.marca||'—')+'</div>'+
+        '<div class="ac-meta">'+esc(c.plan||'—')+' · '+esc(c.estado||'—')+'</div></div></div>';
+    }).join('');
+    ac.classList.add('open');
+  },200);
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#searchWrap')) document.getElementById('autoComplete').classList.remove('open');
+});
+
+function selCliente(id){
+  document.getElementById('autoComplete').classList.remove('open');
+  document.getElementById('body').innerHTML='<div class="loading">Cargando perfil...</div>';
+  google.script.run.withSuccessHandler(renderPerfil).withFailureHandler(function(e){
+    document.getElementById('body').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>';
+  }).mc_pub_getPerfilCliente(id);
+}
+
+function renderPerfil(d){
+  if(!d||!d.marca){document.getElementById('body').innerHTML='<div class="loading">Cliente no encontrado</div>';return;}
+  var estadoCls=(/activo/i.test(d.estado||''))?'badge-activo':'badge-pausa';
+  var html='<div class="perfil"><div class="client-card">'+
+    '<div class="client-top">'+
+      '<div class="client-avatar">'+d.marca.charAt(0).toUpperCase()+'</div>'+
+      '<div style="flex:1"><div class="client-nombre">'+esc(d.marca)+'</div>'+
+        '<div class="client-meta">'+
+          '<span class="badge '+estadoCls+'">'+esc(d.estado||'Activo')+'</span>'+
+          (d.plan?'<span class="badge badge-tipo">'+esc(d.plan)+'</span>':'')+
+          (d.prioridad?'<span class="badge badge-prio">'+esc(d.prioridad)+'</span>':'')+
+        '</div></div></div>'+
+    '<div class="info-grid">'+
+      infoItem('👤 Contacto',d.contacto||'—')+
+      infoItem('📞 Teléfono',d.telefono?'<a href="tel:'+d.telefono+'">'+d.telefono+'</a>':d.telefono||'—')+
+      infoItem('📧 Correo',d.correo?'<a href="mailto:'+d.correo+'">'+d.correo+'</a>':d.correo||'—')+
+      infoItem('🌐 Web',d.web?'<a href="'+d.web+'" target="_blank">'+d.web+'</a>':d.web||'—')+
+      infoItem('🏠 Hosting',d.hosting||'—')+
+      infoItem('📦 Tipo',d.tipo||'—')+
+    '</div>'+
+    '<div class="actions-row">'+
+      (d.telefono?'<button class="act-btn" style="background:#25D366;color:#fff" onclick="window.open(\'https://wa.me/'+d.telefono.replace(/\D/,'')+'\')">📲 WhatsApp</button>':'')+
+      (d.web?'<button class="act-btn" style="background:#DBEAFE;color:#1E40AF" onclick="window.open(\''+d.web+'\',\'_blank\')">🌐 Ir al sitio</button>':'')+
+      '<button class="act-btn" style="background:var(--vl);color:#5B21B6" onclick="google.script.run.mc_pub_abrirFormBriefingWeb()">📋 Briefing</button>'+
+      '<button class="act-btn" style="background:#FEF9C3;color:#92400E" onclick="google.script.run.mc_pub_nuevoSoporte()">🛠️ Nuevo ticket</button>'+
+    '</div></div>';
+
+  // Proyectos activos
+  var proyectos=d.proyectos||[];
+  if(proyectos.length){
+    html+='<div class="section"><div class="section-title">📦 Proyectos<span style="font-size:11px;color:var(--muted)">'+proyectos.length+'</span></div>';
+    proyectos.forEach(function(p){
+      var s=/complet|entregad/i.test(p.estado||'')?'done':/pend|planif/i.test(p.estado||'')?'pend':'open';
+      html+='<div class="row-item"><div style="flex:1"><b>'+esc(p.proyecto||'—')+'</b><br><span style="font-size:10px;color:var(--muted)">'+esc(p.tipo||'')+'</span></div>'+
+        '<span class="row-badge '+s+'">'+esc(p.estado||'—')+'</span></div>';
+    });
+    html+='</div>';
+  }
+
+  // Tickets soporte
+  var tickets=d.tickets||[];
+  if(tickets.length){
+    html+='<div class="section"><div class="section-title">🛠️ Soporte reciente<span style="font-size:11px;color:var(--muted)">'+tickets.length+'</span></div>';
+    tickets.slice(0,4).forEach(function(t){
+      var s=/complet|resolv/i.test(t.estado||'')?'done':'open';
+      html+='<div class="row-item"><div style="flex:1">'+esc((t.nombre||t.descripcion||'Ticket').substring(0,50))+'</div>'+
+        '<span class="row-badge '+s+'">'+esc(t.estado||'—')+'</span></div>';
+    });
+    html+='</div>';
+  }
+
+  html+='</div>';
+  document.getElementById('body').innerHTML=html;
+}
+
+function infoItem(lbl,val){
+  return '<div class="info-item"><div class="info-lbl">'+esc(lbl)+'</div><div class="info-val">'+val+'</div></div>';
+}
+</script></body></html>

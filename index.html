@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monstruo Creativo — CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--green:#059669;--red:#DC2626;--sw:228px}
+html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;font-size:13px;background:var(--bg);color:var(--text)}
+
+/* ── LOGIN ── */
+.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,#F5F3FF 0%,#F1F5F9 100%);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:var(--surface);border-radius:20px;border:1px solid var(--border);padding:36px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.08)}
+.login-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#7C3AED,#A855F7);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.login-title{font-size:20px;font-weight:800;color:var(--text);text-align:center;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:6px}
+.login-url{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;color:var(--text);background:#FAFBFC;margin-bottom:12px;transition:.15s}
+.login-url:focus{outline:none;border-color:var(--v);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.08)}
+.pin-wrap{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.pin-digit{width:48px;height:56px;border:2px solid var(--border);border-radius:12px;font-size:22px;font-weight:700;text-align:center;font-family:inherit;color:var(--text);background:#FAFBFC;transition:.15s;-webkit-text-security:disc}
+.pin-digit:focus{outline:none;border-color:var(--v);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.btn-login{width:100%;padding:13px;background:var(--v);color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;margin-bottom:10px}
+.btn-login:hover{background:var(--vd);box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.btn-login:disabled{opacity:.5;cursor:default}
+.login-error{font-size:12px;color:var(--red);text-align:center;min-height:18px;font-weight:500}
+.login-hint{font-size:11px;color:var(--faint);text-align:center;margin-top:12px}
+
+/* ── APP SHELL ── */
+.app{display:none;position:fixed;inset:0}
+.app.on{display:flex}
+.sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7C3AED,#A855F7);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(124,58,237,.25)}
+.logo-t .ln{font-size:12px;font-weight:700;color:var(--text)}
+.logo-t .ls{font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+.nav-scroll{flex:1;overflow-y:auto;padding:6px 8px 14px;scrollbar-width:none}
+.nav-scroll::-webkit-scrollbar{display:none}
+.ns{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);padding:12px 6px 4px}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:.13s;margin-bottom:1px}
+.ni:hover{background:var(--bg);color:var(--text)}
+.ni.on{background:var(--vl);color:var(--v);font-weight:600}
+.ni-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:.13s}
+.ni:hover .ni-ic{background:var(--border)}
+.ni.on .ni-ic{background:var(--vl)}
+.sep{height:1px;background:var(--border);margin:5px 4px}
+.su{border-top:1px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:9px;flex-shrink:0;cursor:pointer}
+.su:hover{background:var(--bg)}
+.u-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.u-n{font-size:12px;font-weight:600;color:var(--text)}
+.u-r{font-size:10px;color:var(--faint)}
+.u-dot{width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:auto}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:50px;padding:0 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mb{display:none;width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;align-items:center;justify-content:center;font-size:17px}
+@media(max-width:768px){.mb{display:flex}.sidebar{position:fixed;top:0;left:0;bottom:0;z-index:200;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.app.on{display:block}.main{position:fixed;inset:0}}
+.tb-ic{width:26px;height:26px;border-radius:7px;background:var(--vl);color:var(--v);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.tb-title{font-size:13px;font-weight:600;flex:1}
+.tb-r{display:flex;align-items:center;gap:6px}
+.btn{height:32px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:.13s;display:flex;align-items:center;gap:4px}
+.btn:hover{border-color:var(--v);color:var(--v);background:var(--vl)}
+.btn.v{background:var(--v);color:#fff;border-color:var(--v)}
+.btn.v:hover{background:var(--vd)}
+.notif{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative;transition:.13s}
+.notif:hover{border-color:var(--v);background:var(--vl)}
+.npip{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--surface);display:none}
+.npip.on{display:block}
+.qbar{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 18px;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.qbar::-webkit-scrollbar{display:none}
+.ql{font-size:10px;font-weight:600;color:var(--faint);white-space:nowrap}
+.qc{height:26px;padding:0 10px;border:1.5px solid var(--border);border-radius:999px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-weight:500;white-space:nowrap;transition:.13s;flex-shrink:0;display:flex;align-items:center;gap:4px}
+.qc:hover{border-color:var(--v);color:var(--v);background:var(--vl)}
+.qc.urg{border-color:var(--red);color:var(--red);background:#FEF2F2;display:none}
+.fw{flex:1;position:relative;overflow:hidden}
+.pf{width:100%;height:100%;border:none;display:block}
+.ld{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;transition:opacity .2s}
+.ld.off{opacity:0;pointer-events:none}
+.sp{width:26px;height:26px;border:2.5px solid var(--border);border-top-color:var(--v);border-radius:50%;animation:spin .65s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ov{display:none;position:fixed;inset:0;background:rgba(15,18,42,.35);z-index:199;backdrop-filter:blur(3px)}
+.ov.on{display:block}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">🧠</div>
+    <div class="login-title">Monstruo Creativo</div>
+    <div class="login-sub">Sistema de Gestión del Equipo</div>
+    <label class="login-label">URL del sistema (solo primera vez)</label>
+    <input class="login-url" id="gasUrl" type="url" placeholder="https://script.google.com/macros/s/...">
+    <label class="login-label">Tu PIN de acceso</label>
+    <div class="pin-wrap">
+      <input class="pin-digit" id="p1" maxlength="1" type="password" inputmode="numeric" oninput="nextPin(this,'p2')">
+      <input class="pin-digit" id="p2" maxlength="1" type="password" inputmode="numeric" oninput="nextPin(this,'p3')" onkeydown="prevPin(event,'p1')">
+      <input class="pin-digit" id="p3" maxlength="1" type="password" inputmode="numeric" oninput="nextPin(this,'p4')" onkeydown="prevPin(event,'p2')">
+      <input class="pin-digit" id="p4" maxlength="1" type="password" inputmode="numeric" oninput="nextPin(this,'p5')" onkeydown="prevPin(event,'p3')">
+      <input class="pin-digit" id="p5" maxlength="1" type="password" inputmode="numeric" oninput="nextPin(this,'p6')" onkeydown="prevPin(event,'p4')">
+      <input class="pin-digit" id="p6" maxlength="1" type="password" inputmode="numeric" onkeydown="prevPin(event,'p5')" onkeyup="checkComplete()">
+    </div>
+    <button class="btn-login" id="btnLogin" onclick="doLogin()" disabled>Ingresar</button>
+    <div class="login-error" id="loginErr"></div>
+    <div class="login-hint">Cada PIN es único por persona. Si no lo recuerdas,<br>pídelo a Rossio.</div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div class="app" id="app">
+  <div class="ov" id="ov" onclick="cs()"></div>
+  <nav class="sidebar" id="sb">
+    <div class="logo">
+      <div class="logo-mk">🧠</div>
+      <div class="logo-t"><div class="ln">Monstruo Creativo</div><div class="ls">Sistema CMS</div></div>
+    </div>
+    <div class="nav-scroll">
+      <div class="ns">Inicio</div>
+      <div class="ni on" id="n-PanelCentral" onclick="go('PanelCentral','⬡','Panel Central')"><div class="ni-ic">⬡</div>Panel Central<span class="nav-badge hide" id="nb-sol" style="margin-left:auto;background:#DC2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:999px"></span></div>
+      <div class="ni" id="n-PanelMiDia_Master" onclick="go('PanelMiDia_Master','☀','Mi Día')"><div class="ni-ic">☀</div>Mi Día</div>
+      <div class="ni" id="n-MonitorSolicitudes" onclick="go('MonitorSolicitudes','◎','Monitor')"><div class="ni-ic">◎</div>Monitor<span class="nav-badge hide" id="nb-mon" style="margin-left:auto;background:#D97706;color:#fff;font-size:9px;padding:1px 6px;border-radius:999px"></span></div>
+      <div class="ni" id="n-CentroCliente" onclick="go('CentroCliente','👤','Clientes')"><div class="ni-ic">👤</div>Centro Cliente</div>
+      <div class="sep"></div>
+      <div class="ns">Proyectos</div>
+      <div class="ni" id="n-PanelProyectos" onclick="go('PanelProyectos','📦','Proyectos')"><div class="ni-ic">📦</div>Panel Proyectos</div>
+      <div class="ni" id="n-FormNuevoProyecto" onclick="go('FormNuevoProyecto','＋','Nuevo Proyecto')"><div class="ni-ic">＋</div>Nuevo Proyecto</div>
+      <div class="ni" id="n-FormBriefingWeb" onclick="go('FormBriefingWeb','📋','Briefing Web')"><div class="ni-ic">📋</div>Briefing Web</div>
+      <div class="ni" id="n-FormBriefingSEO" onclick="go('FormBriefingSEO','📋','Briefing SEO')"><div class="ni-ic">📋</div>Briefing SEO</div>
+      <div class="ni" id="n-PanelRevisionDemos" onclick="go('PanelRevisionDemos','🧪','Demos')"><div class="ni-ic">🧪</div>Demos</div>
+      <div class="sep"></div>
+      <div class="ns">Tareas y soporte</div>
+      <div class="ni" id="n-FormNuevaTarea" onclick="go('FormNuevaTarea','✅','Nueva Tarea')"><div class="ni-ic">✅</div>Nueva Tarea</div>
+      <div class="ni staff-only" id="n-FormAsignacion" onclick="go('FormAsignacion','↔','Asignar')"><div class="ni-ic">↔</div>Asignar Tarea</div>
+      <div class="ni" id="n-FormNuevoSoporte" onclick="go('FormNuevoSoporte','🛠️','Soporte')"><div class="ni-ic">🛠️</div>Nuevo Ticket</div>
+      <div class="ni staff-only" id="n-FormPlanSoporte" onclick="go('FormPlanSoporte','⏱️','Planes')"><div class="ni-ic">⏱️</div>Plan Soporte</div>
+      <div class="sep"></div>
+      <div class="ns">Agenda</div>
+      <div class="ni" id="n-CalendarioReuniones" onclick="go('CalendarioReuniones','📅','Reuniones')"><div class="ni-ic">📅</div>Reuniones</div>
+      <div class="ni" id="n-CalendarioEntregas" onclick="go('CalendarioEntregas','🗓️','Entregas')"><div class="ni-ic">🗓️</div>Entregas</div>
+      <div class="ni" id="n-DisponibilidadEquipo" onclick="go('DisponibilidadEquipo','🧭','Equipo')"><div class="ni-ic">🧭</div>Disponibilidad</div>
+      <div class="sep"></div>
+      <div class="ns">Análisis</div>
+      <div class="ni" id="n-ReporteSEO" onclick="go('ReporteSEO','📈','SEO')"><div class="ni-ic">📈</div>Reporte SEO</div>
+      <div class="ni" id="n-ReporteMensual" onclick="go('ReporteMensual','📊','Mensual')"><div class="ni-ic">📊</div>Reporte Mensual</div>
+      <div class="sep"></div>
+      <div class="ns">Gestión</div>
+      <div class="ni staff-only" id="n-FormNuevoCliente" onclick="go('FormNuevoCliente','👤','Nuevo Cliente')"><div class="ni-ic">👤</div>Nuevo Cliente</div>
+      <div class="ni staff-only" id="n-FormActualizacionPlugin" onclick="go('FormActualizacionPlugin','🧩','Plugin')"><div class="ni-ic">🧩</div>Plugin Update</div>
+    </div>
+    <div class="su" onclick="confirmLogout()">
+      <div class="u-av" id="uAv">?</div>
+      <div style="flex:1;min-width:0"><div class="u-n" id="uN">—</div><div class="u-r" id="uR">—</div></div>
+      <div class="u-dot"></div>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="topbar">
+      <button class="mb" onclick="ts()">≡</button>
+      <div class="tb-ic" id="tbIc">⬡</div>
+      <span class="tb-title" id="tbTitle">Panel Central</span>
+      <div class="tb-r">
+        <div class="notif" onclick="go('MonitorSolicitudes','◎','Monitor')">🔔<div class="npip" id="npip"></div></div>
+        <button class="btn" onclick="rf()">↻</button>
+        <button class="btn v" onclick="go('FormNuevaTarea','✅','Nueva Tarea')">＋ Tarea</button>
+      </div>
+    </div>
+    <div class="qbar">
+      <span class="ql">Accesos rápidos</span>
+      <div class="qc" onclick="go('PanelMiDia_Master','☀','Mi Día')">☀️ Mi Día</div>
+      <div class="qc" onclick="go('FormNuevoSoporte','🛠️','Soporte')">🛠️ Ticket</div>
+      <div class="qc" onclick="go('FormBriefingWeb','📋','Briefing')">📋 Briefing Web</div>
+      <div class="qc" onclick="go('PanelRevisionDemos','🧪','Demos')">🧪 Demos</div>
+      <div class="qc urg" id="qUrg" onclick="go('MonitorSolicitudes','◎','Monitor')">🔴 <span id="qUrgTxt">0</span></div>
+    </div>
+    <div class="fw">
+      <div class="ld" id="ld"><div class="sp"></div></div>
+      <iframe class="pf" id="pf" onload="document.getElementById('ld').classList.add('off')" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+  </div>
+</div>
+
+<script src="assets/auth.js"></script>
+<script>
+var CURR='', BASE_PANELS='panels/';
+
+/* ── Login ──────────────────────────────────────────────────────────────────── */
+// Recordar URL del GAS si ya fue guardada
+(function(){
+  var savedUrl=localStorage.getItem('mc_gas_url');
+  if(savedUrl) document.getElementById('gasUrl').value=savedUrl;
+})();
+
+function nextPin(el,nextId){
+  if(el.value&&nextId) document.getElementById(nextId).focus();
+  checkComplete();
+}
+function prevPin(e,prevId){
+  if(e.key==='Backspace'&&!e.target.value) document.getElementById(prevId).focus();
+}
+function checkComplete(){
+  var pin=getPin();
+  document.getElementById('btnLogin').disabled=pin.length<4;
+}
+function getPin(){
+  return ['p1','p2','p3','p4','p5','p6'].map(function(id){
+    return document.getElementById(id).value;
+  }).join('').replace(/\s/g,'');
+}
+
+async function doLogin(){
+  var url=document.getElementById('gasUrl').value.trim();
+  var pin=getPin();
+  if(!url){document.getElementById('loginErr').textContent='Pega la URL del sistema';return;}
+  if(pin.length<4){document.getElementById('loginErr').textContent='El PIN debe tener al menos 4 dígitos';return;}
+  var btn=document.getElementById('btnLogin');
+  btn.disabled=true;btn.textContent='Verificando...';
+  document.getElementById('loginErr').textContent='';
+  var result=await MC_AUTH.login(url,pin);
+  btn.disabled=false;btn.textContent='Ingresar';
+  if(result&&result.ok){
+    localStorage.setItem('mc_gas_url',url);
+    initApp(result);
+  } else {
+    document.getElementById('loginErr').textContent=result&&result.msg||'PIN incorrecto';
+    ['p1','p2','p3','p4','p5','p6'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('p1').focus();
+  }
+}
+
+/* ── App ────────────────────────────────────────────────────────────────────── */
+function initApp(user){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('app').classList.add('on');
+  var grad={Rossio:'linear-gradient(135deg,#7C3AED,#A855F7)',Camila:'linear-gradient(135deg,#0284C7,#38BDF8)',Lucy:'linear-gradient(135deg,#059669,#34D399)'};
+  document.getElementById('uAv').style.background=grad[user.nombre]||'#64748B';
+  document.getElementById('uAv').textContent=(user.nombre||'?').charAt(0).toUpperCase();
+  document.getElementById('uN').textContent=user.nombre||'Usuario';
+  document.getElementById('uR').textContent=user.rol==='jefa'?'Jefa de Área':'Especialista';
+  if(user.rol==='operativa'){
+    document.querySelectorAll('.staff-only').forEach(function(el){el.style.display='none';});
+  }
+  go('PanelCentral','⬡','Panel Central');
+  poll();setInterval(poll,90000);
+}
+
+function go(panel,icon,title){
+  CURR=panel;
+  document.querySelectorAll('.ni').forEach(function(e){e.classList.remove('on');});
+  var el=document.getElementById('n-'+panel);if(el)el.classList.add('on');
+  document.getElementById('tbIc').textContent=icon||'';
+  document.getElementById('tbTitle').textContent=title||panel;
+  document.getElementById('ld').classList.remove('off');
+  document.getElementById('pf').src=BASE_PANELS+panel+'.html';
+  document.title=title+' — MC CMS';cs();
+  history.pushState({p:panel,i:icon,t:title},'','#'+panel);
+}
+function rf(){document.getElementById('ld').classList.remove('off');document.getElementById('pf').src=document.getElementById('pf').src;}
+function ts(){document.getElementById('sb').classList.toggle('open');document.getElementById('ov').classList.toggle('on');}
+function cs(){document.getElementById('sb').classList.remove('open');document.getElementById('ov').classList.remove('on');}
+
+function confirmLogout(){
+  if(confirm('¿Cerrar sesión?')){MC_AUTH.logout();location.reload();}
+}
+
+function poll(){
+  // Verificar sesión activa
+  if(!MC_AUTH.isLoggedIn()) return;
+  MC_API.call('mc_pub_panelCentral_getData',{},function(d){
+    var sols=(d&&d.solicitudes)||[];
+    var urg=sols.filter(function(s){return /urgente|alta/i.test(s.prioridad||'');});
+    document.getElementById('npip').classList.toggle('on',urg.length>0);
+    var qu=document.getElementById('qUrg');
+    if(urg.length){qu.style.display='flex';document.getElementById('qUrgTxt').textContent=urg.length+' urgente'+(urg.length!==1?'s':'');}
+    else qu.style.display='none';
+    var nb=document.getElementById('nb-mon');
+    if(nb){if(urg.length){nb.textContent=urg.length;nb.classList.remove('hide');}else nb.classList.add('hide');}
+  });
+}
+
+// Escuchar postMessage de paneles hijos (para mc_close_panel etc.)
+window.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='MC_CLOSE_PANEL') rf();
+});
+window.addEventListener('popstate',function(e){if(e.state&&e.state.p)go(e.state.p,e.state.i,e.state.t);});
+
+// Auto-login si hay sesión activa en sessionStorage
+if(MC_AUTH.isLoggedIn()){
+  var u=MC_AUTH.getUser();
+  if(u.nombre) initApp(u);
+}
+</script>
+</body>
+</html>

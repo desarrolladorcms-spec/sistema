@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    :root{--bg:#faf7ff;--card:#fff;--ink:#28193d;--muted:#7d6f86;--p:#7c3aed;--p2:#ff8a4c;--line:#eee7f5;--ok:#059669;--danger:#dc2626;--dark:#1a0a36}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#fff4e8,#f3e8ff 55%,#eafdf3);color:var(--ink)}
+    .wrap{padding:22px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#ff8a4c);color:white;font-weight:900;display:flex;align-items:center;justify-content:center}.brand h1{margin:0;font-size:22px}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{border:0;background:#fff;color:#5e5068;border-radius:999px;padding:11px 15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(43,22,68,.08)}.tab.active{background:var(--dark);color:white}.panel{display:none}.panel.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 18px 50px rgba(43,22,68,.10)}label{display:block;font-weight:850;font-size:12px;margin:0 0 7px;color:#6b5877}input,select,textarea{width:100%;border:1px solid #e7ddec;border-radius:15px;padding:12px 13px;font:inherit;background:#fff;color:var(--ink);outline:none}textarea{min-height:92px;resize:vertical}.field{margin-bottom:12px}.hint{font-size:12px;color:var(--muted);margin-top:6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.btns{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.btn{border:0;border-radius:16px;padding:12px 17px;font-weight:900;cursor:pointer;background:#fff;color:#6b5877;box-shadow:0 8px 20px rgba(43,22,68,.08)}.btn.primary{background:linear-gradient(135deg,#ff8a4c,#ffb36a);color:#fff}.btn.dark{background:var(--dark);color:#fff}.btn.ghost{background:#f8f2ff}.btn.danger{background:#fee2e2;color:#991b1b}.switch{display:flex;background:#fff;border:1px solid var(--line);border-radius:18px;padding:5px;gap:5px}.switch button{flex:1;border:0;padding:11px;border-radius:14px;font-weight:900;background:transparent;cursor:pointer;color:#6b5877}.switch button.active{background:#ede9fe;color:#5b21b6}.results{display:grid;gap:10px;max-height:400px;overflow:auto}.item{border:1px solid var(--line);border-radius:18px;background:#fff;padding:13px}.item h3{margin:0 0 5px;font-size:15px}.item .meta{font-size:12px;color:var(--muted);line-height:1.45}.secret{font-family:monospace;background:#f7f2fa;border-radius:10px;padding:4px 7px}.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:900;border-radius:999px;padding:5px 9px;background:#ecfdf5;color:#047857;margin-right:5px}.pill.warn{background:#fff7ed;color:#9a3412}.mailrow{display:grid;grid-template-columns:1.1fr 1fr 44px;gap:9px;margin-bottom:9px}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#31233c;color:white;border-radius:999px;padding:12px 18px;font-weight:850;box-shadow:0 18px 50px rgba(0,0,0,.25);display:none;z-index:10}.small{font-size:12px}.searchbox{display:grid;grid-template-columns:1fr 130px;gap:10px;margin-bottom:12px}.statusbox{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;margin:8px 0 13px}.statusbox b{display:block;margin-bottom:5px}@media(max-width:850px){.grid,.row,.row3{grid-template-columns:1fr}.mailrow{grid-template-columns:1fr}.searchbox{grid-template-columns:1fr}.top{align-items:flex-start;gap:12px;flex-direction:column}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><div class="logo">MC</div><div><h1>Centro de accesos</h1><p>Clientes históricos, nuevos y reactivados + accesos web/correos vinculados por ID Cliente.</p></div></div>
+    <div class="tabs"><button class="tab active" data-tab="buscar">🔎 Buscar</button><button class="tab" data-tab="web">🔐 Acceso web</button><button class="tab" data-tab="correo">📧 Correos</button></div>
+  </div>
+
+  <section id="buscar" class="panel active card">
+    <div class="searchbox"><input id="q" placeholder="Busca por marca, link, usuario, correo, hosting, ID cliente..." oninput="debouncedSearch()"><select id="scope" onchange="doSearch()"><option value="all">Todo</option><option value="web">Accesos web</option><option value="mail">Correos</option></select></div>
+    <div class="hint">No se borra historial. Un cliente finalizado sigue existiendo; solo se clasifica y los accesos quedan vinculados a su ID.</div><br>
+    <div id="results" class="results"><div class="item"><b>Escribe algo para buscar.</b></div></div>
+  </section>
+
+  <section id="web" class="panel">
+    <div class="grid">
+      <div class="card">
+        <div class="field"><label>Tipo de registro</label><div class="switch"><button id="tipoCliente" class="active" type="button" onclick="setTipoRegistro('Cliente')">Acceso de cliente</button><button id="tipoOperativa" type="button" onclick="setTipoRegistro('Operativa')">Acceso operativo</button></div></div>
+        <div class="field"><label>Cliente / marca</label><input id="wMarca" list="clientesList" placeholder="Escribe y selecciona la marca" oninput="onClientInput('w')"><div id="wClienteInfo" class="hint">Si no existe, se creará en Clientes sin borrar lo demás.</div></div>
+        <div class="row3"><div class="field"><label>Estado cliente</label><select id="wClienteEstado"></select></div><div class="field"><label>Tipo cliente</label><select id="wClienteTipo"></select></div><div class="field"><label>Origen</label><select id="wClienteOrigen"></select></div></div>
+        <div class="field"><label>Servicio / proyecto relacionado</label><input id="wServicio" placeholder="Ej.: Web 2026, Soporte 2026, SEO 2026, Rediseño..."></div>
+        <div class="row"><div class="field"><label>Link de acceso</label><input id="wLink" placeholder="https://.../wp-admin" oninput="previewWeb()"></div><div class="field"><label>Tipo de acceso</label><select id="wTipo"><option>WP Admin</option><option>cPanel</option><option>Hosting</option><option>FTP</option><option>Base de Datos</option><option>SSH</option><option>Google / API</option><option>Demo</option><option>Otro</option></select></div></div>
+        <div class="row"><div class="field"><label>Usuario</label><input id="wUser" placeholder="usuario o correo"></div><div class="field"><label>Contraseña</label><input id="wPass" placeholder="contraseña"></div></div>
+        <div id="hostingBlock"><div class="row"><div class="field"><label>Tipo de hosting</label><select id="wHostingTipo"><option>Hosting con nosotros</option><option>Hosting del cliente</option><option>No aplica</option><option>Otro / revisar</option></select></div><div class="field"><label>Hosting / proveedor</label><input id="wHosting" placeholder="Banahosting, Hostinger, cPanel cliente..."></div></div></div>
+        <div class="row"><div class="field"><label>Responsable</label><select id="wResp"><option>Rossio</option><option>Camila</option><option>Lucy</option></select></div><div class="field"><label>Estado acceso</label><select id="wEstado"><option>Activo</option><option>Pendiente validar</option><option>Temporal</option><option>Obsoleto</option><option>Archivado</option><option>Inactivo</option></select></div></div>
+        <div class="field"><label>Notas</label><textarea id="wNotas" placeholder="Ej.: acceso enviado por cliente, falta 2FA, usar VPN, etc."></textarea></div>
+        <div class="hint" id="wPreview">Dominio detectado: —</div>
+        <div class="btns"><button class="btn ghost" type="button" onclick="clearWeb()">Limpiar</button><button class="btn primary" id="saveWebBtn" type="button" onclick="saveWeb()">Guardar acceso web</button></div>
+      </div>
+      <div class="card"><h2>Regla de historial</h2><p class="hint">Cliente nuevo, finalizado o reactivado se registra una sola vez. Los proyectos, servicios y accesos se vinculan sin eliminar histórico.</p><p><span class="pill">ID Cliente</span> se genera o reutiliza automáticamente.</p><p><span class="pill warn">Proyecto finalizado</span> no aparece como trabajo activo, pero conserva accesos e historial.</p><hr style="border:0;border-top:1px solid var(--line)"><h3>Buscador rápido</h3><input id="quickWebSearch" placeholder="Buscar accesos de esta marca" oninput="quickSearch(this.value)"><div class="hint">Úsalo antes de guardar para evitar duplicados.</div><div id="quickResults" class="results" style="margin-top:12px;max-height:260px"></div></div>
+    </div>
+  </section>
+
+  <section id="correo" class="panel">
+    <div class="card">
+      <div class="field"><label>Cliente / marca</label><input id="mMarca" list="clientesList" placeholder="Marca del cliente" oninput="onClientInput('m')"><div id="mClienteInfo" class="hint">Puedes registrar 2 o más correos en una sola carga.</div></div>
+      <div class="row3"><div class="field"><label>Estado cliente</label><select id="mClienteEstado"></select></div><div class="field"><label>Tipo cliente</label><select id="mClienteTipo"></select></div><div class="field"><label>Origen</label><select id="mClienteOrigen"></select></div></div>
+      <div class="field"><label>Servicio / proyecto relacionado</label><input id="mServicio" placeholder="Ej.: Web 2026, Soporte 2026, SEO 2026..."></div>
+      <div class="row"><div class="field"><label>Link de acceso webmail / panel correo</label><input id="mLink" placeholder="https://webmail.dominio.com" oninput="previewMail()"></div><div class="field"><label>Proveedor</label><select id="mProveedor"><option>cPanel/Webmail</option><option>Google Workspace</option><option>Microsoft 365</option><option>Zoho Mail</option><option>Hosting del cliente</option><option>Otro</option></select></div></div>
+      <div class="field"><label>Responsable</label><select id="mResp"><option>Rossio</option><option>Camila</option><option>Lucy</option></select></div>
+      <label>Correos a registrar</label><div id="mailRows"></div>
+      <button class="btn ghost" type="button" onclick="addMailRow()">+ Agregar otro correo</button>
+      <div class="field" style="margin-top:12px"><label>Notas generales</label><textarea id="mNotas" placeholder="Ej.: todos usan el mismo webmail, contraseña temporal, pendiente cambiar clave..."></textarea></div>
+      <div class="hint" id="mPreview">Dominio detectado: —</div>
+      <div class="btns"><button class="btn ghost" type="button" onclick="clearMail()">Limpiar</button><button class="btn primary" id="saveMailBtn" type="button" onclick="saveMails()">Guardar correos</button></div>
+    </div>
+  </section>
+</div>
+<datalist id="clientesList"></datalist>
+<div class="toast" id="toast"></div>
+<script src="../assets/api.js"></script>
+<script>
+var STATE={clientes:[],responsable:'Rossio',clienteEstados:['Nuevo','Activo','Proyecto en desarrollo','Proyecto finalizado','En soporte','SEO activo','Reactivado','Cliente recurrente','Inactivo','Archivado'],clienteTipos:['Nuevo','Histórico','Reactivado','Cliente recurrente','Lead','Interno'],clienteOrigenes:['Nuevo registro','Histórico','Importado','Referido','Reactivación','Soporte','SEO','Web','Campañas','Otro']}, tipoRegistro='Cliente', timer=null;
+function $(id){return document.getElementById(id)}
+function showToast(t){var x=$('toast');x.textContent=t;x.style.display='block';setTimeout(function(){x.style.display='none'},3600)}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
+function domainFrom(v){v=String(v||'').trim();try{if(v.indexOf('@')>=0)return v.split('@').pop().toLowerCase();if(v&&!/^https?:\/\//i.test(v))v='https://'+v;var u=new URL(v);return u.hostname.replace(/^www\./,'').toLowerCase()}catch(e){return ''}}
+function init(){document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tab,.panel').forEach(function(x){x.classList.remove('active')});b.classList.add('active');$(b.dataset.tab).classList.add('active')}}); addMailRow(); addMailRow(); google.script.run.withSuccessHandler(function(s){STATE=Object.assign(STATE,s||{});fillState()}).withFailureHandler(function(e){showToast('No se pudo cargar estado: '+e.message);fillState()}).acc_getState_pub();}
+function fillSelect(id, arr, val){var el=$(id); if(!el)return; el.innerHTML=(arr||[]).map(function(x){return '<option>'+esc(x)+'</option>'}).join(''); if(val) el.value=val;}
+function fillState(){var dl=$('clientesList');dl.innerHTML='';(STATE.clientes||[]).forEach(function(c){var o=document.createElement('option');o.value=c.marca||c.name||'';o.label=[c.id,c.estado,c.web,c.email].filter(Boolean).join(' · ');dl.appendChild(o)});['wResp','mResp'].forEach(function(id){if($(id)&&STATE.responsable)$(id).value=STATE.responsable});fillSelect('wClienteEstado',STATE.clienteEstados,'Activo');fillSelect('mClienteEstado',STATE.clienteEstados,'Activo');fillSelect('wClienteTipo',STATE.clienteTipos,'Nuevo');fillSelect('mClienteTipo',STATE.clienteTipos,'Nuevo');fillSelect('wClienteOrigen',STATE.clienteOrigenes,'Nuevo registro');fillSelect('mClienteOrigen',STATE.clienteOrigenes,'Nuevo registro');}
+function findClient(v){var n=norm(v);return (STATE.clientes||[]).find(function(c){return norm(c.marca)===n}) || null}
+function onClientInput(prefix){var v=$(prefix+'Marca').value, c=findClient(v), box=$(prefix+'ClienteInfo');if(c){box.innerHTML='Vinculado a <b>'+esc(c.marca)+'</b> · '+esc(c.id||'sin ID')+' · Estado: '+esc(c.estado||'sin estado'); if(c.estado) $(prefix+'ClienteEstado').value=c.estado; if(c.tipo) $(prefix+'ClienteTipo').value=c.tipo; if(c.origen) $(prefix+'ClienteOrigen').value=c.origen; if(c.servicio && $(prefix+'Servicio') && !$(prefix+'Servicio').value) $(prefix+'Servicio').value=c.servicio;}else{box.textContent='No existe aún: se creará como cliente sin borrar otros registros.'}}
+function setTipoRegistro(t){tipoRegistro=t;$('tipoCliente').classList.toggle('active',t==='Cliente');$('tipoOperativa').classList.toggle('active',t==='Operativa');$('hostingBlock').style.display=t==='Cliente'?'block':'none'}
+function previewWeb(){var d=domainFrom($('wLink').value);$('wPreview').textContent='Dominio detectado: '+(d||'—')}
+function previewMail(){var d=domainFrom($('mLink').value);if(!d){var first=document.querySelector('.mailEmail');d=domainFrom(first&&first.value)}$('mPreview').textContent='Dominio detectado: '+(d||'—')}
+function debouncedSearch(){clearTimeout(timer);timer=setTimeout(doSearch,350)}
+function doSearch(){var q=$('q').value.trim();if(!q){$('results').innerHTML='<div class="item"><b>Escribe algo para buscar.</b></div>';return;}google.script.run.withSuccessHandler(renderResults).withFailureHandler(function(e){showToast(e.message)}).acc_search_pub({q:q,scope:$('scope').value});}
+function quickSearch(v){if(!v){$('quickResults').innerHTML='';return;}google.script.run.withSuccessHandler(function(r){renderResults(r,'quickResults')}).acc_search_pub({q:v,scope:'all'});}
+function renderResults(res,target){target=target||'results';res=res||[];if(!res.length){$(target).innerHTML='<div class="item"><b>Sin resultados.</b></div>';return;}$(target).innerHTML=res.map(function(r,i){var pass=r.password?'<button class="btn small" type="button" onclick="toggleSecret(\'sec'+target+i+'\')">mostrar</button> <span id="sec'+target+i+'" class="secret" data-v="'+esc(r.password)+'">••••••••</span>':'';return '<div class="item"><h3>'+esc(r.marca||'Sin marca')+' <span class="pill">'+esc(r.source||'')+'</span></h3><div class="meta">ID Cliente: '+esc(r.idCliente||'—')+'<br>'+esc(r.link||r.correo||'')+'<br>Usuario/correo: '+esc(r.usuario||r.correo||'')+'<br>Hosting/proveedor: '+esc(r.hosting||r.proveedor||'')+'<br>Estado acceso: '+esc(r.estado||'')+' · Estado cliente: '+esc(r.estadoCliente||'')+'<br>Servicio/proyecto: '+esc(r.servicio||'')+'</div><div style="margin-top:8px">'+pass+'</div></div>'}).join('')}
+function toggleSecret(id){var e=$(id);if(!e)return;var v=e.dataset.v||'';e.textContent=e.textContent.indexOf('•')>=0?v:'••••••••'}
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function saveWeb(){var data={tipoRegistro:tipoRegistro,marca:$('wMarca').value,clienteEstado:$('wClienteEstado').value,clienteTipo:$('wClienteTipo').value,clienteOrigen:$('wClienteOrigen').value,servicio:$('wServicio').value,linkAcceso:$('wLink').value,usuario:$('wUser').value,password:$('wPass').value,tipoAcceso:$('wTipo').value,hostingTipo:tipoRegistro==='Cliente' ? $('wHostingTipo').value : 'No aplica',hosting:$('wHosting').value,responsable:$('wResp').value,estado:$('wEstado').value,notas:$('wNotas').value};if(!data.marca||!data.linkAcceso||!data.usuario||!data.password){showToast('Completa marca, link, usuario y contraseña.');return;}$('saveWebBtn').disabled=true;google.script.run.withSuccessHandler(function(r){$('saveWebBtn').disabled=false;showToast('Acceso guardado · Cliente: '+((r&&r.cliente&&r.cliente.id)||''));clearWeb();refreshState();doSearch();}).withFailureHandler(function(e){$('saveWebBtn').disabled=false;showToast('Error: '+e.message)}).acc_saveWeb_pub(data)}
+function refreshState(){google.script.run.withSuccessHandler(function(s){STATE=Object.assign(STATE,s||{});fillState()}).acc_getState_pub()}
+function clearWeb(){['wMarca','wServicio','wLink','wUser','wPass','wHosting','wNotas','quickWebSearch'].forEach(function(id){if($(id))$(id).value=''});$('quickResults').innerHTML='';$('wClienteInfo').textContent='Si no existe, se creará en Clientes sin borrar lo demás.';previewWeb()}
+function addMailRow(email,pass){var div=document.createElement('div');div.className='mailrow';div.innerHTML='<input class="mailEmail" placeholder="correo@dominio.com" value="'+esc(email||'')+'" oninput="previewMail()"><input class="mailPass" placeholder="contraseña" value="'+esc(pass||'')+'"><button class="btn danger" type="button" onclick="this.parentNode.remove();previewMail()">×</button>';$('mailRows').appendChild(div)}
+function saveMails(){var rows=[];document.querySelectorAll('.mailrow').forEach(function(r){var email=r.querySelector('.mailEmail').value.trim();var pass=r.querySelector('.mailPass').value.trim();if(email||pass)rows.push({correo:email,password:pass})});if(!$('mMarca').value||!$('mLink').value||!rows.length){showToast('Completa marca, link y al menos un correo.');return;}if(rows.some(function(r){return !r.correo||!r.password})){showToast('Cada correo agregado debe tener correo y contraseña.');return;}$('saveMailBtn').disabled=true;google.script.run.withSuccessHandler(function(r){$('saveMailBtn').disabled=false;showToast('Correos guardados: '+(r&&r.count||0));clearMail();refreshState();doSearch();}).withFailureHandler(function(e){$('saveMailBtn').disabled=false;showToast('Error: '+e.message)}).acc_saveCorreos_pub({marca:$('mMarca').value,clienteEstado:$('mClienteEstado').value,clienteTipo:$('mClienteTipo').value,clienteOrigen:$('mClienteOrigen').value,servicio:$('mServicio').value,linkAcceso:$('mLink').value,proveedor:$('mProveedor').value,responsable:$('mResp').value,notas:$('mNotas').value,rows:rows})}
+function clearMail(){['mMarca','mServicio','mLink','mNotas'].forEach(function(id){$(id).value=''});$('mailRows').innerHTML='';addMailRow();addMailRow();$('mClienteInfo').textContent='Puedes registrar 2 o más correos en una sola carga.';previewMail()}
+window.onload=init;
+</script>
+<!-- V24.20: seleccionar automáticamente el personal que abrió el formulario -->
+<script>
+(function(){
+  if (window.__cmsV2420OwnerDefaults) return;
+  window.__cmsV2420OwnerDefaults = true;
+  function norm(v){ return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function matchOwner(txt, owner){
+    var a=norm(txt), b=norm(owner);
+    if(!a||!b) return false;
+    if(a===b) return true;
+    if(b==='camila' && (a==='cami'||a==='camila')) return true;
+    if(b==='lucy' && a==='lucy') return true;
+    if(b==='rossio' && a==='rossio') return true;
+    return false;
+  }
+  function setSelect(sel, owner){
+    if(!sel || !owner) return;
+    var found=false;
+    Array.prototype.forEach.call(sel.options||[], function(o){
+      if(matchOwner(o.value || o.textContent, owner)){ o.selected=true; found=true; }
+    });
+    if(found){ try{ sel.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} }
+  }
+  function applyOwner(ctx){
+    ctx = ctx || {};
+    var owner = ctx.nombre || ctx.responsable || ctx.user || ctx.usuario || 'Rossio';
+    var keys = ['para','responsable','asignada_por','asignado_a','resp','encargado','owner','persona'];
+    keys.forEach(function(k){
+      Array.prototype.forEach.call(document.querySelectorAll('[name="'+k+'"], #'+k), function(el){
+        if(!el) return;
+        if(el.tagName && el.tagName.toLowerCase()==='select') setSelect(el, owner);
+        else if(('value' in el) && !String(el.value||'').trim()) el.value = owner;
+      });
+    });
+    try { if (typeof selPara === 'function') selPara(owner); } catch(e) {}
+    try { if (typeof seleccionarPara === 'function') seleccionarPara(owner); } catch(e2) {}
+    document.body.setAttribute('data-owner-default', owner);
+  }
+  function boot(){
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run.withSuccessHandler(function(ctx){
+        applyOwner(ctx || {});
+        setTimeout(function(){ applyOwner(ctx || {}); }, 250);
+      }).withFailureHandler(function(){ applyOwner({nombre:'Rossio'}); }).mc_getContexto_pub();
+    } else {
+      applyOwner({nombre:'Rossio'});
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
+</body>
+</html>

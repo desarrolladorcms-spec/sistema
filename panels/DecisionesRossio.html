@@ -1,0 +1,61 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#111827}
+header{background:linear-gradient(120deg,#1A0A36,#581c87,#9333EA);color:#fff;padding:18px 22px}
+.title{font-size:20px;font-weight:950}.sub{font-size:12px;opacity:.8;margin-top:3px}
+.toolbar{padding:10px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:8px}
+.btn{border:0;border-radius:10px;padding:8px 14px;background:#9333EA;color:white;font-weight:800;cursor:pointer;font-size:12px}
+.content{padding:14px 16px 24px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid #edf2f7;border-radius:16px;padding:12px;text-align:center;box-shadow:0 6px 16px rgba(15,23,42,.04)}
+.kpi b{font-size:28px;display:block}.kpi span{font-size:11px;color:#667085}
+.kpi.red b{color:#dc2626}.kpi.orange b{color:#ea580c}.kpi.violet b{color:#7c3aed}
+.section{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(15,23,42,.04)}
+.section h3{font-size:14px;color:#32115c;margin:0 0 10px;font-weight:800}
+.item{border-top:1px solid #f1f5f9;padding:10px 0;font-size:13px}.item:first-of-type{border:0;padding-top:0}
+.name{font-weight:800;font-size:13px;color:#111827}.meta{font-size:12px;color:#667085;margin-top:3px;line-height:1.4}
+.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800;margin:2px 4px 2px 0}
+.red{background:#fee2e2;color:#b91c1c}.orange{background:#ffedd5;color:#c2410c}.violet{background:#f3e8ff;color:#581c87}
+.blue{background:#dbeafe;color:#1d4ed8}.green{background:#dcfce7;color:#15803d}
+.empty{padding:14px;text-align:center;color:#94a3b8;font-size:13px;border:1px dashed #cbd5e1;border-radius:12px}
+.loading{padding:30px;text-align:center;color:#667085}
+</style></head><body>
+<header><div class="title">🧠 Decisiones pendientes</div><div class="sub">Todo lo que requiere tu atención ahora mismo</div></header>
+<div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button></div>
+<div class="content" id="app"><div class="loading">Cargando decisiones...</div></div>
+<script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function pill(t,c){return '<span class="pill '+(c||'')+'">'+esc(t)+'</span>'}
+function render(d){
+  var app=document.getElementById('app'),td=d.totalDecisiones||0;
+  var html='<div class="kpis">'+
+    '<div class="kpi red"><b>'+td+'</b><span>Decisiones pendientes</span></div>'+
+    '<div class="kpi orange"><b>'+(d.demosPendientes||[]).length+'</b><span>Demos por revisar</span></div>'+
+    '<div class="kpi violet"><b>'+(d.sinResponsable||[]).length+'</b><span>Sin responsable</span></div></div>';
+  
+  // Demos
+  html+='<div class="section"><h3>🧪 Demos pendientes de aprobar</h3>';
+  var demos=d.demosPendientes||[];
+  if(demos.length){demos.forEach(function(x){html+='<div class="item"><div class="name">'+esc(x.marca)+' · '+esc(x.proyecto)+'</div><div>'+pill(x.estado,'orange')+pill(x.id,'blue')+'</div></div>'});}
+  else html+='<div class="empty">Sin demos pendientes de revisión</div>';
+  html+='</div>';
+  
+  // Sin responsable
+  html+='<div class="section"><h3>📋 Solicitudes sin responsable</h3>';
+  var sr=d.sinResponsable||[];
+  if(sr.length){sr.forEach(function(x){html+='<div class="item"><div class="name">'+esc(x.marca)+' · '+esc(x.tarea)+'</div><div>'+pill(x.prioridad,/Urgente|Alta/.test(x.prioridad)?'red':'orange')+pill(x.id,'blue')+'</div></div>'});}
+  else html+='<div class="empty">Todas las solicitudes tienen responsable asignado</div>';
+  html+='</div>';
+  
+  // Bloqueos escalados
+  html+='<div class="section"><h3>🚧 Bloqueos escalados (+3 días)</h3>';
+  var bl=d.bloqueosEscalados||[];
+  if(bl.length){bl.forEach(function(x){html+='<div class="item"><div class="name">'+esc(x.resp)+' · '+esc(x.marca)+'</div><div class="meta">'+esc(x.tarea)+'</div><div>'+pill(x.dias+' días bloqueada','red')+pill(x.id,'blue')+'</div></div>'});}
+  else html+='<div class="empty">Sin bloqueos críticos</div>';
+  html+='</div>';
+  
+  app.innerHTML=html;
+}
+function loadData(){document.getElementById('app').innerHTML='<div class="loading">Cargando...</div>';google.script.run.withSuccessHandler(render).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>'} ).mc_decisiones_getData_pub()}
+loadData();
+</script></body></html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F8F5FF;color:#1A0A36;font-size:13px}
+:root{--v:#9333EA;--dark:#1A0A36;--gold:#FDE68A}
+.hdr{background:linear-gradient(120deg,#1A0A36,#3b0764);color:#fff;padding:12px 16px}
+.hdr h1{font-size:15px;font-weight:700;color:var(--gold);margin-bottom:2px}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.scroll{padding:12px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 70px);overflow-y:auto}
+
+.proy-card{background:#fff;border-radius:12px;border:1.5px solid #E5E7EB;overflow:hidden}
+.proy-hdr{padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.proy-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.proy-info{flex:1}
+.proy-nombre{font-size:13px;font-weight:700}
+.proy-marca{font-size:10px;color:#78716C}
+.proy-pct{font-size:11px;font-weight:700;color:var(--v);white-space:nowrap}
+.proy-bar{height:4px;background:#F3F4F6;border-radius:2px;margin:4px 14px 0}
+.proy-fill{height:4px;border-radius:2px;background:var(--v)}
+
+.items-list{border-top:1px solid #F3F4F6;display:none}
+.items-list.open{display:block}
+.item-row{padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #F9FAFB}
+.item-row:last-child{border-bottom:none}
+.item-chk{width:16px;height:16px;border:2px solid #D1D5DB;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px}
+.item-chk.done{background:#059669;border-color:#059669;color:#fff}
+.item-chk.proceso{background:#1D4ED8;border-color:#1D4ED8;color:#fff}
+.item-chk.bloq{background:#DC2626;border-color:#DC2626;color:#fff}
+.item-nombre{flex:1;font-size:12px}
+.item-nombre.done{text-decoration:line-through;color:#9CA3AF}
+.item-tipo{font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 6px;border-radius:4px}
+.item-actions{display:flex;gap:3px}
+.btn-ini{background:var(--v);color:#fff;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:9px;font-weight:700}
+.btn-ok{background:#059669;color:#fff;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:9px;font-weight:700}
+.btn-blq{background:#F3F4F6;color:#374151;border:none;border-radius:5px;padding:3px 6px;cursor:pointer;font-size:9px}
+
+.empty{padding:20px;text-align:center;color:#9CA3AF;font-size:12px}
+.loading{padding:30px;text-align:center;color:#9CA3AF;font-size:12px}
+#notifBar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#1A0A36;color:#FDE68A;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>📦 Mis Proyectos</h1>
+  <p id="sub">Cargando...</p>
+</div>
+<div class="scroll" id="scroll"><div class="loading">Cargando proyectos...</div></div>
+<div id="notifBar"></div>
+
+<script src="../assets/api.js"></script>
+<script>
+var DATA=[], PROYECTOS={};
+function esc(x){return String(x||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})}
+function notif(msg,ok){var el=document.getElementById('notifBar');el.style.background=ok===false?'#DC2626':'#1A0A36';el.textContent=msg;el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(function(){el.style.opacity='0';},3000);}
+
+function render(items){
+  DATA=items||[];
+  // Agrupar por proyecto
+  PROYECTOS={};
+  DATA.forEach(function(i){
+    var k=i.proyId||i.proyecto||'Sin proyecto';
+    if(!PROYECTOS[k]) PROYECTOS[k]={id:i.proyId,nombre:i.proyecto||k,marca:i.marca,tipo:i.tipo,items:[]};
+    PROYECTOS[k].items.push(i);
+  });
+  var keys=Object.keys(PROYECTOS);
+  document.getElementById('sub').textContent=keys.length+' proyecto'+(keys.length!==1?'s':'')+' · '+DATA.length+' ítems';
+  if(!keys.length){document.getElementById('scroll').innerHTML='<div class="empty">✅ Sin ítems de proyectos asignados.<br>Cuando Rossio te asigne ítems aparecerán aquí.</div>';return;}
+  var html='';
+  keys.forEach(function(k){
+    var p=PROYECTOS[k];
+    var total=p.items.length;
+    var done=p.items.filter(function(i){return /complet/i.test(i.estado||'');}).length;
+    var pct=total?Math.round(done/total*100):0;
+    var hayBloq=p.items.some(function(i){return /bloquead/i.test(i.estado||'');});
+    var color=hayBloq?'#DC2626':pct===100?'#059669':pct>0?'#9333EA':'#D1D5DB';
+    html+='<div class="proy-card">'+
+      '<div class="proy-hdr" onclick="toggleProy(\''+k.replace(/'/g,"\\'")+'\')" id="hdr-'+btoa(unescape(encodeURIComponent(k))).replace(/[+/=]/g,'')+'">'+
+        '<div class="proy-dot" style="background:'+color+'"></div>'+
+        '<div class="proy-info"><div class="proy-nombre">'+esc(p.nombre)+'</div><div class="proy-marca">'+esc(p.marca)+(p.tipo?' · '+esc(p.tipo):'')+'</div></div>'+
+        '<div class="proy-pct">'+done+'/'+total+' — '+pct+'%</div>'+
+      '</div>'+
+      '<div class="proy-bar"><div class="proy-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '<div class="items-list open" id="list-'+btoa(unescape(encodeURIComponent(k))).replace(/[+/=]/g,'')+'">'+
+        renderItems(p.items)+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('scroll').innerHTML=html;
+}
+
+function renderItems(items){
+  return items.map(function(i){
+    var done=/complet/i.test(i.estado||''),bloq=/bloquead/i.test(i.estado||''),proc=/proceso/i.test(i.estado||'');
+    var cls=done?'done':proc?'proceso':bloq?'bloq':'';
+    var icon=done?'✓':proc?'▶':bloq?'!':'';
+    return '<div class="item-row">'+
+      '<div class="item-chk '+cls+'">'+icon+'</div>'+
+      '<div class="item-nombre'+(done?' done':'')+'">'+esc(i.nombre)+'</div>'+
+      '<span class="item-tipo">'+esc(i.tipoItem||'')+'</span>'+
+      '<div class="item-actions">'+
+        (!done&&!proc?'<button class="btn-ini" onclick="iniciar(\''+i.id+'\',\''+esc(i.nombre)+'\',\''+esc(i.marca)+'\')">▶</button>':'')  +
+        (!done?'<button class="btn-ok" onclick="terminar(\''+i.id+'\',\''+esc(i.nombre)+'\',\''+esc(i.marca)+'\',\''+esc(i.proyecto)+'\',\''+esc(i.tipo)+'\')">✅</button>':'') +
+        (!bloq&&!done?'<button class="btn-blq" onclick="bloquear(\''+i.id+'\')">🚫</button>':'') +
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function toggleProy(k){
+  var id='list-'+btoa(unescape(encodeURIComponent(k))).replace(/[+/=]/g,'');
+  var el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+function iniciar(id,nombre,marca){
+  google.script.run
+    .withSuccessHandler(function(r){if(r&&r.ok!==false){notif('▶ '+nombre+' iniciado');cargar();}else notif('Error: '+(r&&r.msg||'?'),false);})
+    .withFailureHandler(function(e){notif('Error: '+e.message,false);})
+    .op_pub_v2436_iniciarItem({id:id});
+}
+function terminar(id,nombre,marca,proyecto,tipo){
+  var n=window.prompt('¿Qué hiciste? (opcional)\nDejar vacío para "Completado"');
+  if(n===null) return;
+  google.script.run
+    .withSuccessHandler(function(r){if(r&&r.ok!==false){notif('✅ '+nombre+' completado'+(r.tiempoMin?' ('+r.tiempoMin+'min)':''));cargar();}else notif('Error: '+(r&&r.msg||'?'),false);})
+    .withFailureHandler(function(e){notif('Error: '+e.message,false);})
+    .op_pub_v2436_terminarItem({id:id,notas:n||'Completado',marca:marca,proyecto:proyecto,tipoProyecto:tipo,nombre:nombre});
+}
+function bloquear(id){
+  var razon=window.prompt('¿Quién bloquea?\n1 = Cliente\n2 = Interno\n3 = Técnico');
+  if(!razon) return;
+  var mapa={'1':'Cliente','2':'Interno','3':'Tecnico'};
+  google.script.run
+    .withSuccessHandler(function(r){notif(r&&r.ok!==false?'🚫 Bloqueado marcado':'Error',r&&r.ok!==false);cargar();})
+    .withFailureHandler(function(e){notif('Error: '+e.message,false);})
+    .op_pub_v2436_bloquearItem({id:id,bloqueadoPor:mapa[razon]||razon});
+}
+var OP_NOMBRE=(function(){try{return JSON.parse(sessionStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
+function cargar(){
+  google.script.run
+    .withSuccessHandler(render)
+    .withFailureHandler(function(e){document.getElementById('scroll').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>';})
+    .op_pub_v2436_getMiDia();
+}
+cargar();
+</script>
+</body>
+</html>

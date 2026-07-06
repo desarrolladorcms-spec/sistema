@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--
+  WIDGET.HTML — Tarjeta flotante de "tareas del día"
+  ───────────────────────────────────────────────────────────────────────
+  Va en la raíz del sitio, junto a index.html (mismo nivel que /assets).
+
+  Cómo se usa: NO es una app de escritorio. Es una página que se abre en
+  una ventana chica del navegador y se deja fija en una esquina de la
+  pantalla mientras se trabaja. Deja de mostrarse si se cierra la ventana
+  o el navegador — no funciona fuera de eso.
+
+  Se abre desde el CMS (botón "📌 Widget" en AppShell) con window.open(),
+  para heredar la sesión activa (sessionStorage) sin pedir login de nuevo.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Día — MC</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:12.5px;background:#F1F5F9;color:#0F172A;overflow:hidden}
+  .wrap{display:flex;flex-direction:column;height:100vh}
+  .head{background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;cursor:default}
+  .head .t{font-weight:700;font-size:12.5px}
+  .head .h{font-size:10.5px;opacity:.85}
+  .head .x{cursor:pointer;opacity:.85;font-size:14px}
+  .head .x:hover{opacity:1}
+  .body{flex:1;overflow-y:auto;padding:10px}
+  .item{background:#fff;border:1px solid #E8ECF0;border-radius:10px;padding:9px 10px;margin-bottom:7px}
+  .item .n{font-weight:600;font-size:12px;color:#0F172A;margin-bottom:3px}
+  .item .m{font-size:10.5px;color:#64748B;display:flex;justify-content:space-between}
+  .badge{display:inline-block;padding:1px 7px;border-radius:6px;font-size:9.5px;font-weight:700}
+  .b-alta{background:#FEE2E2;color:#DC2626}
+  .b-media{background:#FEF3C7;color:#D97706}
+  .b-baja{background:#DCFCE7;color:#059669}
+  .empty{text-align:center;color:#94A3B8;padding:24px 8px;font-size:11.5px}
+  .foot{padding:6px 10px;border-top:1px solid #E8ECF0;font-size:10px;color:#94A3B8;text-align:center;flex-shrink:0}
+  .sec-t{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin:10px 0 6px}
+  .sec-t:first-child{margin-top:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div><div class="t" id="hTitulo">☀️ Mi Día</div><div class="h" id="hFecha"></div></div>
+    <div class="x" onclick="window.close()" title="Cerrar">✕</div>
+  </div>
+  <div class="body" id="body"><div class="empty">Cargando...</div></div>
+  <div class="foot">Se actualiza solo cada 2 min · <span id="foot-user"></span></div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+function prioridadClase(p) {
+  p = String(p || '').toLowerCase();
+  if (/alta|urgente/.test(p)) return 'b-alta';
+  if (/baja/.test(p)) return 'b-baja';
+  return 'b-media';
+}
+
+function render(d) {
+  var u = MC_API.getUsuario();
+  document.getElementById('hFecha').textContent = new Date().toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('foot-user').textContent = u.nombre || '';
+
+  var html = '';
+  var items = (d.items || []);
+  var soporte = (d.soporte || []);
+  var reuniones = (d.reuniones || []);
+
+  if (reuniones.length) {
+    html += '<div class="sec-t">Reuniones de hoy</div>';
+    reuniones.forEach(function (r) {
+      html += '<div class="item"><div class="n">' + (r.titulo || 'Reunión') + '</div><div class="m"><span>' + (r.hora || '') + '</span></div></div>';
+    });
+  }
+  if (items.length) {
+    html += '<div class="sec-t">Tareas de proyecto</div>';
+    items.forEach(function (it) {
+      html += '<div class="item"><div class="n">' + (it.nombre || it.proyecto || 'Tarea') + '</div>' +
+        '<div class="m"><span>' + (it.marca || '') + (it.limite ? ' · vence ' + it.limite : '') + '</span></div></div>';
+    });
+  }
+  if (soporte.length) {
+    html += '<div class="sec-t">Soporte</div>';
+    soporte.forEach(function (s) {
+      html += '<div class="item"><div class="n">' + (s.nombre || 'Ticket') + '</div>' +
+        '<div class="m"><span>' + (s.marca || '') + '</span><span class="badge ' + prioridadClase(s.prioridad) + '">' + (s.prioridad || '') + '</span></div></div>';
+    });
+  }
+  if (!html) html = '<div class="empty">🎉 No tienes pendientes por ahora.</div>';
+  document.getElementById('body').innerHTML = html;
+}
+
+function cargar() {
+  var u = MC_API.getUsuario();
+  if (!u || !u.nombre) {
+    document.getElementById('body').innerHTML = '<div class="empty">Sin sesión activa. Abre este widget desde el botón "📌 Widget" dentro del sistema.</div>';
+    return;
+  }
+  var accion = (u.rol === 'operativa') ? 'OP_MI_DIA' : 'GET_MI_DIA';
+  var payload = (u.rol === 'operativa') ? { data: { usuario: u.nombre } } : { usuario: u.nombre };
+  MC_API.call(accion, payload, function (r) {
+    if (r && r.ok) render(r);
+    else document.getElementById('body').innerHTML = '<div class="empty">No se pudo cargar. Reintentando...</div>';
+  }, function () {
+    document.getElementById('body').innerHTML = '<div class="empty">Sin conexión. Reintentando...</div>';
+  });
+}
+
+cargar();
+setInterval(cargar, 120000);
+</script>
+</body>
+</html>

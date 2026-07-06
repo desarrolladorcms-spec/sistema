@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F1F5F9;color:#0F172A;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+.hdr{background:linear-gradient(135deg,#1E1B4B 0%,#3730A3 100%);color:#fff;padding:18px 22px;flex-shrink:0}
+.hdr h1{font-size:16px;font-weight:800;margin-bottom:3px}
+.hdr p{font-size:11px;color:rgba(255,255,255,.6)}
+
+.content{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+
+.card{background:#fff;border-radius:14px;border:1px solid #E8ECF0;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:12px}
+
+/* Plugin selector visual */
+.plugin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.plugin-opt{padding:12px 14px;border:1.5px solid #E2E8F0;border-radius:12px;cursor:pointer;transition:.15s;background:#FAFBFC}
+.plugin-opt:hover{border-color:#3730A3;background:#EEF2FF}
+.plugin-opt.sel{border-color:#3730A3;background:#EEF2FF;box-shadow:0 0 0 3px rgba(55,48,163,.1)}
+.plugin-name{font-size:12px;font-weight:700;color:#1E1B4B;margin-bottom:2px}
+.plugin-desc{font-size:10px;color:#94A3B8}
+.plugin-icon{font-size:18px;margin-bottom:4px}
+
+/* Versión */
+.version-input{display:flex;align-items:center;gap:10px}
+.ver-label{font-size:11px;color:#94A3B8;white-space:nowrap}
+.ver-field{flex:1;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#1E1B4B;background:#FAFBFC;text-align:center;letter-spacing:.1em}
+.ver-field:focus{outline:none;border-color:#3730A3;background:#fff}
+
+/* Tipo de cambio chips */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:99px;border:1.5px solid #E2E8F0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:#3730A3;color:#3730A3;background:#EEF2FF}
+.chip.sel{color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.chip[data-v="🐛 Bug fix"].sel{background:#DC2626;border-color:#DC2626}
+.chip[data-v="✨ Nueva función"].sel{background:#7C3AED;border-color:#7C3AED}
+.chip[data-v="🔧 Mejora existente"].sel{background:#0891B2;border-color:#0891B2}
+.chip[data-v="⚠️ Cambio importante"].sel{background:#D97706;border-color:#D97706}
+
+/* Acción requerida */
+.accion-grid{display:flex;flex-direction:column;gap:8px}
+.accion-opt{padding:12px 14px;border:1.5px solid #E2E8F0;border-radius:12px;cursor:pointer;transition:.15s;display:flex;align-items:flex-start;gap:10px}
+.accion-opt:hover{border-color:#3730A3;background:#F8FAFF}
+.accion-opt.sel{border-color:#3730A3;background:#EEF2FF}
+.accion-dot{width:16px;height:16px;border-radius:50%;border:2px solid #CBD5E1;flex-shrink:0;margin-top:1px;transition:.15s}
+.accion-opt.sel .accion-dot{background:#3730A3;border-color:#3730A3}
+.accion-opt.alert.sel .accion-dot{background:#D97706;border-color:#D97706}
+.accion-opt.alert.sel{border-color:#D97706;background:#FFFBEB}
+.accion-label{font-size:12px;font-weight:600;color:#0F172A}
+.accion-sub{font-size:10px;color:#94A3B8;margin-top:1px}
+
+/* Resumen */
+.resumen-field{width:100%;padding:12px 14px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;background:#FAFBFC;line-height:1.5}
+.resumen-field:focus{outline:none;border-color:#3730A3;background:#fff;box-shadow:0 0 0 3px rgba(55,48,163,.07)}
+
+/* Preview */
+.notif-preview{background:#1E1B4B;border-radius:12px;padding:14px;color:#fff}
+.notif-preview-plugin{font-size:14px;font-weight:800;margin-bottom:3px}
+.notif-preview-ver{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ver-badge{background:#3730A3;color:#fff;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.notif-preview-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.notif-chip{padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;background:rgba(255,255,255,.15)}
+.notif-preview-text{font-size:12px;line-height:1.5;color:rgba(255,255,255,.8)}
+.notif-accion{margin-top:10px;background:rgba(217,119,6,.2);border:1px solid rgba(217,119,6,.4);border-radius:8px;padding:8px 10px;font-size:11px;color:#FCD34D}
+
+.footer{background:#fff;border-top:1px solid #E2E8F0;padding:12px 20px;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+.btn-cancel{padding:10px 18px;background:#F1F5F9;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:#64748B}
+.btn-publish{padding:10px 22px;background:linear-gradient(135deg,#1E1B4B,#3730A3);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;transition:.15s;box-shadow:0 4px 12px rgba(55,48,163,.3)}
+.btn-publish:hover{opacity:.9}
+.btn-publish:disabled{opacity:.5}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🧩 Registrar actualización de plugin</h1>
+  <p>El equipo verá esta actualización en su próximo Mi Día</p>
+</div>
+
+<div class="content">
+
+  <!-- Plugin -->
+  <div class="card">
+    <div class="card-title">¿Qué plugin se actualizó?</div>
+    <div class="plugin-grid">
+      <div class="plugin-opt" onclick="selPlugin(this,'mc-optimizer')">
+        <div class="plugin-icon">⚙️</div>
+        <div class="plugin-name">mc-optimizer</div>
+        <div class="plugin-desc">WooCommerce, WhatsApp, Elementor</div>
+      </div>
+      <div class="plugin-opt" onclick="selPlugin(this,'mc-activity-tracker')">
+        <div class="plugin-icon">📡</div>
+        <div class="plugin-name">mc-activity-tracker</div>
+        <div class="plugin-desc">Webhooks y CRM</div>
+      </div>
+      <div class="plugin-opt" onclick="selPlugin(this,'CleanGuard WP')">
+        <div class="plugin-icon">🛡️</div>
+        <div class="plugin-name">CleanGuard WP</div>
+        <div class="plugin-desc">Limpieza y mantenimiento</div>
+      </div>
+      <div class="plugin-opt" onclick="selPlugin(this,'figma-elementor-exporter')">
+        <div class="plugin-icon">🎨</div>
+        <div class="plugin-name">figma-elementor</div>
+        <div class="plugin-desc">Pipeline Figma → Elementor</div>
+      </div>
+    </div>
+    <input type="hidden" id="plugin">
+  </div>
+
+  <!-- Versión + tipo -->
+  <div class="card">
+    <div class="card-title">Versión</div>
+    <div class="version-input" style="margin-bottom:14px">
+      <div class="ver-label">Nueva versión:</div>
+      <input type="text" class="ver-field" id="version" placeholder="2.9.9.46" oninput="updatePreview()">
+    </div>
+    <div class="card-title">Tipo de cambio</div>
+    <div class="chip-grid">
+      <div class="chip" data-v="🐛 Bug fix" onclick="toggleChip(this)">🐛 Bug fix</div>
+      <div class="chip" data-v="✨ Nueva función" onclick="toggleChip(this)">✨ Nueva función</div>
+      <div class="chip" data-v="🔧 Mejora existente" onclick="toggleChip(this)">🔧 Mejora</div>
+      <div class="chip" data-v="⚠️ Cambio importante" onclick="toggleChip(this)">⚠️ Cambio importante</div>
+    </div>
+  </div>
+
+  <!-- Acción -->
+  <div class="card">
+    <div class="card-title">¿Requiere acción del equipo?</div>
+    <div class="accion-grid">
+      <div class="accion-opt" onclick="selAccion(this,'No — solo informativo, el plugin se actualiza automáticamente')">
+        <div class="accion-dot"></div>
+        <div><div class="accion-label">Solo informativo</div>
+          <div class="accion-sub">El plugin se actualiza automáticamente o ya está hecho</div>
+        </div>
+      </div>
+      <div class="accion-opt alert" onclick="selAccion(this,'Sí — actualizar manualmente en sitios de clientes')">
+        <div class="accion-dot"></div>
+        <div><div class="accion-label">Actualizar en sitios de clientes</div>
+          <div class="accion-sub">Hay que subir el ZIP a cada sitio donde esté instalado</div>
+        </div>
+      </div>
+      <div class="accion-opt alert" onclick="selAccion(this,'Sí — revisar configuración tras actualizar')">
+        <div class="accion-dot"></div>
+        <div><div class="accion-label">Revisar configuración</div>
+          <div class="accion-sub">Pueden haberse añadido campos o cambiado opciones</div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="accion">
+  </div>
+
+  <!-- Resumen -->
+  <div class="card">
+    <div class="card-title">¿Qué cambió? (lo que verá el equipo) *</div>
+    <textarea class="resumen-field" id="resumen" placeholder="Ej: Se arregló el bug donde el botón de WooCommerce no aparecía en páginas de producto con Elementor Pro. También se mejoró la velocidad del widget de WhatsApp en mobile..." oninput="updatePreview()"></textarea>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div class="card-title">Así lo verá el equipo</div>
+    <div class="notif-preview" id="preview">
+      <div class="notif-preview-plugin">— Selecciona un plugin —</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <button class="btn-cancel" onclick="google.script.host.close()">Cancelar</button>
+  <button class="btn-publish" id="btnPublish" onclick="publicar()">🔔 Publicar actualización</button>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+var PLUGIN_SEL='', ACCION_SEL='';
+
+function selPlugin(el,name){
+  document.querySelectorAll('.plugin-opt').forEach(function(x){x.classList.remove('sel');});
+  el.classList.add('sel');
+  PLUGIN_SEL=name;
+  document.getElementById('plugin').value=name;
+  updatePreview();
+}
+function selAccion(el,val){
+  document.querySelectorAll('.accion-opt').forEach(function(x){x.classList.remove('sel');});
+  el.classList.add('sel');
+  ACCION_SEL=val;
+  document.getElementById('accion').value=val;
+  updatePreview();
+}
+function toggleChip(c){c.classList.toggle('sel');updatePreview();}
+function getChips(){return Array.from(document.querySelectorAll('.chip.sel')).map(function(c){return c.dataset.v;});}
+
+function updatePreview(){
+  var plugin=PLUGIN_SEL||'Plugin', ver=document.getElementById('version').value||'?.?.?';
+  var chips=getChips(), resumen=document.getElementById('resumen').value;
+  var accion=ACCION_SEL;
+  var html='<div class="notif-preview-plugin">🧩 '+plugin+'</div>'+
+    '<div class="notif-preview-ver">Nueva versión <span class="ver-badge">v'+ver+'</span></div>'+
+    (chips.length?'<div class="notif-preview-chips">'+chips.map(function(c){return '<span class="notif-chip">'+c+'</span>';}).join('')+'</div>':'')+
+    '<div class="notif-preview-text">'+(resumen||'...')+'</div>'+
+    (accion&&accion.indexOf('No')<0?'<div class="notif-accion">⚠️ Acción requerida: '+accion+'</div>':'');
+  document.getElementById('preview').innerHTML=html;
+}
+
+function publicar(){
+  if(!PLUGIN_SEL){alert('Selecciona el plugin.');return;}
+  if(!document.getElementById('version').value.trim()){alert('Ingresa la versión.');return;}
+  if(!document.getElementById('resumen').value.trim()){alert('Describe qué cambió.');return;}
+  var btn=document.getElementById('btnPublish');btn.disabled=true;btn.textContent='Publicando...';
+  google.script.run
+    .withSuccessHandler(function(r){
+      btn.disabled=false;btn.textContent='🔔 Publicar actualización';
+      if(r&&r.ok!==false){alert('✅ '+r.msg+'\n\nCamila y Lucy lo verán en su próximo Mi Día.');google.script.host.close();}
+      else alert('Error: '+(r&&r.msg||'?'));
+    })
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='🔔 Publicar actualización';alert('Error: '+e.message);})
+    .mc_pub_registrarActualizacionPlugin({
+      plugin:PLUGIN_SEL,
+      version:document.getElementById('version').value.trim(),
+      tipoCambio:getChips(),
+      requiereAccion:ACCION_SEL||'No — solo informativo',
+      resumen:document.getElementById('resumen').value,
+      desarrollador:'Rossio'
+    });
+}
+updatePreview();
+</script>
+</body>
+</html>

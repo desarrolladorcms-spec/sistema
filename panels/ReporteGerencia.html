@@ -1,0 +1,152 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#111827;font-size:13px}
+header{background:linear-gradient(120deg,#1A0A36,#3b0764,#9333EA);color:#fff;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.h-left .title{font-size:22px;font-weight:950;margin:0 0 4px}.h-left .sub{font-size:12px;opacity:.75}
+.btn{border:0;border-radius:12px;padding:10px 18px;font-weight:800;cursor:pointer;font-size:13px;color:#fff;display:flex;align-items:center;gap:6px}
+.btn-pdf{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3)}
+.btn-pdf:hover{background:rgba(255,255,255,.3)}
+.content{padding:20px 28px 40px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px;text-align:center;box-shadow:0 4px 12px rgba(15,23,42,.05)}
+.kpi b{font-size:26px;font-weight:800;display:block;line-height:1.1}.kpi span{font-size:11px;color:#64748b;margin-top:2px;display:block}
+.section{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px 20px;margin-bottom:14px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+.section h3{font-size:14px;font-weight:800;color:#1A0A36;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+canvas{max-height:200px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;background:#f3e8ff;color:#4c1d95;font-weight:700;border-bottom:2px solid #ddd6fe}
+td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+tr:last-child td{border:0}
+.pill{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}
+.g{background:#dcfce7;color:#15803d}.r{background:#fee2e2;color:#b91c1c}
+.o{background:#ffedd5;color:#c2410c}.b{background:#dbeafe;color:#1e40af}
+.badge-sem{width:12px;height:12px;border-radius:50%;display:inline-block;vertical-align:-1px}
+.loading{text-align:center;padding:40px;color:#94a3b8}
+.mes-selector{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:13px}
+.mes-selector select{border:1px solid #e5e7eb;border-radius:10px;padding:6px 10px;font-size:13px;background:#fff}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header>
+  <div class="h-left">
+    <div class="title">📊 Reporte Gerencia</div>
+    <div class="sub" id="h-mes">Cargando...</div>
+  </div>
+  <button class="btn btn-pdf" onclick="exportarPDF()">📥 Exportar PDF</button>
+</header>
+<div class="content" id="app"><div class="loading">Generando reporte...</div></div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+var charts=[];
+function destroyCharts(){charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];}
+
+function draw(d){
+  destroyCharts();
+  if(!d||d.ok===false){document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(d&&d.msg||'Sin datos')+'</div>';return;}
+  var p=d.panel||{}, mes=d.mes||'—';
+  document.getElementById('h-mes').textContent='Mes: '+mes;
+
+  // KPIs
+  var T=p.tareas||{}, C=p.clientes||{}, S=p.soporte||{};
+  var html='<div class="kpis">';
+  html+='<div class="kpi"><b style="color:#7c3aed">'+esc(C.activos||0)+'</b><span>Clientes activos</span></div>';
+  html+='<div class="kpi"><b style="color:#059669">'+esc(T.completas||0)+'</b><span>Tareas completadas</span></div>';
+  html+='<div class="kpi"><b style="color:#ea580c">'+esc(T.pendientes||0)+'</b><span>Tareas pendientes</span></div>';
+  html+='<div class="kpi"><b style="color:#0284c7">'+esc(S.resueltos||0)+'</b><span>Soportes resueltos</span></div>';
+  html+='<div class="kpi"><b style="color:#dc2626">'+esc((d.riesgos&&d.riesgos.items&&d.riesgos.items.length)||0)+'</b><span>Riesgos activos</span></div>';
+  html+='</div>';
+
+  // Equipo
+  var carga=d.carga||{items:[]};
+  html+='<div class="grid2">';
+  html+='<div class="section"><h3>👥 Rendimiento del equipo</h3><table><tr><th>Persona</th><th>Tareas</th><th>Completadas</th><th>Tiempo</th><th>%</th></tr>';
+  (carga.items||[]).forEach(function(w){
+    var pct=w.total>0?Math.round(w.completas/w.total*100):0;
+    var color=pct>=80?'g':pct>=60?'o':'r';
+    html+='<tr><td><b>'+esc(w.nombre)+'</b></td><td>'+esc(w.total)+'</td><td>'+esc(w.completas)+'</td><td>'+Math.round((w.minutos||0)/60*10)/10+'h</td><td><span class="pill '+color+'">'+pct+'%</span></td></tr>';
+  });
+  html+='</table></div>';
+
+  // Semáforo clientes
+  var semaforo=d.semaforo||[];
+  html+='<div class="section"><h3>🚦 Semáforo de clientes</h3>';
+  if(semaforo.length){
+    html+='<table><tr><th>Cliente</th><th>Estado</th><th>Motivo</th></tr>';
+    semaforo.slice(0,10).forEach(function(s){
+      var cls=s.semaforo==='🟢'?'g':s.semaforo==='🟡'?'o':'r';
+      html+='<tr><td>'+esc(s.cliente)+'</td><td><span class="pill '+cls+'">'+esc(s.semaforo)+' '+esc(s.nivel)+'</span></td><td>'+esc(s.motivo||'—')+'</td></tr>';
+    });
+    html+='</table>';
+  } else html+='<div style="color:#94a3b8;text-align:center;padding:12px">Sin datos de semáforo aún. Ejecuta Rentabilidad primero.</div>';
+  html+='</div></div>';
+
+  // Tareas por área + Oportunidades
+  html+='<div class="grid2">';
+  html+='<div class="section"><h3>📊 Distribución por área</h3><canvas id="chartArea"></canvas></div>';
+
+  var oport=d.oportunidades&&d.oportunidades.items||[];
+  html+='<div class="section"><h3>💼 Oportunidades comerciales</h3>';
+  if(oport.length){
+    html+='<table><tr><th>Cliente</th><th>Oportunidad</th><th>Prioridad</th></tr>';
+    oport.forEach(function(o){
+      var cls=o.prioridad==='Alta'?'r':o.prioridad==='Media'?'o':'g';
+      html+='<tr><td>'+esc(o.cliente)+'</td><td>'+esc(o.oportunidad||o.servicio)+'</td><td><span class="pill '+cls+'">'+esc(o.prioridad)+'</span></td></tr>';
+    });
+    html+='</table>';
+  } else html+='<div style="color:#94a3b8;text-align:center;padding:12px">Sin oportunidades detectadas</div>';
+  html+='</div></div>';
+
+  // Riesgos
+  var riesgos=(d.riesgos&&d.riesgos.items)||[];
+  html+='<div class="section"><h3>🚨 Riesgos operativos</h3>';
+  if(riesgos.length){
+    html+='<table><tr><th>Cliente</th><th>Área</th><th>Riesgo</th><th>Acción</th></tr>';
+    riesgos.forEach(function(r){
+      html+='<tr><td>'+esc(r.cliente)+'</td><td>'+esc(r.area)+'</td><td>'+esc(r.riesgo)+'</td><td>'+esc(r.accion)+'</td></tr>';
+    });
+    html+='</table>';
+  } else html+='<div style="color:#94a3b8;text-align:center;padding:12px">✅ Sin riesgos críticos este mes</div>';
+  html+='</div>';
+
+  // SEO Summary
+  var seo=d.seo||{};
+  html+='<div class="section"><h3>🔎 SEO del mes</h3><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">';
+  [['Clientes SEO',seo.clientesActivos],['Tareas SEO',seo.tareas],['Contenidos',seo.contenidos],['Atrasadas',seo.tareasAtrasadas]].forEach(function(x){
+    html+='<div style="text-align:center;padding:10px;background:#f0f9ff;border-radius:12px"><b style="font-size:22px;color:#0284c7">'+esc(x[1]||0)+'</b><br><span style="font-size:11px;color:#64748b">'+esc(x[0])+'</span></div>';
+  });
+  html+='</div></div>';
+
+  document.getElementById('app').innerHTML=html;
+
+  // Chart área
+  var areaData=carga.items||[];
+  if(areaData.length&&document.getElementById('chartArea')){
+    var c=new Chart(document.getElementById('chartArea'),{type:'doughnut',data:{
+      labels:areaData.map(function(w){return w.nombre}),
+      datasets:[{data:areaData.map(function(w){return w.total}),backgroundColor:['#7c3aed','#059669','#ea580c'],borderWidth:0}]
+    },options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+    charts.push(c);
+  }
+}
+
+function exportarPDF(){
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.ok) window.open(r.url,'_blank');
+      else alert('PDF: '+(r&&r.msg||'Error al generar'));
+    })
+    .withFailureHandler(function(e){alert('Error: '+e.message);})
+    .mc_reporteGerencia_exportarPDF_pub('');
+}
+
+google.script.run
+  .withSuccessHandler(draw)
+  .withFailureHandler(function(e){draw({ok:false,msg:e.message});})
+  .mc_reporteGerencia_getData_pub();
+</script>
+</body></html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--green:#059669;--red:#DC2626;--amber:#D97706;--blue:#0284C7}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:linear-gradient(120deg,#78350F,#B45309);color:#fff;padding:13px 18px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700;color:#FDE68A;margin-bottom:2px}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s2{grid-column:1/-1}
+.f label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:4px}
+.f select,.f input,.f textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;color:var(--text);background:#FAFBFC;transition:.15s}
+.f select:focus,.f input:focus,.f textarea:focus{outline:none;border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(217,119,6,.07)}
+/* Asignado a — cards de persona */
+.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.persona-opt{padding:14px 10px;border:2px solid var(--border);border-radius:12px;text-align:center;cursor:pointer;transition:.15s;background:var(--surface)}
+.persona-opt:hover{border-color:var(--amber);background:#FFFBEB}
+.persona-opt.sel{border-color:var(--amber);background:#FFFBEB}
+.persona-avatar{width:36px;height:36px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg)}
+.persona-opt.sel .persona-avatar{background:#FDE68A}
+.persona-name{font-size:12px;font-weight:700;color:var(--text)}
+.persona-rol{font-size:9px;color:var(--muted)}
+/* Prioridad inline */
+.prio-row{display:flex;gap:6px}
+.prio-btn{flex:1;padding:8px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;transition:.15s;background:var(--surface)}
+.prio-btn.u{border-color:var(--red);background:#FEF2F2;color:var(--red)}
+.prio-btn.a{border-color:var(--amber);background:#FFF7ED;color:var(--amber)}
+.prio-btn.m{border-color:var(--blue);background:#EFF6FF;color:var(--blue)}
+.prio-btn.b{border-color:var(--green);background:#F0FDF4;color:var(--green)}
+.prio-btn:not(.u):not(.a):not(.m):not(.b){color:var(--muted)}
+.prio-btn.sel{box-shadow:0 0 0 2px currentColor}
+/* SLA indicator */
+.sla-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:600;background:#FEF9C3;color:#92400E;display:none}
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:11px 18px;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.btn{padding:9px 18px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-ghost{background:var(--bg);color:var(--muted)}
+.btn-assign{background:linear-gradient(135deg,var(--amber),#D97706);color:#fff}
+.btn-assign:hover{opacity:.9;box-shadow:0 4px 12px rgba(217,119,6,.3)}
+.btn-assign:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr"><h1>📋 Asignar Tarea o Solicitud</h1><p>Asigna al responsable y define el contexto</p></div>
+<div class="scroll">
+  <div class="card"><div class="card-title">¿Qué se asigna?</div>
+    <div class="g2">
+      <div class="f"><label>Tipo *</label>
+        <select id="tipo">
+          <option value="">— Seleccionar —</option>
+          <option>Solicitud web / soporte</option>
+          <option>Tarea de proyecto web</option>
+          <option>Tarea SEO</option>
+          <option>Revisión de demo</option>
+          <option>Gestión interna</option>
+          <option>Otro</option>
+        </select></div>
+      <div class="f"><label>Cliente / Marca</label>
+        <select id="marca"><option value="">— Seleccionar —</option></select></div>
+      <div class="f s2"><label>Descripción / Tarea *</label>
+        <textarea id="tarea" rows="3" placeholder="Describe con detalle lo que hay que hacer..."></textarea></div>
+      <div class="f"><label>Proyecto relacionado (si aplica)</label>
+        <input type="text" id="proyecto" placeholder="Ej: Sitio Web Voltwell"></div>
+      <div class="f"><label>Fecha límite</label>
+        <input type="date" id="limite"></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">¿A quién se asigna?</div>
+    <div class="persona-grid">
+      <div class="persona-opt" onclick="selPersona(this,'Rossio')">
+        <div class="persona-avatar">🧠</div>
+        <div class="persona-name">Rossio</div><div class="persona-rol">Jefa de Área</div></div>
+      <div class="persona-opt sel" onclick="selPersona(this,'Camila')">
+        <div class="persona-avatar">🎨</div>
+        <div class="persona-name">Camila</div><div class="persona-rol">Web / Diseño</div></div>
+      <div class="persona-opt" onclick="selPersona(this,'Lucy')">
+        <div class="persona-avatar">🌐</div>
+        <div class="persona-name">Lucy</div><div class="persona-rol">Web / SEO</div></div>
+    </div>
+    <input type="hidden" id="paraHidden" value="Camila">
+  </div>
+  <div class="card"><div class="card-title">Prioridad y SLA</div>
+    <div class="prio-row">
+      <div class="prio-btn u sel" onclick="selPrio(this,'Urgente')">🔴 Urgente<br><small>Hoy</small></div>
+      <div class="prio-btn a" onclick="selPrio(this,'Alta')">🟠 Alta<br><small>48h</small></div>
+      <div class="prio-btn m" onclick="selPrio(this,'Media')">🟡 Media<br><small>3-5d</small></div>
+      <div class="prio-btn b" onclick="selPrio(this,'Baja')">🟢 Baja<br><small>+5d</small></div>
+    </div>
+    <input type="hidden" id="prioHidden" value="Urgente">
+    <div style="margin-top:10px">
+      <div class="f"><label>Notas adicionales para quien recibe</label>
+        <input type="text" id="notas" placeholder="Contexto extra, accesos necesarios, etc."></div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <button class="btn btn-ghost" onclick="google.script.host.close()">Cancelar</button>
+  <button class="btn btn-assign" id="btnAssign" onclick="asignar()">📋 Asignar tarea</button>
+</div>
+<script src="../assets/api.js"></script>
+<script>
+var PARA='Camila', PRIO='Urgente';
+google.script.run.withSuccessHandler(function(clientes){
+  var sel=document.getElementById('marca');
+  (clientes||[]).forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+}).mc_pub_getClientesMarcas();
+// Fecha por defecto: hoy
+document.getElementById('limite').value=new Date().toISOString().split('T')[0];
+
+function selPersona(el,v){
+  document.querySelectorAll('.persona-opt').forEach(function(x){x.classList.remove('sel');});
+  el.classList.add('sel');PARA=v;document.getElementById('paraHidden').value=v;
+}
+function selPrio(el,v){
+  document.querySelectorAll('.prio-btn').forEach(function(x){x.classList.remove('sel');});
+  el.classList.add('sel');PRIO=v;document.getElementById('prioHidden').value=v;
+}
+function asignar(){
+  var tipo=document.getElementById('tipo').value,tarea=document.getElementById('tarea').value.trim();
+  if(!tipo){alert('Selecciona el tipo de tarea.');return;}
+  if(!tarea){alert('Escribe la descripción.');return;}
+  var btn=document.getElementById('btnAssign');btn.disabled=true;btn.textContent='Asignando...';
+  google.script.run
+    .withSuccessHandler(function(r){btn.disabled=false;btn.textContent='📋 Asignar tarea';
+      if(r&&r.ok!==false){alert('✅ Tarea asignada a '+PARA);google.script.host.close();}
+      else alert('Error: '+(r&&r.msg||'?'));})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='📋 Asignar tarea';alert('Error: '+e.message);})
+    .mc_pub_formAsignacion({tipo:tipo,marca:document.getElementById('marca').value,tarea:tarea,
+      proyecto:document.getElementById('proyecto').value,limite:document.getElementById('limite').value,
+      para:PARA,prioridad:PRIO,notas:document.getElementById('notas').value});
+}
+</script></body></html>

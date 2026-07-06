@@ -1,0 +1,46 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#172033}header{background:linear-gradient(120deg,#7f1d1d,#f97316);color:#fff;padding:18px 22px}.title{font-size:22px;font-weight:950}.sub{font-size:13px;opacity:.9}.toolbar{padding:12px 18px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;gap:10px}.toolbar input{padding:9px 10px;border:1px solid #e5e7eb;border-radius:10px;min-width:260px}.btn{border:0;border-radius:10px;padding:9px 12px;background:#ea580c;color:white;font-weight:900;cursor:pointer}.btn.gray{background:#64748b}.content{padding:16px 18px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;box-shadow:0 8px 20px rgba(15,23,42,.05)}.name{font-weight:950}.meta{font-size:12px;color:#64748b;line-height:1.4}.motivo{white-space:pre-wrap;background:#fff7ed;border-radius:12px;padding:10px;margin:10px 0;font-size:12px}.pill{display:inline-block;border-radius:999px;background:#fee2e2;color:#991b1b;padding:4px 8px;font-size:11px;font-weight:900}.loading,.empty{text-align:center;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:14px;padding:20px}
+</style></head><body><header><div class="title">🚧 Control de bloqueos</div><div class="sub">Detecta elementos pausados, bloqueados o pendientes por cliente/aprobación/contenido.</div></header><div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button><input id="q" placeholder="Buscar marca, responsable o motivo" oninput="render()"></div><div class="content" id="app"><div class="loading">Cargando...</div></div><script src="../assets/api.js"></script>
+<script>
+let DATA=[];function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));}function loadData(){document.getElementById('app').innerHTML='<div class="loading">Cargando...</div>';google.script.run.withSuccessHandler(r=>{DATA=(r&&r.items)||[];render();}).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message||e)+'</div>';}).mc_bloqueos_getData_pub();}
+function filtered(){let q=document.getElementById('q').value.toLowerCase();return DATA.filter(x=>!q||String(x.marca+' '+x.tarea+' '+x.responsable+' '+x.estado+' '+x.motivo).toLowerCase().indexOf(q)>=0);}
+function render(){let arr=filtered();if(!arr.length){document.getElementById('app').innerHTML='<div class="empty">Sin bloqueos activos.</div>';return;}document.getElementById('app').innerHTML='<div class="grid">'+arr.map(x=>'<div class="card"><span class="pill">'+esc(x.estado)+'</span><div class="name">'+esc(x.marca||'Sin marca')+'</div><div class="meta">'+esc(x.fuente)+' · '+esc(x.id)+' · '+esc(x.responsable)+'<br>'+esc(x.tarea)+'</div><div class="motivo">'+esc(x.motivo||'Sin motivo detallado')+'</div><button class="btn" onclick="wa(\''+esc(x.key)+'\')">Preparar WhatsApp al cliente</button></div>').join('')+'</div>';}
+function wa(k){google.script.run.withSuccessHandler(r=>{alert(r.msg||'Listo');loadData();}).withFailureHandler(e=>alert(e.message||e)).mc_bloqueos_prepararWhatsApp_pub(k)}loadData();
+</script>
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body></html>

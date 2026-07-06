@@ -1,0 +1,57 @@
+<!doctype html>
+<html><head><base target="_top"><meta charset="utf-8"><style>
+:root{--dark:#1A0A36;--violet:#9333EA;--orange:#EA580C;--txt:#25324b;--muted:#667085}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:var(--txt)}header{background:linear-gradient(120deg,#1A0A36,#3b0764,#ea580c);color:#fff;padding:18px 22px}.title{font-size:22px;font-weight:950}.sub{font-size:13px;opacity:.86;margin-top:3px}.toolbar{padding:12px 18px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:10px}.btn{border:0;border-radius:10px;padding:9px 12px;background:#9333EA;color:white;font-weight:900;cursor:pointer;text-decoration:none;display:inline-block}.btn.orange{background:#EA580C}.content{padding:16px 18px 24px}.kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:14px}.kpi{background:#fff;border:1px solid #edf2f7;border-radius:16px;padding:13px;box-shadow:0 8px 18px rgba(15,23,42,.04)}.kpi b{font-size:27px;display:block}.kpi span{font-size:12px;color:#667085}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;box-shadow:0 8px 22px rgba(15,23,42,.05)}.panel h2{font-size:15px;color:#32115c;margin:0 0 10px}.item{border-top:1px solid #f1f5f9;padding:10px 0}.item:first-of-type{border-top:0}.name{font-weight:900;font-size:13px}.meta{font-size:12px;color:#667085;line-height:1.45;margin-top:2px}.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;background:#f3f4f6;margin:2px 4px 2px 0}.red{background:#fee2e2;color:#b91c1c}.orangeP{background:#ffedd5;color:#c2410c}.yellow{background:#fef3c7;color:#92400e}.blue{background:#dbeafe;color:#1d4ed8}.green{background:#dcfce7;color:#15803d}.violet{background:#f3e8ff;color:#581c87}.empty{padding:16px;text-align:center;color:#98a2b3;border:1px dashed #cbd5e1;border-radius:14px;background:#fff}.loading{padding:30px;color:#667085}.bar{height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;margin-top:6px}.bar>div{height:8px;background:linear-gradient(90deg,#9333EA,#EA580C);border-radius:99px}.sectionFull{grid-column:1 / -1}@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style></head><body><header><div class="title">📌 Panel de hoy</div><div class="sub">Resumen operativo: demos, entregas, solicitudes, WhatsApps, herramientas, carga y tareas sin movimiento.</div></header><div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button><button class="btn orange" onclick="openWhats()">📲 Centro WhatsApps</button><button class="btn orange" onclick="openAuditoria()">🧹 Auditoría</button></div><div class="content" id="app"><div class="loading">Cargando panel...</div></div><script src="../assets/api.js"></script>
+<script>
+let DATA=null;function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function pill(txt,cls){return '<span class="pill '+(cls||'')+'">'+esc(txt)+'</span>'}
+function loadData(){document.getElementById('app').innerHTML='<div class="loading">Actualizando...</div>';google.script.run.withSuccessHandler(r=>{DATA=r||{};render();}).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message||e)+'</div>';}).mc_hoy_getResumen_pub();}
+function kpi(v,t,cls){return '<div class="kpi"><b>'+v+'</b><span>'+esc(t)+'</span></div>'}
+function render(){let d=DATA||{}, e=d.entregas||{};let app=document.getElementById('app');let k='<div class="kpis">'+kpi(e.atrasado||0,'Entregas atrasadas')+kpi(e.hoy||0,'Vencen hoy')+kpi(e.h24||0,'Faltan 24h')+kpi((d.demos||[]).length,'Demos Rossio')+kpi((d.solicitudes||[]).length,'Solicitudes pendientes')+kpi((d.whatsapps||[]).length,'WhatsApps pendientes')+kpi((d.movimiento||[]).length,'Sin movimiento')+'</div>';
+let urg=(d.entregasItems||[]).map(it=>'<div class="item"><div class="name">'+esc(it.marca||'Sin marca')+'</div><div>'+pill(it.alerta,it.categoria==='atrasado'?'red':it.categoria==='hoy'?'orangeP':'yellow')+pill(it.fuente,'blue')+pill(it.responsableVisual||'-')+'</div><div class="meta"><b>'+esc(it.proyecto||'-')+'</b><br>'+esc(it.tarea||'-')+'<br>Límite: '+esc(it.fechaTxt||'-')+'</div></div>').join('')||'<div class="empty">Sin entregas críticas.</div>';
+let sol=(d.solicitudes||[]).slice(0,8).map(x=>'<div class="item"><div class="name">'+esc(x.id)+' · '+esc(x.marca||'Sin marca')+'</div><div class="meta">'+esc(x.tarea||'-')+'<br>Prioridad: '+esc(x.prioridad||'-')+' · Límite: '+esc(x.limite||'-')+'</div></div>').join('')||'<div class="empty">Sin solicitudes pendientes.</div>';
+let demos=(d.demos||[]).slice(0,8).map(x=>'<div class="item"><div class="name">'+esc(x.id)+' · '+esc(x.cliente||'Sin cliente')+'</div><div>'+pill(x.estado||'Pendiente Rossio','violet')+'</div><div class="meta">'+esc(x.proyecto||'-')+'<br>'+esc(x.terminado||'')+'<br>Envío: '+esc(x.responsable||'-')+' · '+esc(x.fecha||'-')+'</div></div>').join('')||'<div class="empty">Sin demos pendientes.</div>';
+let wa=(d.whatsapps||[]).slice(0,6).map(x=>'<div class="item"><div class="name">'+esc(x.para||'Sin destinatario')+'</div><div class="meta">'+esc((x.mensaje||'').slice(0,150))+'</div>'+(x.link?'<a class="btn" target="_blank" href="'+esc(x.link)+'">Abrir WA</a>':'')+'</div>').join('')||'<div class="empty">Sin WhatsApps pendientes.</div>';
+let mov=(d.movimiento||[]).slice(0,8).map(x=>'<div class="item"><div class="name">'+esc(x.responsable)+' · '+esc(x.marca||'Sin marca')+'</div><div>'+pill(x.diasSinMov+' días sin movimiento','red')+pill(x.estado||'-')+'</div><div class="meta">'+esc(x.tarea||'-')+'<br>Últ. mov.: '+esc(x.ultimo||'-')+'</div></div>').join('')||'<div class="empty">Sin tareas estancadas.</div>';
+let carga=(d.carga||[]).map(x=>{let w=Math.min(100,(x.total||0)*8);return '<div class="item"><div class="name">'+esc(x.responsable)+' '+pill((x.total||0)+' activas','blue')+pill((x.atrasadas||0)+' atrasadas',x.atrasadas?'red':'green')+'</div><div class="bar"><div style="width:'+w+'%"></div></div><div class="meta">Urgentes: '+(x.urgentes||0)+' · Hoy: '+(x.hoy||0)+' · En proceso: '+(x.enProceso||0)+'</div></div>'}).join('')||'<div class="empty">Sin carga registrada.</div>';
+let tools=(d.herramientas||[]).slice(0,6).map(x=>'<div class="item"><div class="name">'+esc(x.herramienta)+'</div><div>'+pill(x.dias<0?'Vencida '+Math.abs(x.dias)+'d':'Faltan '+x.dias+'d',x.dias<=3?'red':'yellow')+'</div><div class="meta">Proveedor: '+esc(x.proveedor||'-')+' · Vence: '+esc(x.vencimiento||'-')+'</div></div>').join('')||'<div class="empty">Sin herramientas críticas.</div>';
+let aud=(d.auditoria||[]).slice(0,6).map(x=>'<div class="item"><div class="name">'+esc(x.hoja)+' · '+esc(x.marca||x.id)+'</div><div>'+pill(x.nivel,x.nivel==='Alta'?'red':x.nivel==='Media'?'yellow':'blue')+'</div><div class="meta">'+esc(x.problema)+'<br>'+esc(x.accion)+'</div></div>').join('')||'<div class="empty">Auditoría sin problemas críticos.</div>';
+app.innerHTML=k+'<div class="grid"><div class="panel"><h2>📦 Entregas críticas</h2>'+urg+'</div><div class="panel"><h2>🧪 Demos por revisar</h2>'+demos+'</div><div class="panel"><h2>📥 Solicitudes pendientes</h2>'+sol+'</div><div class="panel"><h2>📲 WhatsApps pendientes</h2>'+wa+'</div><div class="panel"><h2>🕘 Tareas sin movimiento</h2>'+mov+'</div><div class="panel"><h2>⚖️ Carga laboral</h2>'+carga+'</div><div class="panel"><h2>🛠️ Herramientas por vencer</h2>'+tools+'</div><div class="panel sectionFull"><h2>🧹 Datos incompletos detectados</h2>'+aud+'</div></div>';}
+function openWhats(){google.script.run.mc_pub_abrirCentroWhatsApp();}function openAuditoria(){google.script.run.mc_pub_abrirAuditoriaDatos();}loadData();
+</script>
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body></html>

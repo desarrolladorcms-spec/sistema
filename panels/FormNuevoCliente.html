@@ -1,0 +1,213 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--green:#059669;--red:#DC2626;--amber:#D97706}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:linear-gradient(120deg,#1E1B4B,#4C1D95);color:#fff;padding:13px 18px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700;color:#FDE68A;margin-bottom:2px}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.stepper{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 18px;display:flex;align-items:center;flex-shrink:0}
+.step{display:flex;align-items:center;gap:7px}
+.step-n{width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:.2s;flex-shrink:0}
+.step.done .step-n{background:var(--v);color:#fff}
+.step.act .step-n{background:var(--v);color:#fff;box-shadow:0 0 0 4px rgba(124,58,237,.15)}
+.step.idle .step-n{background:var(--bg);color:var(--faint);border:1.5px solid var(--border)}
+.step-lbl{font-size:10px;font-weight:600;color:var(--faint)}
+.step.act .step-lbl{color:var(--v)}
+.step.done .step-lbl{color:var(--text)}
+.step-line{flex:1;height:2px;background:var(--border);min-width:16px;max-width:48px}
+.step.done+.step-line{background:var(--v)}
+.scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.panel{display:none}.panel.act{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.s2{grid-column:1/-1}
+.f label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:4px}
+.f select,.f input,.f textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;color:var(--text);background:#FAFBFC;transition:.15s}
+.f select:focus,.f input:focus,.f textarea:focus{outline:none;border-color:var(--v);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.07)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--v);color:var(--v);background:var(--vl)}
+.chip.on{background:var(--v);border-color:var(--v);color:#fff}
+.chip.on.green{background:var(--green);border-color:var(--green)}
+.chip.on.amber{background:var(--amber);border-color:var(--amber)}
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:11px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.footer-info{font-size:10px;color:var(--faint)}
+.btn-group{display:flex;gap:8px}
+.btn{padding:9px 18px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-ghost{background:var(--bg);color:var(--muted)}.btn-ghost:hover{background:var(--border)}
+.btn-primary{background:var(--v);color:#fff}.btn-primary:hover{background:var(--vd)}
+.btn-success{background:var(--green);color:#fff}.btn-primary:disabled,.btn-success:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr"><h1>👤 Nuevo Cliente</h1><p>Registra el cliente en el sistema y conéctalo a sus servicios</p></div>
+<div class="stepper" id="stepper">
+  <div class="step act"><div class="step-n">1</div><div class="step-lbl">Datos</div></div>
+  <div class="step-line"></div>
+  <div class="step idle"><div class="step-n">2</div><div class="step-lbl">Servicios</div></div>
+  <div class="step-line"></div>
+  <div class="step idle"><div class="step-n">3</div><div class="step-lbl">Acceso</div></div>
+</div>
+<div class="scroll">
+
+<!-- Paso 1: Datos básicos -->
+<div class="panel act" id="p0">
+  <div class="card"><div class="card-title">¿Quién es el cliente?</div>
+    <div class="g2">
+      <div class="f s2"><label>Nombre de marca / empresa *</label><input type="text" id="marca" placeholder="Ej: VOLTWELL"></div>
+      <div class="f"><label>Persona de contacto</label><input type="text" id="contacto" placeholder="Ej: Ruben Torres"></div>
+      <div class="f"><label>Teléfono / WhatsApp</label><input type="tel" id="telefono" placeholder="+51 900 000 000"></div>
+      <div class="f"><label>Correo electrónico</label><input type="email" id="correo" placeholder="hola@empresa.com"></div>
+      <div class="f"><label>Sitio web</label><input type="url" id="web" placeholder="https://empresa.com"></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">Tipo y origen</div>
+    <div class="g2">
+      <div class="f"><label>Tipo de cliente</label>
+        <select id="tipo"><option>Nuevo</option><option>Recurrente</option><option>Referido</option><option>Reactivado</option></select></div>
+      <div class="f"><label>Origen</label>
+        <select id="origen"><option>Referido</option><option>Redes sociales</option><option>Google Ads</option><option>Orgánico web</option><option>Comercial / ventas</option><option>Otro</option></select></div>
+      <div class="f"><label>Estado</label>
+        <select id="estado"><option>Activo</option><option>En negociación</option><option>Pausado</option><option>Finalizado</option></select></div>
+      <div class="f"><label>Prioridad</label>
+        <div class="chips" id="chkPrio">
+          <div class="chip on amber" data-v="Alta">🟠 Alta</div>
+          <div class="chip" data-v="Media">🟡 Media</div>
+          <div class="chip" data-v="Baja">🟢 Baja</div>
+        </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Paso 2: Servicios -->
+<div class="panel" id="p1">
+  <div class="card"><div class="card-title">¿Qué servicios contrata?</div>
+    <div class="f"><label>Tipo de servicio principal</label>
+      <div class="chips" id="chkTipo">
+        <div class="chip" data-v="Web">🌐 Web / Landing</div>
+        <div class="chip" data-v="SEO">📈 SEO Mensual</div>
+        <div class="chip" data-v="Campañas + Soporte Técnico">📣 Campañas + Soporte</div>
+        <div class="chip" data-v="Soporte Web">🛠️ Soporte Web</div>
+        <div class="chip" data-v="Diseño">🎨 Diseño</div>
+      </div>
+    </div>
+    <div class="f" style="margin-top:12px"><label>Plan / servicio específico</label>
+      <input type="text" id="plan" placeholder="Ej: Campañas + Soporte Técnico · Ilimitado"></div>
+  </div>
+  <div class="card" style="border-color:#DDD6FE;background:#FDFCFF"><div class="card-title" style="color:#5B21B6">¿Quién lleva este proyecto?</div>
+    <p style="font-size:11px;color:#64748B;margin-bottom:10px">El sistema creará el proyecto y asignará las tareas automáticamente a esta persona.</p>
+    <div class="f"><label>Responsable del proyecto *</label>
+      <div class="chips" id="chkResponsable">
+        <div class="chip" data-v="Rossio">🧠 Rossio</div>
+        <div class="chip on" data-v="Camila">🎨 Camila</div>
+        <div class="chip" data-v="Lucy">🌐 Lucy</div>
+      </div>
+      <input type="hidden" id="responsable" value="Camila">
+    </div>
+  </div>
+  <div class="card"><div class="card-title">Hosting y dominio</div>
+    <div class="g2">
+      <div class="f"><label>Tipo de hosting</label>
+        <select id="hosting"><option>Hosting con nosotros</option><option>Hosting del cliente</option><option>Sin hosting</option></select></div>
+      <div class="f"><label>Proveedor hosting</label>
+        <select id="proveedor"><option>SiteGround</option><option>Banahosting</option><option>Hostinger</option><option>GoDaddy</option><option>Otro</option><option>No aplica</option></select></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">Notas internas</div>
+    <div class="f"><textarea id="notas" rows="3" placeholder="Referencias, acuerdos especiales, notas del equipo..."></textarea></div>
+  </div>
+</div>
+
+<!-- Paso 3: Acceso y confirmación -->
+<div class="panel" id="p2">
+  <div class="card" style="background:#F5F3FF;border-color:#DDD6FE">
+    <div class="card-title" style="color:#5B21B6">Resumen del cliente</div>
+    <div id="resumen" style="font-size:12px;color:#374151;line-height:1.7"></div>
+  </div>
+  <div class="card"><div class="card-title">Configuración inicial</div>
+    <div class="g2">
+      <div class="f"><label>¿Crear grupo de WhatsApp?</label>
+        <div class="chips" id="chkWA">
+          <div class="chip" data-v="Sí">✅ Sí, crear</div>
+          <div class="chip on" data-v="No">⬜ Después</div>
+        </div></div>
+      <div class="f"><label>¿Crear proyecto inicial?</label>
+        <div class="chips" id="chkProy">
+          <div class="chip on" data-v="Sí">✅ Sí, automático</div>
+          <div class="chip" data-v="No">⬜ Después</div>
+        </div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="footer">
+  <div class="footer-info" id="fInfo">Paso 1 de 3</div>
+  <div class="btn-group">
+    <button class="btn btn-ghost" id="btnBack" style="display:none" onclick="prev()">← Anterior</button>
+    <button class="btn btn-primary" id="btnNext" onclick="next()">Siguiente →</button>
+    <button class="btn btn-success" id="btnSave" style="display:none" onclick="guardar()">✓ Crear cliente</button>
+  </div>
+</div>
+<script src="../assets/api.js"></script>
+<script>
+var S=0, MAX=3;
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+// Chips single/multi
+document.querySelectorAll('.chips').forEach(g=>{
+  var single=['chkPrio','chkWA','chkProy','chkTipo'].includes(g.id)?false:false;
+  // chkPrio, chkWA, chkProy = single; chkTipo = multi
+  g.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(['chkPrio','chkWA','chkProy'].includes(g.id)) g.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+      c.classList.toggle('on');
+    });
+  });
+});
+function gc(id){return [...document.querySelectorAll('#'+id+' .chip.on')].map(c=>c.dataset.v);}
+function next(){
+  if(S===0&&!document.getElementById('marca').value.trim()){alert('Escribe el nombre de la marca.');return;}
+  if(S<MAX-1){S++;render();}
+}
+function prev(){if(S>0){S--;render();}}
+function render(){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('act',i===S));
+  var steps=document.querySelectorAll('.step');
+  steps.forEach((s,i)=>{s.className='step '+( i<S?'done':i===S?'act':'idle');});
+  document.querySelectorAll('.step-line').forEach((l,i)=>{l.style.background=i<S?'var(--v)':'var(--border)';});
+  document.getElementById('btnBack').style.display=S>0?'':'none';
+  document.getElementById('btnNext').style.display=S<MAX-1?'':'none';
+  document.getElementById('btnSave').style.display=S===MAX-1?'':'none';
+  document.getElementById('fInfo').textContent='Paso '+(S+1)+' de '+MAX;
+  if(S===2) buildResumen();
+}
+function buildResumen(){
+  var r='<b>'+esc(document.getElementById('marca').value)+'</b><br>'+
+    '👤 '+esc(document.getElementById('contacto').value||'—')+'<br>'+
+    '📞 '+esc(document.getElementById('telefono').value||'—')+' · '+esc(document.getElementById('correo').value||'—')+'<br>'+
+    '🌐 '+esc(document.getElementById('web').value||'—')+'<br>'+
+    '📌 '+esc(gc('chkTipo').join(', ')||'—')+' · '+esc(document.getElementById('plan').value||'—')+'<br>'+
+    '🏷️ '+esc(document.getElementById('estado').value)+' · '+esc(gc('chkPrio')[0]||'Media')+'<br>'+
+    '👤 Responsable: <b>'+esc(document.getElementById('responsable').value)+'</b>';
+  document.getElementById('resumen').innerHTML=r;
+}
+function guardar(){
+  var btn=document.getElementById('btnSave');btn.disabled=true;btn.textContent='Creando...';
+  var data={marca:document.getElementById('marca').value.trim(),responsable:document.getElementById('responsable').value,contacto:document.getElementById('contacto').value,
+    telefono:document.getElementById('telefono').value,correo:document.getElementById('correo').value,
+    web:document.getElementById('web').value,tipo:document.getElementById('tipo').value,
+    origen:document.getElementById('origen').value,estado:document.getElementById('estado').value,
+    prioridad:gc('chkPrio')[0]||'Media',servicio:gc('chkTipo').join(', '),
+    plan:document.getElementById('plan').value,hosting:document.getElementById('hosting').value,
+    proveedor:document.getElementById('proveedor').value,notas:document.getElementById('notas').value,
+    crearProyecto:gc('chkProy')[0]==='Sí'};
+  google.script.run
+    .withSuccessHandler(r=>{btn.disabled=false;btn.textContent='✓ Crear cliente';
+      if(r&&r.ok!==false){alert('✅ Cliente creado: '+data.marca+(r.proyecto&&r.proyecto.ok?'\nProyecto creado automáticamente con '+r.proyecto.itemsCreados+' ítems para '+data.responsable:''));google.script.host.close();}
+      else alert('Error: '+(r&&r.msg||'?'));})
+    .withFailureHandler(e=>{btn.disabled=false;btn.textContent='✓ Crear cliente';alert('Error: '+e.message);})
+    .mc_pub_nuevoCliente(data);
+}
+</script></body></html>

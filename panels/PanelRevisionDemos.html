@@ -1,0 +1,236 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--vl:#F5F3FF;--green:#059669;--amber:#D97706;--red:#DC2626;--blue:#0284C7}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.hdr{background:linear-gradient(120deg,#1E1B4B,#4C1D95);color:#fff;padding:12px 16px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hdr-title{font-size:15px;font-weight:700;color:#FDE68A}
+.hdr-actions{display:flex;gap:6px}
+.btn-hdr{padding:5px 11px;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600}
+.btn-ref{background:rgba(255,255,255,.15);color:rgba(255,255,255,.9)}
+.btn-add{background:#FDE68A;color:#1E1B4B}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.kpi{background:rgba(255,255,255,.1);border-radius:9px;padding:7px 10px;text-align:center}
+.kpi-n{font-size:18px;font-weight:800;color:#FDE68A;line-height:1}
+.kpi-l{font-size:9px;color:rgba(255,255,255,.6);margin-top:2px}
+/* Content */
+.content{padding:12px 12px 24px}
+.stage-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);padding:10px 4px 6px;display:flex;align-items:center;gap:6px}
+.stage-badge{background:var(--border);color:var(--muted);padding:1px 7px;border-radius:999px;font-size:9px;font-weight:700}
+/* Demo card */
+.demo-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:13px 15px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.demo-card.priority{border-left:3px solid var(--v)}
+.demo-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.demo-marca{font-size:13px;font-weight:700}
+.demo-badges{display:flex;gap:4px;flex-wrap:wrap}
+.badge{padding:2px 8px;border-radius:999px;font-size:9px;font-weight:700}
+.badge-tipo{background:var(--vl);color:#5B21B6}
+.badge-new{background:#FEE2E2;color:var(--red)}
+.demo-proyecto{font-size:11px;color:var(--muted);margin-bottom:6px}
+.demo-link a{font-size:11px;color:var(--blue);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px}
+.demo-link a:hover{text-decoration:underline}
+.demo-nota{margin-top:6px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:7px 9px;font-size:11px;color:#92400E;line-height:1.4}
+.demo-actions{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.act{padding:5px 11px;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700;transition:.15s}
+.act-aprobar{background:#D1FAE5;color:#065F46}.act-aprobar:hover{background:#A7F3D0}
+.act-obs{background:#FEF9C3;color:#92400E}.act-obs:hover{background:#FDE68A}
+.act-enviar{background:#DBEAFE;color:#1E40AF}.act-enviar:hover{background:#BFDBFE}
+.act-ver{background:var(--vl);color:#5B21B6}
+.loading{text-align:center;padding:40px;color:var(--faint);font-size:12px}
+.empty{text-align:center;padding:20px;color:var(--faint);font-size:12px;border:1px dashed var(--border);border-radius:12px}
+/* Modal observación */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;backdrop-filter:blur(2px);align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border-radius:16px;padding:18px;width:380px}
+.modal h3{font-size:14px;font-weight:700;margin-bottom:8px}
+.modal-sub{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.4}
+.modal textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;min-height:100px;resize:vertical}
+.modal textarea:focus{outline:none;border-color:var(--amber)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.btn-cancel-m{padding:8px 14px;background:var(--bg);border:none;border-radius:9px;cursor:pointer;font-size:12px}
+.btn-ok-m{padding:8px 16px;background:var(--amber);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-ok-m.aprobar{background:var(--green)}
+.btn-ok-m:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-title">🧪 Revisión de Demos</div>
+    <div class="hdr-actions">
+      <button class="btn-hdr btn-ref" onclick="cargar()">↻</button>
+      <button class="btn-hdr btn-add" onclick="google.script.run.mc_pub_abrirFormEnviarDemoRevision()">＋ Enviar demo</button>
+    <button class="btn-hdr" style="background:#FDE68A;color:#1E1B4B;font-weight:700" onclick="abrirLinkObs()">🔗 Link cliente</button>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-n" id="kPendientes">—</div><div class="kpi-l">Para revisar</div></div>
+    <div class="kpi"><div class="kpi-n" id="kCliente">—</div><div class="kpi-l">En cliente</div></div>
+    <div class="kpi"><div class="kpi-n" id="kAprobadas">—</div><div class="kpi-l">Aprobadas</div></div>
+    <div class="kpi"><div class="kpi-n" id="kTotal">—</div><div class="kpi-l">Total mes</div></div>
+  </div>
+</div>
+<div class="content" id="content"><div class="loading">Cargando demos...</div></div>
+
+<!-- Modal WA listo para copiar -->
+<div class="modal-bg" id="modalWA">
+<div class="modal" style="max-width:400px">
+  <h3 style="color:var(--green);margin-bottom:6px">✅ Demo enviada al cliente</h3>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:12px">El mensaje de WhatsApp está listo. Cópialo y pégalo en el grupo del cliente.</p>
+  <div id="waText" style="background:#E9F5E9;border:1px solid #BBF7D0;border-radius:10px;padding:12px;font-size:11px;font-family:monospace;white-space:pre-wrap;max-height:220px;overflow-y:auto;color:#1B4332;line-height:1.5"></div>
+  <div class="modal-btns" style="margin-top:10px">
+    <button class="btn-cancel-m" onclick="cerrarModal('modalWA');cargar()">Cerrar</button>
+    <button style="padding:8px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700" onclick="copiarWA()">📋 Copiar mensaje WA</button>
+  </div>
+</div>
+</div>
+
+<div class="modal-bg" id="modalObs">
+<div class="modal">
+  <h3>✏️ Observaciones para la chica</h3>
+  <div class="modal-sub">Describe claramente qué debe corregir o mejorar. Esto se le enviará como nota.</div>
+  <textarea id="obsText" placeholder="Ej: Falta alinear el botón de contacto en mobile. La imagen del banner está pixelada. Cambiar el color del footer a #1A0A36..."></textarea>
+  <div class="modal-btns">
+    <button class="btn-cancel-m" onclick="cerrarModal('modalObs')">Cancelar</button>
+    <button class="btn-ok-m" id="btnObsOk" onclick="confirmarObs()">Enviar observaciones</button>
+  </div>
+</div>
+</div>
+
+<div class="modal-bg" id="modalApprove">
+<div class="modal">
+  <h3 style="color:var(--green)">✅ Aprobar y enviar al cliente</h3>
+  <div class="modal-sub">La demo pasará a "Enviada al cliente". ¿Quieres agregar un mensaje de acompañamiento?</div>
+  <textarea id="approveText" placeholder="Opcional: mensaje especial para el cliente..." rows="3"></textarea>
+  <div class="modal-btns">
+    <button class="btn-cancel-m" onclick="cerrarModal('modalApprove')">Cancelar</button>
+    <button class="btn-ok-m aprobar" id="btnApproveOk" onclick="confirmarApprove()">✅ Aprobar y marcar enviada</button>
+  </div>
+</div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+var ID_ACT='', DATA=[];
+var STAGES=[
+  {key:'pendiente',label:'⏳ Pendientes de revisión',estados:['Demo enviada a Rossio','En revisión Rossio','Corregida para revisión']},
+  {key:'cliente',label:'👤 En revisión del cliente',estados:['Enviada al cliente','Observada por cliente']},
+  {key:'ok',label:'✅ Aprobadas / Entregadas',estados:['Aprobada por Rossio','Entregada']}
+];
+
+function render(data){
+  DATA=data||[];
+  var pend=DATA.filter(function(d){return STAGES[0].estados.some(function(e){return (d.estado||'').toLowerCase().includes(e.toLowerCase());});});
+  var cli=DATA.filter(function(d){return STAGES[1].estados.some(function(e){return (d.estado||'').toLowerCase().includes(e.toLowerCase());});});
+  var ok=DATA.filter(function(d){return STAGES[2].estados.some(function(e){return (d.estado||'').toLowerCase().includes(e.toLowerCase());});});
+  document.getElementById('kPendientes').textContent=pend.length;
+  document.getElementById('kCliente').textContent=cli.length;
+  document.getElementById('kAprobadas').textContent=ok.length;
+  document.getElementById('kTotal').textContent=DATA.length;
+  var html='';
+  [[pend,0],[cli,1],[ok,2]].forEach(function(pair){
+    var group=pair[0],idx=pair[1],s=STAGES[idx];
+    if(!group.length) return;
+    html+='<div class="stage-title">'+s.label+'<span class="stage-badge">'+group.length+'</span></div>';
+    group.forEach(function(d){
+      var isNew=d.esNueva||(/enviada a rossio/i.test(d.estado||''));
+      html+='<div class="demo-card'+(isNew?' priority':'')+'">';
+      html+='<div class="demo-row1"><div class="demo-marca">'+esc(d.marca||d.proyecto||'—')+'</div>'+
+        '<div class="demo-badges"><span class="badge badge-tipo">'+esc(d.tipo||'Demo')+'</span>'+
+        (isNew?'<span class="badge badge-new">🔴 Nueva</span>':'')+
+        '</div></div>';
+      if(d.proyecto) html+='<div class="demo-proyecto">📦 '+esc(d.proyecto)+'</div>';
+      if(d.linkDemo) html+='<div class="demo-link"><a href="'+esc(d.linkDemo)+'" target="_blank">🔗 Ver demo</a></div>';
+      if(d.notas) html+='<div class="demo-nota">📝 '+esc(d.notas)+'</div>';
+      if(idx===0){
+        html+='<div class="demo-actions">'+
+          '<button class="act act-aprobar" onclick="abrirApprove(\''+d.id+'\')">✅ Aprobar</button>'+
+          '<button class="act act-obs" onclick="abrirObs(\''+d.id+'\')">✏️ Observar</button>'+
+          (d.linkDemo?'<button class="act act-ver" onclick="window.open(\''+esc(d.linkDemo)+'\',\'_blank\')">👁️ Ver</button>':'')+
+        '</div>';
+      } else if(idx===1){
+        html+='<div class="demo-actions">'+
+          '<button class="act act-enviar" onclick="">📲 WA cliente</button>'+
+        '</div>';
+      }
+      html+='</div>';
+    });
+  });
+  if(!html) html='<div class="empty">✅ No hay demos activas en este momento</div>';
+  document.getElementById('content').innerHTML=html;
+}
+
+function abrirObs(id){ID_ACT=id;document.getElementById('obsText').value='';document.getElementById('modalObs').classList.add('show');}
+function abrirApprove(id){ID_ACT=id;document.getElementById('approveText').value='';document.getElementById('modalApprove').classList.add('show');}
+function cerrarModal(id){document.getElementById(id).classList.remove('show');ID_ACT='';}
+
+function copiarWA(){
+  var txt=document.getElementById('waText').textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    toast('📋 Mensaje copiado. Pégalo en WhatsApp ✓');
+  }).catch(function(){
+    window.prompt('Copia este mensaje:',txt);
+  });
+}
+function copiarLinkObs(id,marca){
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.ok){
+        navigator.clipboard.writeText(r.url).then(function(){
+          toast('✅ Link copiado. Pégalo en WhatsApp al cliente.');
+        }).catch(function(){
+          window.prompt('Copia este link:',r.url);
+        });
+      } else alert('Error: '+(r&&r.msg||'?'));
+    })
+    .mc_pub_generarLinkObservaciones(id,marca);
+}
+function confirmarObs(){
+  var txt=document.getElementById('obsText').value.trim();
+  if(!txt){alert('Escribe las observaciones.');return;}
+  var btn=document.getElementById('btnObsOk');btn.disabled=true;btn.textContent='Enviando...';
+  google.script.run
+    .withSuccessHandler(function(){btn.disabled=false;btn.textContent='Enviar observaciones';cerrarModal('modalObs');cargar();})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='Enviar observaciones';alert(e.message);})
+    .mc_demos_marcarObservadaCliente_pub({id:ID_ACT,observaciones:txt});
+}
+function confirmarApprove(){
+  var btn=document.getElementById('btnApproveOk');btn.disabled=true;btn.textContent='Aprobando...';
+  google.script.run
+    .withSuccessHandler(function(r){
+      btn.disabled=false;btn.textContent='✅ Aprobar y marcar enviada';
+      cerrarModal('modalApprove');
+      if(r&&r.ok!==false){
+        // Mostrar modal WA listo
+        document.getElementById('waText').textContent=r.waMsg||'';
+        document.getElementById('modalWA').classList.add('show');
+      } else {
+        alert('Error: '+(r&&r.msg||'?'));
+        cargar();
+      }
+    })
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='✅ Aprobar y marcar enviada';alert(e.message);})
+    .mc_demos_marcarEntregada_pub({id:ID_ACT,notas:document.getElementById('approveText').value});
+}
+
+function abrirLinkObs(){
+  var id=window.prompt('ID de la demo (ej: DEMO-20250702):');
+  if(!id) return;
+  var marca=window.prompt('Nombre del cliente:','');
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.ok){
+        window.prompt('📋 Copia este link para el cliente:',r.url);
+      } else alert('Error: '+(r&&r.msg||'?'));
+    })
+    .mc_pub_generarLinkObservaciones(id,marca||'');
+}
+function cargar(){
+  document.getElementById('content').innerHTML='<div class="loading">Actualizando...</div>';
+  google.script.run.withSuccessHandler(render)
+    .withFailureHandler(function(e){document.getElementById('content').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>';})
+    .mc_v2332_listarDemosPendientes_();
+}
+cargar();
+</script></body></html>

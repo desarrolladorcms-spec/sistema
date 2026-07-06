@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{--p:#7c3aed;--b:#e5e7eb;--bg:#f8fafc;--tx:#111827;--mut:#64748b;--ok:#16a34a;--err:#dc2626;--warn:#d97706}
+  *{box-sizing:border-box} body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:var(--bg);color:var(--tx);font-size:13px}
+  .wrap{padding:14px}.hero{background:linear-gradient(135deg,#1a0a36,#9333ea);color:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 8px 28px rgba(124,58,237,.2)}
+  h1{margin:0;font-size:18px}.sub{margin-top:4px;opacity:.9;line-height:1.4}.card{background:#fff;border:1px solid var(--b);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;background:#e9d5ff;color:#581c87}.btn.primary{background:var(--p);color:#fff}.btn.danger{background:#fee2e2;color:#991b1b}.btn:disabled{opacity:.55;cursor:not-allowed}
+  .bar{height:10px;background:#ede9fe;border-radius:999px;overflow:hidden;margin:8px 0}.fill{height:100%;background:linear-gradient(90deg,#7c3aed,#06b6d4);width:0%}
+  .pill{display:inline-flex;align-items:center;border-radius:999px;padding:4px 9px;font-weight:700;background:#f1f5f9;color:#334155}.ok{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}.err{background:#fee2e2;color:#991b1b}
+  .mut{color:var(--mut)}pre{white-space:pre-wrap;background:#0f172a;color:#dbeafe;border-radius:10px;padding:10px;max-height:220px;overflow:auto;font-size:11px;line-height:1.45}.small{font-size:12px}.log{padding-left:17px;margin:6px 0}.log li{margin:3px 0}.hidden{display:none}.foot{font-size:11px;color:#64748b;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🛠️ Actualizador seguro</h1>
+    <div class="sub">Corre la actualización desde esta hoja, sin entrar a Apps Script. Cada clic hace una parte pequeña y guarda avance.</div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <span id="estado" class="pill warn">Cargando...</span>
+      <span class="mut small" id="version">—</span>
+    </div>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div><b>Paso actual:</b> <span id="paso">—</span></div>
+    <div class="mut small" id="detalle">—</div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="btn primary" id="run" onclick="continuar()">▶ Ejecutar siguiente parte</button>
+      <button class="btn" id="refresh" onclick="cargar()">↻ Actualizar estado</button>
+      <button class="btn danger" id="reset" onclick="reiniciar()">↺ Reiniciar avance</button>
+    </div>
+    <p class="foot">Cuando diga <b>Finalizado</b>, ya no necesitas ejecutar nada más. Si una parte demora, vuelve a presionar “Ejecutar siguiente parte”.</p>
+  </div>
+
+  <div class="card">
+    <b>Últimos movimientos</b>
+    <ul class="log" id="log"><li class="mut">Sin logs todavía.</li></ul>
+  </div>
+
+  <div class="card" id="errCard" style="display:none">
+    <b>Errores registrados</b>
+    <ul class="log" id="errs"></ul>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Ver detalle técnico compacto</summary>
+      <pre id="raw">{}</pre>
+    </details>
+  </div>
+</div>
+<script src="../assets/api.js"></script>
+<script>
+const MODE = '<?= MC_UPD_MODE ?>';
+const FN = MODE === 'master' ? {
+  status:'mc_actualizador_estado_pub', run:'mc_actualizador_continuar_pub', reset:'mc_actualizador_reiniciar_pub'
+} : {
+  status:'op_actualizador_estado_pub', run:'op_actualizador_continuar_pub', reset:'op_actualizador_reiniciar_pub'
+};
+function call(name, ok){
+  setBusy(true);
+  google.script.run.withSuccessHandler(res=>{ setBusy(false); render(res||{}); if(ok) ok(res); })
+    .withFailureHandler(err=>{ setBusy(false); renderError(err && err.message ? err.message : String(err)); })[name]();
+}
+function setBusy(v){ ['run','refresh','reset'].forEach(id=>document.getElementById(id).disabled=v); }
+function cargar(){ call(FN.status); }
+function continuar(){ call(FN.run); }
+function reiniciar(){ if(confirm('¿Reiniciar el avance del actualizador?')) call(FN.reset); }
+function renderError(msg){ document.getElementById('estado').textContent='Error'; document.getElementById('estado').className='pill err'; document.getElementById('errs').innerHTML='<li>'+escapeHtml(msg)+'</li>'; document.getElementById('errCard').style.display='block'; }
+function render(res){
+  const total = res.totalPasos || 1, current = res.done ? total : (res.pasoActualNumero || 1);
+  const pct = Math.max(0, Math.min(100, Math.round(((current-1)/(total))*100)));
+  document.getElementById('fill').style.width = (res.done?100:pct)+'%';
+  document.getElementById('version').textContent = (res.version || '') + (res.archivo ? ' · '+res.archivo : '');
+  document.getElementById('paso').textContent = res.pasoActual || '—';
+  document.getElementById('detalle').textContent = 'Paso ' + current + ' de ' + total + (res.updatedAt ? ' · ' + new Date(res.updatedAt).toLocaleTimeString() : '');
+  const est=document.getElementById('estado'); est.textContent = res.done ? '✅ Finalizado' : '⏳ En proceso'; est.className = 'pill ' + (res.done?'ok':'warn');
+  const log = res.log || []; document.getElementById('log').innerHTML = log.length ? log.slice().reverse().map(x=>'<li>'+escapeHtml(x)+'</li>').join('') : '<li class="mut">Sin logs todavía.</li>';
+  const errs = res.errors || []; document.getElementById('errCard').style.display = errs.length ? 'block' : 'none'; document.getElementById('errs').innerHTML = errs.map(x=>'<li>'+escapeHtml(x)+'</li>').join('');
+  document.getElementById('raw').textContent = JSON.stringify(res, null, 2);
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+cargar();
+</script>
+</body>
+</html>

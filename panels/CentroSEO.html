@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Centro SEO 2.0 · Monstruo Creativo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#f6f8fb;color:#111827;font-size:14px}.app{max-width:1180px;margin:0 auto;padding:20px}.hero{background:linear-gradient(135deg,#101827,#123f63 54%,#10b981);color:#fff;border-radius:24px;padding:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;box-shadow:0 14px 36px rgba(15,23,42,.16)}.hero h1{margin:0 0 8px;font-size:29px;line-height:1.08}.hero p{margin:0;color:rgba(255,255,255,.86);max-width:720px;line-height:1.55}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.14);border-radius:999px;padding:8px 12px;font-weight:800;font-size:12px;white-space:nowrap}.bar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tab,.btn{border:0;border-radius:12px;padding:10px 13px;font-weight:800;cursor:pointer;font-family:inherit}.tab{background:#fff;color:#334155;border:1px solid #e5e7eb}.tab.active{background:#111827;color:#fff;border-color:#111827}.btn{background:#10b981;color:#fff}.btn:hover,.tab:hover{filter:brightness(.97)}.btn.dark{background:#111827}.btn.blue{background:#2563eb}.btn.purple{background:#7c3aed}.btn.orange{background:#d97706}.btn.red{background:#dc2626}.btn.gray{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 2px 10px rgba(15,23,42,.04)}.metric{font-size:28px;font-weight:900;line-height:1}.mut{color:#64748b}.small{font-size:12px}.section{display:none}.section.active{display:block}.two{display:grid;grid-template-columns:360px 1fr;gap:14px}.form{display:flex;flex-direction:column;gap:9px}.form label{font-size:12px;font-weight:800;color:#334155}.form input,.form select,.form textarea{width:100%;border:1px solid #dbe3ee;border-radius:12px;padding:10px 11px;font-family:inherit;background:#fff;color:#111827}.form textarea{min-height:88px;resize:vertical}.table{width:100%;border-collapse:separate;border-spacing:0 8px}.table th{text-align:left;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:0 10px}.table td{background:#fff;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:11px 10px;vertical-align:top}.table td:first-child{border-left:1px solid #e5e7eb;border-radius:12px 0 0 12px}.table td:last-child{border-right:1px solid #e5e7eb;border-radius:0 12px 12px 0}.tag{display:inline-flex;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:900}.ok{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}.info{background:#dbeafe;color:#1d4ed8}.gray{background:#f1f5f9;color:#475569}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.empty{text-align:center;color:#64748b;padding:34px}.toast{position:fixed;right:22px;bottom:22px;background:#111827;color:#fff;border-radius:14px;padding:12px 16px;opacity:0;transform:translateY(8px);transition:.2s;max-width:420px;box-shadow:0 16px 38px rgba(0,0,0,.22);z-index:50}.toast.show{opacity:1;transform:translateY(0)}pre{white-space:pre-wrap;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:#0f172a;color:#e2e8f0;border-radius:14px;padding:12px;overflow:auto}.link{color:#2563eb;text-decoration:none;font-weight:800}.right{margin-left:auto}.note{border:1px dashed #cbd5e1;background:#fff;border-radius:16px;padding:13px;color:#475569;margin:12px 0}.loading{display:flex;align-items:center;gap:8px;color:#64748b;padding:26px}.spin{width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:#10b981;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.hero{flex-direction:column}.app{padding:12px}}@media(max-width:560px){.grid{grid-template-columns:1fr}.table{font-size:12px}.hero h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;font-family:-apple-system,sans-serif">
+  <div style="font-size:18px">🚀</div>
+  <div style="flex:1">
+    <div style="font-weight:700;font-size:14px">Panel SEO unificado disponible</div>
+    <div style="font-size:12px;opacity:.9;margin-top:2px">Ahora incluye el tracker de 12 semanas, herramientas IA, dashboard de keywords, vista del cliente y más.</div>
+  </div>
+  <a id="btnSistemaUnificado" href="#" target="_blank" onclick="abrirSistemaUnificado(this)" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:8px 14px;text-decoration:none;font-weight:700;font-size:12px;white-space:nowrap">Abrir sistema →</a>
+</div>
+<script src="../assets/api.js"></script>
+<script>
+function abrirSistemaUnificado(el){
+  var url = (typeof SISTEMA_SEO_URL !== 'undefined' ? SISTEMA_SEO_URL : '') ||
+            (window.google && google.script && google.script.run ? '' : window.GAS_URL || '');
+  // Intentar obtener URL desde config si no está definida
+  if (!url && window.google && google.script) {
+    google.script.run.withSuccessHandler(function(u){ if(u) window.open(u,'_blank'); }).mc_cfg_('SISTEMA_SEO_URL','');
+    return false;
+  }
+  if (url) el.href = url;
+  return !!url;
+}
+</script>
+
+<div class="app">
+  <section class="hero">
+    <div><h1>🧭 Centro SEO 2.0</h1><p>Área SEO reformulada desde cero: un solo panel, hojas técnicas ocultas, trabajo por formularios y decisiones GSC convertibles a tareas. Sin llenar pestañas manualmente.</p></div>
+    <div class="pill" id="rolePill">● Cargando</div>
+  </section>
+  <div class="bar">
+    <button class="tab active" data-tab="dash" onclick="showTab('dash')">📌 Resumen</button>
+    <button class="tab" data-tab="clients" onclick="showTab('clients')">👥 Clientes</button>
+    <button class="tab" data-tab="primer" onclick="showTab('primer')">📝 Primer contacto</button>
+    <button class="tab" data-tab="tasks" onclick="showTab('tasks')">📋 Tareas</button>
+    <button class="tab" data-tab="contents" onclick="showTab('contents')">📝 Contenidos</button>
+    <button class="tab" data-tab="gsc" onclick="showTab('gsc')">📈 GSC</button>
+    <button class="btn gray right" onclick="loadData()">↻ Actualizar vista</button>
+  </div>
+  <div class="toolbar">
+    <button class="btn purple" onclick="openPrimerContacto()">📝 Abrir ficha primer contacto</button>
+    <button class="btn dark" onclick="if(confirm('mc_seo2_prepare_pub fue actualizado: ya no oculta las hojas activas. Continuar?'))run('mc_seo2_prepare_pub',{},true)">🧹 Preparar SEO 2.0</button>
+    <button class="btn orange" onclick="run('mc_seo2_updateGsc_pub',{},true)">📈 Actualizar GSC</button>
+    <button class="btn gray" onclick="run('mc_seo2_diagnose_pub',{},false)">🔍 Diagnóstico</button>
+  </div>
+
+  <section id="dash" class="section active">
+    <div id="metrics" class="grid"></div>
+    <div class="note"><b>Regla nueva:</b> Camila/Lucy trabajan desde este panel. Las hojas SEO quedan como base técnica oculta. Las decisiones de GSC se convierten en tareas solo cuando se decide trabajarlas.</div>
+    <div class="card"><h3>🧠 Decisiones SEO pendientes</h3><div id="decisionsBox" class="loading"><span class="spin"></span>Cargando...</div></div>
+  </section>
+
+  <section id="clients" class="section">
+    <div class="two">
+      <div class="card"><h3>👥 Registrar / actualizar cliente SEO</h3><form class="form" onsubmit="saveClient(event)">
+        <input type="hidden" id="clientId">
+        <label>Cliente / marca</label><input id="clientName" required>
+        <label>Web</label><input id="clientWeb" placeholder="https://...">
+        <label>Plan</label><select id="clientPlan"><option>SEO Base</option><option>SEO Crecimiento</option><option>SEO + IA/GEO</option><option>SEO Local</option><option>SEO Técnico</option></select>
+        <label>Responsable</label><select id="clientResp"><option>Rossio</option><option>Camila</option><option>Lucy</option></select>
+        <label>Estado</label><select id="clientStatus"><option>Activo</option><option>Pausado</option><option>Finalizado</option><option>En espera</option></select>
+        <label>Propiedad GSC</label><input id="clientGsc" placeholder="https://dominio.com/ o sc-domain:dominio.com">
+        <label>Drive / grupo WA / notas</label><textarea id="clientNotes" placeholder="Links, acuerdos, accesos pendientes..."></textarea>
+        <button class="btn">Guardar cliente</button><button type="button" class="btn gray" onclick="resetClientForm()">Limpiar</button>
+      </form></div>
+      <div class="card"><h3>Clientes activos</h3><div id="clientsBox"></div></div>
+    </div>
+  </section>
+
+
+  <section id="primer" class="section">
+    <div class="card">
+      <h3>📝 Ficha SEO · Primer contacto</h3>
+      <p class="mut">Este es el formulario que llenan Rossio/Camila/Lucy en la primera reunión con el cliente. Guarda diagnóstico, datos de marca, objetivos, keywords iniciales, competencia, accesos y evaluación interna.</p>
+      <div class="toolbar">
+        <button class="btn purple" onclick="openPrimerContacto()">Abrir formulario primer contacto</button>
+        <button class="btn gray" onclick="loadData()">Actualizar conteos</button>
+      </div>
+      <div class="note"><b>No es una hoja legacy.</b> Se guarda en la base técnica <b>🧾 SEO 2.0 Primer Contacto</b>. La hoja puede quedar oculta; el trabajo se hace desde el formulario.</div>
+      <div id="fichasBox" class="empty">Abre el formulario para crear o revisar fichas de clientes.</div>
+    </div>
+  </section>
+
+  <section id="tasks" class="section">
+    <div class="two">
+      <div class="card"><h3>📋 Nueva tarea SEO</h3><form class="form" onsubmit="saveTask(event)">
+        <label>Cliente</label><select id="taskClient"></select>
+        <label>Responsable</label><select id="taskResp"><option>Rossio</option><option>Camila</option><option>Lucy</option></select>
+        <label>Tipo</label><select id="taskType"><option>Técnico</option><option>Contenido</option><option>Keyword</option><option>Reporte</option><option>GSC</option><option>Reunión</option></select>
+        <label>Tarea</label><input id="taskTitle" required>
+        <label>Prioridad</label><select id="taskPrio"><option>Media</option><option>Alta</option><option>Urgente</option><option>Baja</option></select>
+        <label>Límite</label><input id="taskDue" type="date">
+        <label>Link / notas</label><textarea id="taskNotes"></textarea>
+        <button class="btn blue">Crear tarea</button>
+      </form></div>
+      <div class="card"><h3>Tareas SEO</h3><div id="tasksBox"></div></div>
+    </div>
+  </section>
+
+  <section id="contents" class="section">
+    <div class="two">
+      <div class="card"><h3>📝 Nuevo contenido SEO</h3><form class="form" onsubmit="saveContent(event)">
+        <label>Cliente</label><select id="contentClient"></select>
+        <label>Keyword principal</label><input id="contentKw" required>
+        <label>Título sugerido</label><input id="contentTitle" required>
+        <label>Tipo</label><select id="contentType"><option>Artículo SEO</option><option>Landing SEO</option><option>Optimización página</option><option>FAQ</option><option>Local SEO</option></select>
+        <label>Responsable</label><select id="contentResp"><option>Camila</option><option>Lucy</option><option>Rossio</option></select>
+        <label>Estado</label><select id="contentStatus"><option>Idea</option><option>Por redactar</option><option>En redacción</option><option>En revisión</option><option>Publicado</option></select>
+        <label>Límite</label><input id="contentDue" type="date">
+        <label>Documento / URL / notas</label><textarea id="contentNotes"></textarea>
+        <button class="btn purple">Guardar contenido</button>
+      </form></div>
+      <div class="card"><h3>Contenidos SEO</h3><div id="contentsBox"></div></div>
+    </div>
+  </section>
+
+  <section id="gsc" class="section">
+    <div class="card"><h3>📈 Lectura GSC</h3><p class="mut">El sistema consulta Search Console con las propiedades guardadas en clientes. Si una web no tiene propiedad GSC o permisos, queda indicado en diagnóstico.</p><div id="gscBox"></div></div>
+  </section>
+
+  <div id="result" style="margin-top:14px"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var MC_SEO_ROLE = '';
+// v23.71: CentroSEO debe ser JS válido incluso si se abre con createHtmlOutputFromFile.
+// El rol se toma de la URL (?role=camila/lucy/rossio) o cae en Rossio.
+var qs=new URLSearchParams(location.search||'');
+var ROLE=(qs.get('role')||MC_SEO_ROLE||'rossio').toLowerCase();
+var DATA={clients:[],tasks:[],contents:[],decisions:[],gsc:[],summary:{}};
+document.getElementById('rolePill').textContent='● '+(ROLE==='camila'?'Camila':ROLE==='lucy'?'Lucy':'Rossio');
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3600)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function run(fn,arg,reload){arg=arg||{};arg.role=ROLE;if(!(window.google&&google.script&&google.script.run)){toast('Abre este panel desde Apps Script/Web App para ejecutar.');return;}toast('Ejecutando...');google.script.run.withSuccessHandler(function(res){toast(res&&res.msg?res.msg:'Listo');showResult(res);if(reload)loadData();}).withFailureHandler(function(err){toast('Error: '+(err&&err.message?err.message:err));})[fn](arg)}
+function openPrimerContacto(){if(!(window.google&&google.script&&google.script.run)){toast('Abre este panel desde Sheets para abrir la ficha.');return;}toast('Abriendo ficha de primer contacto...');google.script.run.withFailureHandler(function(err){toast('Error: '+(err&&err.message?err.message:err));}).mc_pub_abrirFichaSEOPrimerContacto();}
+function showResult(o){document.getElementById('result').innerHTML='<pre>'+esc(JSON.stringify(o,null,2))+'</pre>'}
+function showTab(id){document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===id)});document.querySelectorAll('.section').forEach(function(s){s.classList.toggle('active',s.id===id)})}
+function tag(v){var s=String(v||'').toLowerCase();var c=s.match(/final|public|aprob|activo|ok/) ? 'ok' : s.match(/bloq|error|rechaz|observ/) ? 'bad' : s.match(/pend|esper|revis|idea/) ? 'warn' : s.match(/proceso|redac|gsc/) ? 'info' : 'gray';return '<span class="tag '+c+'">'+esc(v||'-')+'</span>'}
+function loadData(){document.getElementById('decisionsBox').innerHTML='<div class="loading"><span class="spin"></span>Cargando...</div>';runSilent('mc_seo2_getData_pub',{role:ROLE},function(res){DATA=res||{};renderAll();},function(e){document.getElementById('decisionsBox').innerHTML='<div class="empty">Error: '+esc(e.message||e)+'</div>'})}
+function runSilent(fn,arg,ok,fail){if(!(window.google&&google.script&&google.script.run)){fail({message:'Sin google.script.run'});return;}google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](arg||{})}
+function renderAll(){renderMetrics();renderClients();renderTasks();renderContents();renderDecisions();renderGsc();renderFichas();fillSelects()}
+function renderMetrics(){var s=DATA.summary||{};document.getElementById('metrics').innerHTML=[['Clientes',s.clientes||0],['Fichas primer contacto',s.fichasPrimerContacto||0],['Tareas abiertas',s.tareasAbiertas||0],['Contenidos activos',s.contenidosActivos||0],['Decisiones GSC',s.decisionesPendientes||0]].map(function(x){return '<div class="card"><div class="metric">'+x[1]+'</div><div class="mut">'+x[0]+'</div></div>'}).join('')}
+function fillSelects(){var opts=(DATA.clients||[]).map(function(c){return '<option value="'+esc(c.cliente)+'">'+esc(c.cliente)+'</option>'}).join('');document.getElementById('taskClient').innerHTML=opts||'<option>Sin clientes</option>';document.getElementById('contentClient').innerHTML=opts||'<option>Sin clientes</option>';}
+function renderFichas(){var box=document.getElementById('fichasBox');if(!box)return;var arr=DATA.fichas||[];if(!arr.length){box.innerHTML='<div class="empty">Sin fichas de primer contacto guardadas todavía.</div>';return;}box.innerHTML='<table class="table"><tr><th>Empresa</th><th>Especialista</th><th>Actualizado</th><th>Estado</th></tr>'+arr.slice(0,30).map(function(f){return '<tr><td><b>'+esc(f.empresa)+'</b></td><td>'+esc(f.especialista||'')+'</td><td>'+esc(f.actualizado||f.fecha||'')+'</td><td>'+tag(f.estado||'Guardado')+'</td></tr>'}).join('')+'</table>'}
+function renderClients(){var arr=DATA.clients||[];if(!arr.length){document.getElementById('clientsBox').innerHTML='<div class="empty">Sin clientes SEO todavía.</div>';return;}document.getElementById('clientsBox').innerHTML='<table class="table"><tr><th>Cliente</th><th>Resp.</th><th>Plan</th><th>Estado</th><th></th></tr>'+arr.map(function(c){return '<tr><td><b>'+esc(c.cliente)+'</b><br><span class="small mut">'+esc(c.web)+'</span></td><td>'+esc(c.responsable)+'</td><td>'+esc(c.plan)+'</td><td>'+tag(c.estado)+'</td><td><button class="btn gray" onclick="editClient(\''+esc(c.id)+'\')">Editar</button></td></tr>'}).join('')+'</table>'}
+function editClient(id){var c=(DATA.clients||[]).find(function(x){return x.id===id});if(!c)return;showTab('clients');document.getElementById('clientId').value=c.id;document.getElementById('clientName').value=c.cliente;document.getElementById('clientWeb').value=c.web;document.getElementById('clientPlan').value=c.plan||'SEO Base';document.getElementById('clientResp').value=c.responsable||'Rossio';document.getElementById('clientStatus').value=c.estado||'Activo';document.getElementById('clientGsc').value=c.gsc||'';document.getElementById('clientNotes').value=[c.drive,c.grupo,c.notas].filter(Boolean).join('\n')}
+function resetClientForm(){['clientId','clientName','clientWeb','clientGsc','clientNotes'].forEach(function(id){document.getElementById(id).value=''})}
+function saveClient(e){e.preventDefault();run('mc_seo2_saveClient_pub',{id:clientId.value,cliente:clientName.value,web:clientWeb.value,plan:clientPlan.value,responsable:clientResp.value,estado:clientStatus.value,gsc:clientGsc.value,notas:clientNotes.value},true);resetClientForm()}
+function saveTask(e){e.preventDefault();run('mc_seo2_saveTask_pub',{cliente:taskClient.value,responsable:taskResp.value,tipo:taskType.value,tarea:taskTitle.value,prioridad:taskPrio.value,limite:taskDue.value,notas:taskNotes.value},true);e.target.reset()}
+function saveContent(e){e.preventDefault();run('mc_seo2_saveContent_pub',{cliente:contentClient.value,kw:contentKw.value,titulo:contentTitle.value,tipo:contentType.value,responsable:contentResp.value,estado:contentStatus.value,limite:contentDue.value,notas:contentNotes.value},true);e.target.reset()}
+function renderTasks(){var arr=DATA.tasks||[];if(!arr.length){document.getElementById('tasksBox').innerHTML='<div class="empty">Sin tareas SEO abiertas.</div>';return;}document.getElementById('tasksBox').innerHTML='<table class="table"><tr><th>Tarea</th><th>Cliente</th><th>Resp.</th><th>Estado</th><th></th></tr>'+arr.map(function(t){return '<tr><td><b>'+esc(t.tarea)+'</b><br><span class="small mut">'+esc(t.tipo)+' · '+esc(t.prioridad)+'</span></td><td>'+esc(t.cliente)+'</td><td>'+esc(t.responsable)+'</td><td>'+tag(t.estado)+'</td><td><button class="btn gray" onclick="taskAction(\''+esc(t.id)+'\',\'En proceso\')">Iniciar</button> <button class="btn" onclick="taskAction(\''+esc(t.id)+'\',\'Finalizado\')">Finalizar</button></td></tr>'}).join('')+'</table>'}
+function taskAction(id,estado){run('mc_seo2_taskAction_pub',{id:id,estado:estado},true)}
+function renderContents(){var arr=DATA.contents||[];if(!arr.length){document.getElementById('contentsBox').innerHTML='<div class="empty">Sin contenidos SEO registrados.</div>';return;}document.getElementById('contentsBox').innerHTML='<table class="table"><tr><th>Contenido</th><th>Cliente</th><th>Resp.</th><th>Estado</th></tr>'+arr.map(function(c){return '<tr><td><b>'+esc(c.titulo)+'</b><br><span class="small mut">KW: '+esc(c.kw)+'</span></td><td>'+esc(c.cliente)+'</td><td>'+esc(c.responsable)+'</td><td>'+tag(c.estado)+'</td></tr>'}).join('')+'</table>'}
+function renderDecisions(){var arr=DATA.decisions||[];if(!arr.length){document.getElementById('decisionsBox').innerHTML='<div class="empty">Sin decisiones GSC pendientes. Ejecuta Actualizar GSC cuando existan clientes con propiedad GSC.</div>';return;}document.getElementById('decisionsBox').innerHTML='<table class="table"><tr><th>Decisión</th><th>Cliente</th><th>Prioridad</th><th>Estado</th><th></th></tr>'+arr.map(function(d){return '<tr><td><b>'+esc(d.titulo)+'</b><br><span class="small mut">'+esc(d.detalle)+'</span></td><td>'+esc(d.cliente)+'</td><td>'+tag(d.prioridad)+'</td><td>'+tag(d.estado)+'</td><td><button class="btn blue" onclick="taskFromDecision(\''+esc(d.id)+'\')">Crear tarea</button></td></tr>'}).join('')+'</table>'}
+function taskFromDecision(id){run('mc_seo2_createTaskFromDecision_pub',{id:id},true)}
+function renderGsc(){var arr=DATA.gsc||[];if(!arr.length){document.getElementById('gscBox').innerHTML='<div class="empty">Todavía no hay lectura GSC nueva.</div>';return;}document.getElementById('gscBox').innerHTML='<table class="table"><tr><th>Keyword</th><th>Cliente</th><th>Pos.</th><th>Clicks</th><th>Tipo</th></tr>'+arr.slice(0,80).map(function(g){return '<tr><td><b>'+esc(g.keyword)+'</b><br><span class="small mut">'+esc(g.url)+'</span></td><td>'+esc(g.cliente)+'</td><td>'+esc(g.posicion)+'</td><td>'+esc(g.clicks)+'</td><td>'+tag(g.tipo)+'</td></tr>'}).join('')+'</table>'}
+loadData();
+</script>
+
+<script>
+// V23.73 — Cliente SEO conectado a Clientes, duración/renovación y propiedades GSC.
+(function(){
+  function v(id){var el=document.getElementById(id);return el?el.value:'';}
+  function set(id,val){var el=document.getElementById(id);if(el)el.value=val||'';}
+  function call(fn,arg,ok,fail){if(!(window.google&&google.script&&google.script.run)){if(fail)fail({message:'Sin google.script.run'});return;} google.script.run.withSuccessHandler(ok||function(){}).withFailureHandler(fail||function(e){toast('Error: '+(e.message||e));})[fn](arg||{});}
+  function ensureClientFields(){
+    if(document.getElementById('seo_client_extra_v2373')) return;
+    var form=document.querySelector('#clients form'); if(!form)return;
+    var box=document.createElement('div'); box.id='seo_client_extra_v2373'; box.className='note';
+    box.innerHTML='<b>Conexión con Clientes</b><br><span class="small">Busca primero el cliente general para no crear registros SEO huérfanos.</span>'+
+      '<label style="display:block;margin-top:10px;font-size:12px;font-weight:800;color:#334155">Buscar en Clientes</label><input id="clientSearch" placeholder="Marca, contacto, web o servicio..." oninput="seoCSearch()"><div id="clientSearchBox" class="small mut" style="margin-top:6px"></div>'+
+      '<input type="hidden" id="clientMasterId"><input type="hidden" id="clientMasterRow"><input type="hidden" id="clientServicio">'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><div><label>Duración SEO activo</label><select id="clientDuration" onchange="seoClientCalcFin()"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option><option value="24">24 meses</option><option value="0">Mensual / continuo</option></select></div><div><label>Fecha fin / renovación</label><input type="date" id="clientEnd"></div></div>'+
+      '<label style="display:block;margin-top:10px">Manejo de renovación</label><select id="clientRenewal"><option>Revisar renovación 15 días antes</option><option>Renovación automática mensual</option><option>Renovación 3 meses</option><option>Renovación 6 meses</option><option>Renovación 12 meses</option><option>Sin renovación</option></select>'+
+      '<label style="display:block;margin-top:10px">Propiedad GSC</label><div style="display:flex;gap:8px"><select id="clientGscSelect" style="flex:1"><option value="">— seleccionar propiedad GSC —</option></select><button type="button" class="btn gray" onclick="seoLoadGsc()">Traer GSC</button><button type="button" class="btn gray" onclick="seoAutoGscClient()">Auto</button></div><div id="clientGscStatus" class="small mut" style="margin-top:6px"></div>';
+    form.insertBefore(box, form.firstChild);
+    var today=new Date().toISOString().slice(0,10); if(!v('clientEnd')) seoClientCalcFin();
+  }
+  var timer=null;
+  window.seoCSearch=function(){clearTimeout(timer);timer=setTimeout(function(){var q=v('clientSearch'), box=document.getElementById('clientSearchBox'); if(!box)return; if(q.trim().length<2){box.textContent='Escribe al menos 2 letras.';return;} box.innerHTML='<span class="spin"></span> Buscando...'; call('mc_seo2_clientesBuscar_pub',{q:q,limite:8},function(res){var arr=res.items||[]; if(!arr.length){box.textContent='Sin coincidencias en Clientes.';return;} box.innerHTML=arr.map(function(c){var raw=encodeURIComponent(JSON.stringify(c));return '<button type="button" class="btn gray" style="padding:6px 8px;margin:3px" onclick="seoUseMasterClient(decodeURIComponent(\''+raw+'\'))">'+esc(c.marca||c.cliente)+' '+(c.servicio?'· '+esc(c.servicio):'')+'</button>';}).join('');},function(e){box.textContent='Error: '+(e.message||e);});},280);};
+  window.seoUseMasterClient=function(raw){var c=JSON.parse(raw); set('clientMasterId',c.id); set('clientMasterRow',c.row); set('clientServicio',c.servicio); set('clientSearch',c.marca||c.cliente); set('clientName',c.marca||c.cliente); if(c.web)set('clientWeb',c.web); var notes=[c.contacto?('Contacto: '+c.contacto):'',c.telefono?('WA: '+c.telefono):'',c.email?('Email: '+c.email):'',c.servicio?('Servicio actual: '+c.servicio):''].filter(Boolean).join('\n'); if(notes&&!v('clientNotes'))set('clientNotes',notes); var b=document.getElementById('clientSearchBox'); if(b)b.textContent='✓ Conectado a Clientes: '+(c.marca||c.cliente); seoAutoGscClient();};
+  window.seoClientCalcFin=function(){var start=document.getElementById('clientStart')?v('clientStart'):''; if(!start) start=new Date().toISOString().slice(0,10); var m=Number(v('clientDuration')||3); if(!m){set('clientEnd','');return;} var d=new Date(start+'T12:00:00'); d.setMonth(d.getMonth()+m); set('clientEnd',d.toISOString().slice(0,10));};
+  window.seoLoadGsc=function(cb){var st=document.getElementById('clientGscStatus'), sel=document.getElementById('clientGscSelect'), web=v('clientWeb'); if(st)st.innerHTML='<span class="spin"></span> Leyendo propiedades Search Console...'; call('mc_seo2_listGscProperties_pub',{web:web},function(res){if(st)st.textContent=res.ok?'Propiedades encontradas: '+(res.total||0):(res.msg||'No se pudo leer GSC'); if(sel){while(sel.options.length>1)sel.remove(1); (res.items||[]).forEach(function(p){var o=document.createElement('option');o.value=p.siteUrl;o.textContent=p.siteUrl+(p.permissionLevel?' · '+p.permissionLevel:'');sel.appendChild(o);}); if(res.guess){sel.value=res.guess; set('clientGsc',res.guess);}} if(typeof cb==='function')cb(res);},function(e){if(st)st.textContent='Error: '+(e.message||e);});};
+  window.seoAutoGscClient=function(){seoLoadGsc(function(res){if(res.guess){set('clientGsc',res.guess); var st=document.getElementById('clientGscStatus'); if(st)st.textContent='✓ Propiedad sugerida: '+res.guess;}});};
+  var oldRenderAll=window.renderAll;
+  window.renderAll=function(){if(oldRenderAll)oldRenderAll(); ensureClientFields();};
+  var oldEdit=window.editClient;
+  window.editClient=function(id){if(oldEdit)oldEdit(id); ensureClientFields(); var c=(DATA.clients||[]).find(function(x){return x.id===id}); if(!c)return; set('clientMasterId',c.clienteMasterId); set('clientMasterRow',c.clienteMasterRow); set('clientServicio',c.servicioCliente); set('clientDuration',c.duracionMeses||3); set('clientEnd',c.fechaFin); set('clientRenewal',c.renovacion||'Revisar renovación 15 días antes'); set('clientGscSelect',c.gsc||''); set('clientSearch',c.cliente||'');};
+  window.saveClient=function(e){e.preventDefault(); var gsc=v('clientGscSelect')||v('clientGsc'); run('mc_seo2_saveClient_pub',{id:v('clientId'),cliente:v('clientName'),web:v('clientWeb'),plan:v('clientPlan'),responsable:v('clientResp'),estado:v('clientStatus'),gsc:gsc,notas:v('clientNotes'),clienteMasterId:v('clientMasterId'),clienteMasterRow:v('clientMasterRow'),servicioCliente:v('clientServicio'),duracionMeses:v('clientDuration'),fechaFin:v('clientEnd'),renovacion:v('clientRenewal'),tipoAlta:'Centro SEO 2.0'},true); resetClientForm();};
+  var oldReset=window.resetClientForm;
+  window.resetClientForm=function(){if(oldReset)oldReset(); ['clientMasterId','clientMasterRow','clientServicio','clientSearch','clientEnd'].forEach(function(id){set(id,'')}); var sel=document.getElementById('clientGscSelect'); if(sel)sel.selectedIndex=0;};
+  var oldMetrics=window.renderMetrics;
+  window.renderMetrics=function(){if(oldMetrics)oldMetrics(); var m=document.getElementById('metrics'); if(m && DATA.summary){m.innerHTML += '<div class="card"><div class="metric">'+(DATA.summary.renovacionesProximas||0)+'</div><div class="mut">Renovaciones próximas</div></div>';}};
+  setTimeout(ensureClientFields,300);
+})();
+</script>
+
+</body>
+</html>

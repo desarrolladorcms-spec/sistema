@@ -1,0 +1,232 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--vl:#F5F3FF;--green:#059669;--amber:#D97706;--blue:#0284C7;--red:#DC2626}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+.hdr{background:linear-gradient(120deg,#1E1B4B,#4C1D95);color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr-left h1{font-size:14px;font-weight:700;color:#FDE68A}
+.hdr-left p{font-size:9px;color:rgba(255,255,255,.5);margin-top:1px}
+.hdr-nav{display:flex;align-items:center;gap:8px}
+.nav-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 12px;border-radius:7px;cursor:pointer;font-size:13px}
+.nav-btn:hover{background:rgba(255,255,255,.25)}
+.mes-lbl{font-size:13px;font-weight:600;color:#FDE68A;min-width:130px;text-align:center}
+.btn-add{background:#FDE68A;color:#1E1B4B;border:none;padding:5px 12px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700}
+
+/* Main layout */
+.main{display:grid;grid-template-columns:1fr 280px;overflow:hidden}
+
+/* Calendar */
+.cal{padding:12px;overflow-y:auto}
+.day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.dh{text-align:center;font-size:9px;font-weight:700;color:var(--faint);padding:5px 0;text-transform:uppercase;letter-spacing:.06em}
+.weeks{display:flex;flex-direction:column;gap:3px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day{min-height:78px;background:var(--surface);border-radius:10px;padding:5px 6px;cursor:pointer;border:1.5px solid transparent;transition:.15s}
+.day:hover{border-color:var(--v);background:var(--vl)}
+.day.otro{background:#F8F9FB;opacity:.5}
+.day.hoy{border-color:var(--v)}
+.day.sel{border-color:var(--green);box-shadow:0 0 0 2px rgba(5,150,105,.1)}
+.day-n{font-size:11px;font-weight:600;color:var(--muted);width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:3px}
+.day.hoy .day-n{background:var(--v);color:#fff;border-radius:50%;font-size:10px}
+.ev-pill{font-size:9px;font-weight:600;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-pill.demo{background:#EDE9FE;color:#5B21B6}
+.ev-pill.cliente{background:#D1FAE5;color:#065F46}
+.ev-pill.interna{background:#DBEAFE;color:#1E40AF}
+.ev-pill.ads{background:#FEF9C3;color:#92400E}
+.ev-pill.otro{background:#F3F4F6;color:#374151}
+.mas{font-size:9px;color:var(--faint);padding-left:3px}
+
+/* Panel lateral */
+.side{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+.side-top{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.side-top-date{font-size:13px;font-weight:700;margin-bottom:2px}
+.side-top-sub{font-size:10px;color:var(--muted)}
+.side-events{flex:1;overflow-y:auto;padding:10px 12px}
+.ev-card{background:var(--bg);border-radius:10px;border:1px solid var(--border);padding:10px 12px;margin-bottom:8px}
+.ev-card-hora{font-size:10px;font-weight:700;color:var(--v);margin-bottom:3px}
+.ev-card-title{font-size:12px;font-weight:700;margin-bottom:4px}
+.ev-card-meta{font-size:10px;color:var(--muted);line-height:1.5}
+.ev-card-actions{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.ev-act{padding:4px 9px;border:none;border-radius:6px;cursor:pointer;font-size:10px;font-weight:600}
+.ev-act.wa{background:#D1FAE5;color:#065F46}
+.ev-act.edit{background:var(--vl);color:#5B21B6}
+.ev-act.meet{background:#DBEAFE;color:#1E40AF}
+.btn-nueva{width:100%;margin:10px 12px 12px;width:calc(100% - 24px);padding:9px;background:var(--v);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-nueva:hover{background:#5B21B6}
+.empty-side{text-align:center;padding:20px;color:var(--faint);font-size:11px}
+
+/* Modal nueva reunión */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;backdrop-filter:blur(2px);align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border-radius:16px;padding:18px;width:380px;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:14px;font-weight:700;margin-bottom:14px}
+.mf label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);display:block;margin-bottom:3px}
+.mf{margin-bottom:10px}
+.mf select,.mf input,.mf textarea{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:12px;font-family:inherit;color:var(--text)}
+.mf select:focus,.mf input:focus,.mf textarea:focus{outline:none;border-color:var(--v)}
+.mf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.btn-cancel-m{padding:8px 14px;background:var(--bg);border:none;border-radius:9px;cursor:pointer;font-size:12px}
+.btn-ok-m{padding:8px 16px;background:var(--v);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-ok-m:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr">
+  <div class="hdr-left"><h1>📅 Calendario de Reuniones</h1><p>Reuniones del equipo y con clientes</p></div>
+  <div class="hdr-nav">
+    <button class="nav-btn" onclick="navMes(-1)">‹</button>
+    <span class="mes-lbl" id="mesLbl"></span>
+    <button class="nav-btn" onclick="navMes(1)">›</button>
+    <button class="btn-add" onclick="abrirModal()">＋ Nueva</button>
+  </div>
+</div>
+
+<div class="main">
+<div class="cal" id="cal"></div>
+<div class="side">
+  <div class="side-top">
+    <div class="side-top-date" id="sideFecha">Selecciona un día</div>
+    <div class="side-top-sub" id="sideSub">Click en el calendario para ver reuniones</div>
+  </div>
+  <div class="side-events" id="sideEvents"><div class="empty-side">👆 Selecciona un día para ver sus reuniones</div></div>
+  <button class="btn-nueva" onclick="abrirModal()">＋ Nueva reunión</button>
+</div>
+</div>
+
+<div class="modal-bg" id="modal">
+<div class="modal">
+  <h3>📅 Nueva Reunión</h3>
+  <div class="mf"><label>Tipo *</label>
+    <select id="mTipo">
+      <option>Demo con cliente</option><option>Reunión interna</option>
+      <option>Reunión ADS</option><option>Briefing cliente</option>
+      <option>Revisión de proyecto</option><option>Llamada comercial</option><option>Otro</option>
+    </select></div>
+  <div class="mf"><label>Título / descripción *</label>
+    <input type="text" id="mTitulo" placeholder="Ej: Revisión avance Voltwell"></div>
+  <div class="mf-row">
+    <div class="mf"><label>Fecha *</label><input type="date" id="mFecha"></div>
+    <div class="mf"><label>Hora inicio</label><input type="time" id="mHoraInicio" value="10:00"></div>
+  </div>
+  <div class="mf-row">
+    <div class="mf"><label>Duración (min)</label><input type="number" id="mDuracion" value="60" min="15" step="15"></div>
+    <div class="mf"><label>Área</label>
+      <select id="mArea"><option>Web</option><option>SEO</option><option>ADS</option><option>Administración</option></select></div>
+  </div>
+  <div class="mf"><label>Cliente / proyecto (si aplica)</label>
+    <input type="text" id="mProyecto" placeholder="Ej: Voltwell — Sitio Web 2026"></div>
+  <div class="mf"><label>Participantes</label>
+    <input type="text" id="mParticipantes" placeholder="Rossio, Camila, Lucy, Cliente..."></div>
+  <div class="mf"><label>Link Meet / Zoom</label>
+    <input type="url" id="mLink" placeholder="https://meet.google.com/..."></div>
+  <div class="mf"><label>Notas</label>
+    <textarea id="mNotas" rows="2" placeholder="Agenda o puntos a tratar..."></textarea></div>
+  <div class="modal-btns">
+    <button class="btn-cancel-m" onclick="cerrarModal()">Cancelar</button>
+    <button class="btn-ok-m" id="btnOkM" onclick="guardarReunion()">✓ Guardar</button>
+  </div>
+</div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+var HOY=new Date(), MES=new Date(HOY.getFullYear(),HOY.getMonth(),1), DIA_SEL=null;
+var REUNIONES=[], MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function navMes(d){MES=new Date(MES.getFullYear(),MES.getMonth()+d,1);cargar();}
+
+function cargar(){
+  document.getElementById('mesLbl').textContent=MESES[MES.getMonth()]+' '+MES.getFullYear();
+  document.getElementById('cal').innerHTML='<div style="text-align:center;padding:40px;color:var(--faint)">Cargando...</div>';
+  google.script.run.withSuccessHandler(function(data){
+    REUNIONES=data||[];renderCal();
+  }).withFailureHandler(function(){renderCal();}).mc_v22_reuniones_getAll_pub();
+}
+
+function renderCal(){
+  var start=new Date(MES);start.setDate(start.getDate()-start.getDay());
+  var end=new Date(MES.getFullYear(),MES.getMonth()+1,0);
+  end.setDate(end.getDate()+(6-end.getDay()));
+  var html='<div class="day-headers">'+['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(function(d){return '<div class="dh">'+d+'</div>';}).join('')+'</div><div class="weeks">';
+  var cur=new Date(start);
+  while(cur<=end){
+    html+='<div class="week">';
+    for(var i=0;i<7;i++){
+      var d=new Date(cur);
+      var isHoy=d.toDateString()===HOY.toDateString();
+      var isOtro=d.getMonth()!==MES.getMonth();
+      var isSel=DIA_SEL&&d.toDateString()===DIA_SEL.toDateString();
+      var ds=d.toDateString();
+      var evs=REUNIONES.filter(function(r){return r.fecha&&new Date(r.fecha).toDateString()===ds;});
+      html+='<div class="day'+(isHoy?' hoy':'')+(isOtro?' otro':'')+(isSel?' sel':'')+'" onclick="selDia(new Date(\''+d.toISOString()+'\'))">';
+      html+='<div class="day-n">'+d.getDate()+'</div>';
+      html+='<div class="eventos">';
+      evs.slice(0,3).forEach(function(e){
+        var cls=e.tipo==='Demo con cliente'?'demo':e.tipo==='Reunión ADS'?'ads':e.tipo==='Reunión interna'?'interna':'cliente';
+        html+='<div class="ev-pill '+cls+'">'+esc((e.titulo||e.tipo||'').substring(0,18))+'</div>';
+      });
+      if(evs.length>3) html+='<div class="mas">+'+( evs.length-3)+' más</div>';
+      html+='</div></div>';
+      cur.setDate(cur.getDate()+1);
+    }
+    html+='</div>';
+  }
+  html+='</div>';
+  document.getElementById('cal').innerHTML=html;
+}
+
+function selDia(d){
+  DIA_SEL=new Date(d);renderCal();
+  var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('sideFecha').textContent=dias[d.getDay()]+' '+d.getDate()+' de '+meses[d.getMonth()];
+  var evs=REUNIONES.filter(function(r){return r.fecha&&new Date(r.fecha).toDateString()===d.toDateString();});
+  if(!evs.length){document.getElementById('sideEvents').innerHTML='<div class="empty-side">Sin reuniones este día</div>';return;}
+  var html='';
+  evs.forEach(function(r){
+    var cls=r.tipo==='Demo con cliente'?'demo':r.tipo==='Reunión ADS'?'ads':r.tipo==='Reunión interna'?'interna':'cliente';
+    html+='<div class="ev-card">'+
+      '<div class="ev-card-hora"><span class="ev-pill '+cls+'" style="font-size:9px">'+esc(r.tipo||'')+'</span> '+esc(r.horaInicio||'')+'</div>'+
+      '<div class="ev-card-title">'+esc(r.titulo||'Reunión')+'</div>'+
+      '<div class="ev-card-meta">'+
+        (r.participantes?'👥 '+esc(r.participantes)+'<br>':'')+
+        (r.proyecto?'📦 '+esc(r.proyecto)+'<br>':'')+
+        (r.duracion?'⏱️ '+esc(r.duracion)+' min':'')+'</div>'+
+      '<div class="ev-card-actions">'+
+        (r.link?'<button class="ev-act meet" onclick="window.open(\''+esc(r.link)+'\')">📹 Meet</button>':'')+
+        '<button class="ev-act wa" onclick="">📲 WA</button>'+
+        '<button class="ev-act edit" onclick="">✏️ Editar</button>'+
+      '</div></div>';
+  });
+  document.getElementById('sideEvents').innerHTML=html;
+  document.getElementById('sideSub').textContent=evs.length+' reunión'+(evs.length!==1?'es':'')+' este día';
+}
+
+function abrirModal(){
+  if(DIA_SEL) document.getElementById('mFecha').value=DIA_SEL.toISOString().split('T')[0];
+  else document.getElementById('mFecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modal').classList.add('show');
+}
+function cerrarModal(){document.getElementById('modal').classList.remove('show');}
+
+function guardarReunion(){
+  var titulo=document.getElementById('mTitulo').value.trim();
+  var fecha=document.getElementById('mFecha').value;
+  if(!titulo||!fecha){alert('Título y fecha son obligatorios.');return;}
+  var btn=document.getElementById('btnOkM');btn.disabled=true;btn.textContent='Guardando...';
+  google.script.run
+    .withSuccessHandler(function(r){btn.disabled=false;btn.textContent='✓ Guardar';cerrarModal();cargar();})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='✓ Guardar';alert(e.message);})
+    .mc_v22_reuniones_agregar_pub({
+      tipo:document.getElementById('mTipo').value,titulo:titulo,
+      fecha:fecha,horaInicio:document.getElementById('mHoraInicio').value,
+      duracion:document.getElementById('mDuracion').value,
+      area:document.getElementById('mArea').value,
+      proyecto:document.getElementById('mProyecto').value,
+      participantes:document.getElementById('mParticipantes').value,
+      link:document.getElementById('mLink').value,
+      notas:document.getElementById('mNotas').value
+    });
+}
+cargar();
+</script></body></html>

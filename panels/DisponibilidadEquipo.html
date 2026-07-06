@@ -1,0 +1,135 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--green:#059669;--amber:#D97706;--red:#DC2626}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.hdr{background:linear-gradient(120deg,#064E3B,#065F46);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:14px;font-weight:700;color:#6EE7B7}
+.hdr-sub{font-size:9px;color:rgba(255,255,255,.5);margin-top:1px}
+.nav-row{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px}
+.nav-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:11px;background:var(--surface);color:var(--muted)}
+.nav-btn:hover{border-color:var(--green);color:var(--green)}
+.semana-lbl{flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--text)}
+.btn-hdr{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 11px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600}
+/* Grilla de equipo */
+.content{padding:12px}
+.equipo-grid{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:14px}
+/* Cabeceras día */
+.header-col{text-align:center;padding:6px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
+.header-col.hoy{color:var(--green)}
+/* Celda persona */
+.persona-cel{display:flex;align-items:center;padding:0 4px}
+.persona-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-right:4px}
+.persona-nombre{font-size:10px;font-weight:700;color:var(--text)}
+/* Celdas de disponibilidad */
+.disp-cel{min-height:60px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:.15s;position:relative;padding:4px;display:flex;flex-direction:column;gap:2px}
+.disp-cel:hover{border-color:var(--green);background:#F0FDF4}
+.disp-cel.libre{background:#F0FDF4;border-color:#BBF7D0}
+.disp-cel.ocupado{background:#FEE2E2;border-color:#FECACA}
+.disp-cel.parcial{background:#FEF9C3;border-color:#FDE68A}
+.disp-cel.vac{background:#EFF6FF;border-color:#BFDBFE}
+/* Evento mini */
+.ev-mini{font-size:8px;font-weight:600;padding:2px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-mini.reunion{background:#EDE9FE;color:#5B21B6}
+.ev-mini.proyecto{background:#D1FAE5;color:#065F46}
+.ev-mini.soporte{background:#DBEAFE;color:#1E40AF}
+/* Leyenda */
+.leyenda{display:flex;gap:12px;padding:0 0 12px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.leg-dot{width:12px;height:12px;border-radius:3px}
+/* Totales row */
+.totales-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:8px}
+.total-cel{text-align:center;padding:5px 4px;border-radius:6px;background:var(--bg);border:1px solid var(--border);font-size:9px}
+.total-cel b{display:block;font-size:12px;font-weight:700;color:var(--text)}
+.total-cel span{color:var(--faint)}
+.loading{text-align:center;padding:30px;color:var(--faint);font-size:12px}
+</style></head><body>
+<div class="hdr">
+  <div><div class="hdr-title">🧭 Disponibilidad del Equipo</div><div class="hdr-sub">Vista semanal — reuniones + ítems activos</div></div>
+  <div style="display:flex;gap:6px"><button class="btn-hdr" onclick="cargar()">↻ Actualizar</button></div>
+</div>
+<div class="nav-row">
+  <button class="nav-btn" onclick="navSem(-1)">‹ Anterior</button>
+  <div class="semana-lbl" id="semLbl"></div>
+  <button class="nav-btn" onclick="navSem(1)">Siguiente ›</button>
+  <button class="nav-btn" onclick="navHoy()">Hoy</button>
+</div>
+<div class="content" id="content"><div class="loading">Cargando disponibilidad...</div></div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+var HOY=new Date(), SEM=lunes(new Date());
+var DIAS_N=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+var PERSONAS=[{nombre:'Rossio',icon:'🧠'},{nombre:'Camila',icon:'🎨'},{nombre:'Lucy',icon:'🌐'}];
+
+function lunes(d){var c=new Date(d);c.setHours(0,0,0,0);var day=c.getDay();c.setDate(c.getDate()-(day===0?6:day-1));return c;}
+function navSem(n){SEM=new Date(SEM);SEM.setDate(SEM.getDate()+n*7);cargar();}
+function navHoy(){SEM=lunes(new Date());cargar();}
+
+function fmt(d){return d.getDate()+'/'+(d.getMonth()+1);}
+function isSameDay(a,b){return a.toDateString()===b.toDateString();}
+
+function cargar(){
+  var fin=new Date(SEM);fin.setDate(fin.getDate()+6);
+  document.getElementById('semLbl').textContent='Semana del '+fmt(SEM)+' al '+fmt(fin);
+  document.getElementById('content').innerHTML='<div class="loading">Cargando...</div>';
+  google.script.run.withSuccessHandler(render).withFailureHandler(function(){render({});})
+    .mc_pub_getDisponibilidadEquipo(SEM.toISOString(),fin.toISOString());
+}
+
+function render(data){
+  data=data||{};
+  var dias=[];
+  for(var i=0;i<7;i++){var d=new Date(SEM);d.setDate(d.getDate()+i);dias.push(d);}
+
+  var html='<div class="leyenda">'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#D1FAE5;border:1px solid #059669"></div> Libre</div>'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#FEE2E2;border:1px solid #DC2626"></div> Ocupado</div>'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#FEF9C3;border:1px solid #D97706"></div> Parcial</div>'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#EDE9FE"></div> Reunión</div>'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#D1FAE5"></div> Proyecto</div>'+
+  '</div>';
+
+  // Cabeceras
+  html+='<div class="equipo-grid">';
+  html+='<div class="header-col"></div>';
+  dias.forEach(function(d){
+    var esHoy=isSameDay(d,HOY);
+    html+='<div class="header-col'+(esHoy?' hoy':'')+'">'+(esHoy?'🟢 ':'')+DIAS_N[d.getDay()]+'<br>'+fmt(d)+'</div>';
+  });
+  html+='</div>';
+
+  // Totales (reuniones por día)
+  var reuniones=(data.reuniones||[]);
+  html+='<div class="totales-row"><div class="total-cel"></div>';
+  dias.forEach(function(d){
+    var cnt=reuniones.filter(function(r){return r.fecha&&isSameDay(new Date(r.fecha),d);}).length;
+    html+='<div class="total-cel"><b>'+(cnt||'—')+'</b><span>reunión'+(cnt!==1?'es':'')+' </span></div>';
+  });
+  html+='</div>';
+
+  // Filas por persona
+  html+='<div class="equipo-grid">';
+  PERSONAS.forEach(function(p){
+    html+='<div class="persona-cel"><div class="persona-avatar">'+p.icon+'</div><div class="persona-nombre">'+p.nombre+'</div></div>';
+    dias.forEach(function(d){
+      var evs=reuniones.filter(function(r){return r.fecha&&isSameDay(new Date(r.fecha),d)&&(r.participantes||'').toLowerCase().indexOf(p.nombre.toLowerCase())>=0;});
+      var items=(data.items||[]).filter(function(i){return i.responsable===p.nombre;});
+      var tieneReu=evs.length>0;
+      var tieneItems=items.length>0;
+      var cls=tieneReu&&tieneItems?'parcial':tieneReu?'ocupado':tieneItems?'parcial':'libre';
+      html+='<div class="disp-cel '+cls+'">';
+      evs.slice(0,2).forEach(function(e){html+='<div class="ev-mini reunion">📅 '+esc((e.titulo||e.tipo||'').substring(0,14))+'</div>';});
+      if(isSameDay(d,HOY)){
+        items.slice(0,2).forEach(function(i){html+='<div class="ev-mini proyecto">📦 '+esc((i.nombre||'').substring(0,14))+'</div>';});
+      }
+      html+='</div>';
+    });
+  });
+  html+='</div>';
+
+  document.getElementById('content').innerHTML=html;
+}
+cargar();
+</script></body></html>

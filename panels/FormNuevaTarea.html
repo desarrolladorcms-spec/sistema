@@ -1,0 +1,245 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--green:#059669;--amber:#D97706;--red:#DC2626;--blue:#0284C7}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:linear-gradient(120deg,#78350F,#B45309);color:#fff;padding:12px 18px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700;color:#FDE68A;margin-bottom:1px}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.scroll{flex:1;overflow-y:auto;padding:14px 16px}
+.card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s2{grid-column:1/-1}
+.f{margin-bottom:0}
+.f label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:4px}
+.f input,.f select,.f textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;color:var(--text);background:#FAFBFC;transition:.15s}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(217,119,6,.07)}
+.f textarea{resize:vertical;min-height:70px}
+
+/* Buscador de cliente */
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;color:var(--faint)}
+.search-input{padding-left:30px!important}
+.search-input.found{border-color:var(--green)!important;background:#F0FDF4!important}
+.search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:99;max-height:200px;overflow-y:auto;display:none}
+.search-results.open{display:block}
+.sr-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:8px;transition:.1s}
+.sr-item:hover{background:var(--bg)}
+.sr-item:last-child{border-bottom:none}
+.sr-icon{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0}
+.sr-name{font-size:12px;font-weight:700;color:var(--text)}
+.sr-meta{font-size:10px;color:var(--muted)}
+.found-badge{display:none;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;margin-top:4px}
+.found-badge.show{display:inline-flex}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--amber);color:var(--amber);background:#FFFBEB}
+.chip.on{background:var(--amber);border-color:var(--amber);color:#fff}
+
+/* Prioridad visual */
+.prio-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.prio-opt{padding:8px 4px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:.15s;background:var(--surface);font-size:11px;font-weight:700}
+.prio-opt:hover,.prio-opt.sel{box-shadow:0 0 0 2px currentColor}
+.prio-u{color:var(--red)}.prio-u.sel{background:#FEE2E2;border-color:var(--red)}
+.prio-a{color:var(--amber)}.prio-a.sel{background:#FFFBEB;border-color:var(--amber)}
+.prio-m{color:var(--blue)}.prio-m.sel{background:#EFF6FF;border-color:var(--blue)}
+.prio-b{color:var(--green)}.prio-b.sel{background:#F0FDF4;border-color:var(--green)}
+
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:11px 16px;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.btn{padding:9px 18px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-ghost{background:var(--bg);color:var(--muted)}
+.btn-create{background:linear-gradient(135deg,var(--amber),#D97706);color:#fff}
+.btn-create:hover{opacity:.9;box-shadow:0 4px 12px rgba(217,119,6,.3)}
+.btn-create:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr"><h1>✅ Nueva Tarea</h1><p>Asigna una tarea al equipo o a ti misma</p></div>
+<div class="scroll">
+  <!-- ¿A quién y para qué cliente? -->
+  <div class="card"><div class="card-title">¿A quién va y de qué cliente?</div>
+    <div class="g2">
+      <div class="f"><label>Asignada a *</label>
+        <div class="chips" id="chkPara">
+          <div class="chip on" data-v="Rossio">🧠 Rossio</div>
+          <div class="chip" data-v="Camila">🎨 Camila</div>
+          <div class="chip" data-v="Lucy">🌐 Lucy</div>
+        </div>
+        <input type="hidden" id="paraHidden" value="Rossio">
+      </div>
+      <div class="f"><label>Asignada por</label>
+        <div class="chips" id="chkAsignadaPor">
+          <div class="chip on" data-v="Rossio">Rossio</div>
+          <div class="chip" data-v="Camila">Camila</div>
+          <div class="chip" data-v="Lucy">Lucy</div>
+        </div>
+        <input type="hidden" id="asignadaPorHidden" value="Rossio">
+      </div>
+      <div class="f s2"><label>Cliente / Marca *</label>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="clienteSearch" type="text" placeholder="Escribe para buscar: Voltwell, ETPOWER..." autocomplete="off" oninput="buscarCliente(this.value)" onblur="setTimeout(function(){document.getElementById('searchRes').classList.remove('open')},200)">
+          <div class="search-results" id="searchRes"></div>
+          <input type="hidden" id="marcaHidden">
+          <span class="found-badge" id="foundBadge">✓ Cliente seleccionado</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalles de la tarea -->
+  <div class="card"><div class="card-title">¿Qué hay que hacer?</div>
+    <div class="g2">
+      <div class="f s2"><label>Descripción de la tarea *</label>
+        <textarea id="tarea" rows="3" placeholder="Describe con claridad qué hay que hacer. Sé específica sobre el resultado esperado..."></textarea></div>
+      <div class="f"><label>Tipo de tarea</label>
+        <div class="chips" id="chkTipo">
+          <div class="chip on" data-v="Web">🌐 Web</div>
+          <div class="chip" data-v="SEO">📈 SEO</div>
+          <div class="chip" data-v="Contenido">✍️ Contenido</div>
+          <div class="chip" data-v="Diseño">🎨 Diseño</div>
+          <div class="chip" data-v="Gestión">📋 Gestión</div>
+          <div class="chip" data-v="ADS">📣 ADS</div>
+        </div>
+        <input type="hidden" id="tipoHidden" value="Web">
+      </div>
+      <div class="f"><label>Área</label>
+        <div class="chips" id="chkArea">
+          <div class="chip on" data-v="Web">🌐 Web</div>
+          <div class="chip" data-v="SEO">📈 SEO</div>
+          <div class="chip" data-v="ADS">📣 ADS</div>
+          <div class="chip" data-v="Admin">⚙️ Admin</div>
+        </div>
+        <input type="hidden" id="areaHidden" value="Web">
+      </div>
+      <div class="f"><label>Proyecto relacionado</label>
+        <input type="text" id="proyecto" placeholder="Ej: Sitio Web Voltwell 2026"></div>
+      <div class="f"><label>Link del sitio / recurso</label>
+        <input type="url" id="sitioWeb" placeholder="https://..."></div>
+    </div>
+  </div>
+
+  <!-- Plazo y prioridad -->
+  <div class="card"><div class="card-title">Plazo y urgencia</div>
+    <div class="g2">
+      <div class="f"><label>Prioridad</label>
+        <div class="prio-row">
+          <div class="prio-opt prio-u" onclick="selPrio(this,'Urgente')">🔴<br>Urgente</div>
+          <div class="prio-opt prio-a sel" onclick="selPrio(this,'Alta')">🟠<br>Alta</div>
+          <div class="prio-opt prio-m" onclick="selPrio(this,'Media')">🟡<br>Media</div>
+          <div class="prio-opt prio-b" onclick="selPrio(this,'Baja')">🟢<br>Baja</div>
+        </div>
+        <input type="hidden" id="prioHidden" value="Alta">
+      </div>
+      <div class="f">
+        <div class="f" style="margin-bottom:10px"><label>Fecha límite</label>
+          <input type="date" id="limite"></div>
+        <div class="f"><label>Tiempo estimado (min)</label>
+          <input type="number" id="estimado" placeholder="60" min="0" step="15"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contexto extra -->
+  <div class="card"><div class="card-title">Contexto e instrucciones (opcional)</div>
+    <div class="f s2"><label>Ayudas / instrucciones para quien recibe la tarea</label>
+      <textarea id="ayudas" rows="3" placeholder="Instrucciones detalladas, referencias, pasos a seguir, accesos necesarios..."></textarea></div>
+    <div class="g2" style="margin-top:10px">
+      <div class="f"><label>Entregable esperado</label>
+        <input type="text" id="entregable" placeholder="Ej: Capturas de pantalla, link de demo..."></div>
+      <div class="f"><label>Link Drive / referencia</label>
+        <input type="url" id="linkDrive" placeholder="https://drive.google.com/..."></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <button class="btn btn-ghost" onclick="google.script.host.close()">Cancelar</button>
+  <button class="btn btn-create" id="btnCreate" onclick="crear()">✅ Crear tarea</button>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+var CLIENTES=[], TIMER_BUSQ=null, PRIO='Alta';
+// Fecha límite por defecto: mañana
+var man=new Date();man.setDate(man.getDate()+1);document.getElementById('limite').value=man.toISOString().split('T')[0];
+
+// Cargar clientes para búsqueda
+google.script.run.withSuccessHandler(function(d){CLIENTES=d||[];}).mc_pub_getClientesCompletos();
+
+// Chips single-select
+function initSingleChips(groupId, hiddenId){
+  document.querySelectorAll('#'+groupId+' .chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      document.querySelectorAll('#'+groupId+' .chip').forEach(function(x){x.classList.remove('on');});
+      c.classList.add('on');
+      document.getElementById(hiddenId).value=c.dataset.v;
+    });
+  });
+}
+initSingleChips('chkPara','paraHidden');
+initSingleChips('chkAsignadaPor','asignadaPorHidden');
+initSingleChips('chkTipo','tipoHidden');
+initSingleChips('chkArea','areaHidden');
+
+function selPrio(el,v){
+  document.querySelectorAll('.prio-opt').forEach(function(x){x.classList.remove('sel');});
+  el.classList.add('sel');PRIO=v;document.getElementById('prioHidden').value=v;
+}
+
+// Buscador de cliente con debounce
+function buscarCliente(q){
+  clearTimeout(TIMER_BUSQ);var res=document.getElementById('searchRes');
+  if(q.length<2){res.classList.remove('open');return;}
+  TIMER_BUSQ=setTimeout(function(){
+    var r=CLIENTES.filter(function(c){
+      return (c.marca||'').toLowerCase().includes(q.toLowerCase())||
+             (c.contacto||'').toLowerCase().includes(q.toLowerCase());
+    }).slice(0,6);
+    if(!r.length){res.classList.remove('open');return;}
+    res.innerHTML=r.map(function(c){
+      return '<div class="sr-item" onmousedown="selCliente(\''+esc(c.marca)+'\',\''+esc(c.id||c.marca)+'\')">'+
+        '<div class="sr-icon">'+(c.marca||'?').charAt(0).toUpperCase()+'</div>'+
+        '<div><div class="sr-name">'+esc(c.marca||'—')+'</div><div class="sr-meta">'+esc(c.plan||c.tipo||'Cliente')+'</div></div></div>';
+    }).join('');
+    res.classList.add('open');
+  },200);
+}
+function selCliente(marca,id){
+  document.getElementById('clienteSearch').value=marca;
+  document.getElementById('clienteSearch').classList.add('found');
+  document.getElementById('marcaHidden').value=id||marca;
+  document.getElementById('searchRes').classList.remove('open');
+  document.getElementById('foundBadge').classList.add('show');
+  document.getElementById('foundBadge').textContent='✓ '+marca+' seleccionado';
+}
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function crear(){
+  var tarea=document.getElementById('tarea').value.trim();
+  var marca=document.getElementById('marcaHidden').value||document.getElementById('clienteSearch').value.trim();
+  if(!tarea){alert('Escribe la descripción de la tarea.');return;}
+  if(!marca){alert('Selecciona un cliente de la lista.');return;}
+  var btn=document.getElementById('btnCreate');btn.disabled=true;btn.textContent='Creando...';
+  google.script.run
+    .withSuccessHandler(function(r){btn.disabled=false;btn.textContent='✅ Crear tarea';
+      if(r&&r.ok!==false){alert('✅ Tarea creada correctamente');google.script.host.close();}
+      else alert('Error: '+(r&&r.msg||'?'));})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='✅ Crear tarea';alert('Error: '+e.message);})
+    .mc_pub_nuevaTarea({
+      para:document.getElementById('paraHidden').value,
+      asignadaPor:document.getElementById('asignadaPorHidden').value,
+      marca:marca,tarea:tarea,
+      tipo:document.getElementById('tipoHidden').value,
+      area:document.getElementById('areaHidden').value,
+      proyecto:document.getElementById('proyecto').value,
+      sitioWeb:document.getElementById('sitioWeb').value,
+      prioridad:PRIO,limite:document.getElementById('limite').value,
+      estimado:document.getElementById('estimado').value,
+      entregable:document.getElementById('entregable').value,
+      ayudas:document.getElementById('ayudas').value,
+      linkDrive:document.getElementById('linkDrive').value
+    });
+}
+</script></body></html>

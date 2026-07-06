@@ -1,0 +1,46 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#172033}header{background:linear-gradient(120deg,#065f46,#16a34a);color:#fff;padding:18px 22px}.title{font-size:22px;font-weight:950}.sub{font-size:13px;opacity:.9}.toolbar{padding:12px 18px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;gap:10px}.toolbar input{padding:9px 10px;border:1px solid #e5e7eb;border-radius:10px;min-width:260px}.btn{border:0;border-radius:10px;padding:9px 12px;background:#16a34a;color:white;font-weight:900;cursor:pointer}.content{padding:16px 18px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 8px 20px rgba(15,23,42,.05)}.top{display:flex;justify-content:space-between;gap:12px}.name{font-size:18px;font-weight:950}.score{font-weight:950;background:#f1f5f9;border-radius:999px;padding:6px 10px}.pill{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;background:#f1f5f9;margin:2px}.bad{background:#fee2e2;color:#991b1b}.warn{background:#fef3c7;color:#92400e}.blue{background:#dbeafe;color:#1d4ed8}.items{margin-top:8px;font-size:12px;color:#475569}.item{padding:6px 0;border-top:1px dashed #e5e7eb}.loading,.empty{text-align:center;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:14px;padding:20px}
+</style></head><body><header><div class="title">👥 Clientes con pendientes</div><div class="sub">Agrupa atrasos, bloqueos, tareas, soportes, WhatsApps y tareas sin movimiento por cliente.</div></header><div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button><input id="q" placeholder="Buscar cliente o tarea" oninput="render()"></div><div class="content" id="app"><div class="loading">Cargando...</div></div><script src="../assets/api.js"></script>
+<script>
+let DATA=[];function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));}function loadData(){document.getElementById('app').innerHTML='<div class="loading">Cargando...</div>';google.script.run.withSuccessHandler(r=>{DATA=(r&&r.clientes)||[];render();}).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message||e)+'</div>';}).mc_clientesPendientes_getData_pub();}
+function filtered(){let q=document.getElementById('q').value.toLowerCase();return DATA.filter(c=>!q||String(c.marca+' '+JSON.stringify(c.items)).toLowerCase().indexOf(q)>=0);}
+function render(){let arr=filtered();if(!arr.length){document.getElementById('app').innerHTML='<div class="empty">Sin pendientes para este filtro.</div>';return;}document.getElementById('app').innerHTML=arr.map(c=>'<div class="card"><div class="top"><div class="name">'+esc(c.marca)+'</div><div class="score">Score '+esc(c.score)+'</div></div><div><span class="pill bad">Atrasadas '+esc(c.atrasadas)+'</span><span class="pill warn">Hoy '+esc(c.hoy)+'</span><span class="pill blue">Próximas '+esc(c.proximas)+'</span><span class="pill bad">Bloqueos '+esc(c.bloqueadas)+'</span><span class="pill">Sin mov. '+esc(c.sinMovimiento)+'</span><span class="pill">WA '+esc(c.whatsapp)+'</span><span class="pill">Sin fecha '+esc(c.sinFecha)+'</span></div><div class="items">'+(c.items||[]).slice(0,8).map(i=>'<div class="item"><b>'+esc(i.tipo)+'</b> · '+esc(i.id)+' · '+esc(i.tarea)+'<br><small>'+esc(i.responsable||'')+' · '+esc(i.estado||'')+' · '+esc(i.alerta||'')+' · '+esc(i.limite||'')+'</small></div>').join('')+'</div></div>').join('');}
+loadData();
+</script>
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body></html>

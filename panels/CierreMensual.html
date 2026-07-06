@@ -1,0 +1,48 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#111827}
+header{background:linear-gradient(120deg,#1A0A36,#065f46,#059669);color:#fff;padding:18px 22px}
+.title{font-size:20px;font-weight:950}.sub{font-size:12px;opacity:.8;margin-top:3px}
+.toolbar{padding:10px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:8px}
+.btn{border:0;border-radius:10px;padding:8px 14px;background:#059669;color:white;font-weight:800;cursor:pointer;font-size:12px}
+.content{padding:14px 16px 24px}
+.progress-ring{text-align:center;margin-bottom:14px;background:#fff;border:1px solid #edf2f7;border-radius:18px;padding:20px;box-shadow:0 6px 16px rgba(15,23,42,.04)}
+.ring-pct{font-size:48px;font-weight:950;color:#059669}.ring-label{font-size:14px;color:#667085;margin-top:4px}
+.ring-bar{height:12px;background:#f1f5f9;border-radius:99px;overflow:hidden;margin:12px auto 0;max-width:300px}
+.ring-fill{height:12px;background:linear-gradient(90deg,#059669,#34d399);border-radius:99px;transition:width .6s ease}
+.step{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 4px 14px rgba(15,23,42,.04)}
+.step-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.step-icon.ok{background:#dcfce7}.step-icon.pending{background:#fef3c7}.step-icon.manual{background:#dbeafe}
+.step-body{flex:1}.step-title{font-size:14px;font-weight:800;margin:0 0 4px}
+.step-detail{font-size:12px;color:#667085;line-height:1.4;margin:0}
+.step-action{font-size:12px;color:#ea580c;font-weight:700;margin-top:6px;cursor:pointer}
+.step-action:hover{text-decoration:underline}
+.loading{padding:30px;text-align:center;color:#667085}
+</style></head><body>
+<header><div class="title">📆 Cierre Mensual</div><div class="sub">Verificación paso a paso antes de cerrar el mes</div></header>
+<div class="toolbar">
+  <button class="btn" onclick="loadData()">↻ Verificar de nuevo</button>
+  <button class="btn" style="background:#7c3aed" onclick="google.script.run.mc_pub_generarReporteMensualActual()">📊 Generar reporte</button>
+</div>
+<div class="content" id="app"><div class="loading">Verificando estado del mes...</div></div>
+<script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function render(d){
+  var app=document.getElementById('app');
+  var html='<div class="progress-ring"><div class="ring-pct">'+d.pctCompleto+'%</div><div class="ring-label">Cierre de '+esc(d.mes)+' — '+d.completados+'/'+d.total+' pasos verificados</div><div class="ring-bar"><div class="ring-fill" style="width:'+d.pctCompleto+'%"></div></div></div>';
+  
+  (d.checks||[]).forEach(function(c,i){
+    var icon=c.estado==='ok'?'✅':'⏳';
+    var iconClass=c.estado==='ok'?'ok':c.estado==='manual'?'manual':'pending';
+    html+='<div class="step"><div class="step-icon '+iconClass+'">'+icon+'</div><div class="step-body"><p class="step-title">Paso '+(i+1)+': '+esc(c.paso)+'</p><p class="step-detail">'+esc(c.detalle)+'</p>';
+    if(c.accion) html+='<div class="step-action" onclick="alert(\''+esc(c.accion)+'\')">→ '+esc(c.accion)+'</div>';
+    html+='</div></div>';
+  });
+  
+  if(d.pctCompleto===100) html+='<div style="text-align:center;padding:18px;background:#dcfce7;border-radius:18px;margin-top:14px"><div style="font-size:32px">🎉</div><div style="font-size:16px;font-weight:900;color:#059669;margin-top:6px">¡Mes listo para cerrar!</div><div style="font-size:13px;color:#065f46;margin-top:4px">Todos los pasos están verificados. Genera el reporte mensual.</div></div>';
+  
+  app.innerHTML=html;
+}
+function loadData(){document.getElementById('app').innerHTML='<div class="loading">Verificando...</div>';google.script.run.withSuccessHandler(render).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>'}).mc_v22_cierreMensual_getData_pub()}
+loadData();
+</script></body></html>

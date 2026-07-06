@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F8F5FF;color:#1A0A36;font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+:root{--v:#9333EA;--vl:#F5F3FF;--dark:#1A0A36;--gold:#FDE68A;--rojo:#DC2626;--amarillo:#D97706;--verde:#059669}
+
+/* Header */
+.hdr{background:linear-gradient(120deg,#1A0A36,#3b0764);color:#fff;padding:12px 16px;flex-shrink:0}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.hdr-title{font-size:16px;font-weight:700;color:var(--gold)}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.6)}
+.btn-refresh{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px}
+.btn-refresh:hover{background:rgba(255,255,255,.25)}
+
+/* Timer activo (barra fija) */
+.timer-bar{background:#1A0A36;color:#FDE68A;padding:8px 16px;display:none;align-items:center;gap:10px;flex-shrink:0;border-bottom:2px solid var(--v)}
+.timer-bar.show{display:flex}
+.timer-nombre{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timer-clock{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;min-width:70px;text-align:right}
+.btn-stop{background:#DC2626;border:none;color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700}
+
+/* Scroll area */
+.scroll{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+
+/* Secciones */
+.sec{background:#fff;border-radius:10px;border:1px solid #E5E7EB;overflow:hidden}
+.sec-hdr{padding:8px 12px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;user-select:none}
+.sec-hdr:hover{opacity:.85}
+.sec-count{font-size:10px;padding:1px 7px;border-radius:99px;font-weight:600}
+.sec-body{border-top:1px solid #F3F4F6}
+
+/* Items */
+.item{padding:9px 12px;border-bottom:1px solid #F9FAFB;display:flex;align-items:flex-start;gap:8px}
+.item:last-child{border-bottom:none}
+.item-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.item-info{flex:1;min-width:0}
+.item-nombre{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px}
+.item-meta{font-size:10px;color:#78716C;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{font-size:9px;padding:1px 6px;border-radius:99px;font-weight:600}
+.tag{background:#F3F4F6;color:#374151;font-size:9px;padding:1px 5px;border-radius:4px}
+.item-actions{display:flex;gap:4px;flex-shrink:0;align-items:center}
+
+/* Botones de acción */
+.btn-ini{background:var(--v);color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:10px;font-weight:600}
+.btn-ini:hover{opacity:.85}
+.btn-ok{background:#059669;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:10px;font-weight:600}
+.btn-ok:hover{opacity:.85}
+.btn-blq{background:#F3F4F6;color:#374151;border:none;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:10px}
+.btn-blq:hover{background:#E5E7EB}
+
+/* Reunión */
+.reunion-card{padding:9px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #F9FAFB}
+.reunion-hora{font-size:13px;font-weight:700;color:var(--v);min-width:42px}
+.reunion-info{flex:1}
+.reunion-titulo{font-size:12px;font-weight:600}
+.reunion-meta{font-size:10px;color:#78716C}
+.reunion-link{font-size:10px;color:var(--v);text-decoration:none}
+
+/* Modal de bloqueo / completar */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:18px;width:320px;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--dark)}
+.field{margin-bottom:10px}
+label{font-size:11px;font-weight:600;color:#64748B;display:block;margin-bottom:3px}
+select,textarea{width:100%;padding:7px 9px;border:1.5px solid #E2E8F0;border-radius:7px;font-size:12px;font-family:inherit}
+select:focus,textarea:focus{outline:none;border-color:var(--v)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn-cancel-m{padding:7px 14px;background:#F1F5F9;border:none;border-radius:7px;cursor:pointer;font-size:12px}
+.btn-ok-m{padding:7px 14px;background:var(--v);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+.btn-ok-m:disabled{opacity:.5}
+
+/* Notif bar */
+#notifBar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#1A0A36;color:#FDE68A;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+
+.empty{color:#9CA3AF;font-size:11px;text-align:center;padding:12px}
+.loading-msg{color:#9CA3AF;font-size:12px;text-align:center;padding:24px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-title">📌 Mi Día</div>
+    <button class="btn-refresh" onclick="cargar()">↻ Actualizar</button>
+  </div>
+  <div class="hdr-sub" id="hdrFecha">Cargando...</div>
+</div>
+
+<!-- Timer activo -->
+<div class="timer-bar" id="timerBar">
+  <span style="font-size:14px">▶</span>
+  <span class="timer-nombre" id="timerNombre"></span>
+  <span class="timer-clock" id="timerClock">00:00</span>
+  <button class="btn-stop" onclick="pararTimer()">⏹ Listo</button>
+</div>
+
+<div class="scroll" id="scroll">
+  <div class="loading-msg">Cargando tu día...</div>
+</div>
+
+<!-- Modal completar -->
+<div class="modal-bg" id="modalOk">
+  <div class="modal">
+    <h3>✅ Marcar como completado</h3>
+    <div class="field"><label>¿Qué hiciste? (opcional)</label>
+      <textarea id="okNotas" rows="2" placeholder="Breve descripción del avance..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel-m" onclick="cerrarModal('modalOk')">Cancelar</button>
+      <button class="btn-ok-m" id="btnOkConfirm" onclick="confirmarOk()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal bloqueo -->
+<div class="modal-bg" id="modalBlq">
+  <div class="modal">
+    <h3>🚫 Marcar como bloqueado</h3>
+    <div class="field"><label>¿Quién bloquea?</label>
+      <select id="blqPor">
+        <option value="Cliente">Cliente — no ha enviado material / feedback</option>
+        <option value="Interno">Interno — depende de otra persona del equipo</option>
+        <option value="Tecnico">Técnico — problema de herramienta / acceso</option>
+      </select>
+    </div>
+    <div class="field"><label>Detalle (opcional)</label>
+      <textarea id="blqMotivo" rows="2" placeholder="¿Qué falta para avanzar?"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel-m" onclick="cerrarModal('modalBlq')">Cancelar</button>
+      <button class="btn-ok-m" onclick="confirmarBloqueo()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="notifBar"></div>
+
+<script src="../assets/api.js"></script>
+<script>
+var OP_NOMBRE=(function(){try{return JSON.parse(sessionStorage.getItem('mc_usuario')).nombre||'';}catch(e){return '';}}());
+
+// ── Estado global ────────────────────────────────────────────────────────────
+var DATA = null;
+var TIMER = {activo:false, id:null, tipo:null, startTs:null, ivId:null, itemData:null};
+var MODAL_TARGET = null;
+
+// ── Utilidades ───────────────────────────────────────────────────────────────
+function esc(x){return String(x||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})}
+function pad(n){return String(n).padStart(2,'0')}
+function notif(msg,ok){
+  var el=document.getElementById('notifBar');
+  el.style.background=ok===false?'#DC2626':'#1A0A36';
+  el.textContent=msg; el.style.opacity='1';
+  clearTimeout(el._t); el._t=setTimeout(function(){el.style.opacity='0';},3500);
+}
+
+// ── Timer ────────────────────────────────────────────────────────────────────
+function iniciarTimer(id, tipo, nombre, marca, proyecto, tipoItem){
+  if(TIMER.activo) pararTimerVisual();
+  var startTs = Date.now();
+  TIMER = {activo:true, id:id, tipo:tipo, startTs:startTs, ivId:null,
+           itemData:{nombre:nombre,marca:marca,proyecto:proyecto,tipoProyecto:tipoItem}};
+  var bar = document.getElementById('timerBar');
+  document.getElementById('timerNombre').textContent = marca+' · '+nombre;
+  bar.classList.add('show');
+  TIMER.ivId = setInterval(function(){
+    var s=Math.floor((Date.now()-TIMER.startTs)/1000);
+    var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+    document.getElementById('timerClock').textContent=(h>0?pad(h)+':':'')+pad(m)+':'+pad(sec);
+  },1000);
+  // Llamar al servidor
+  var fn = tipo==='proyecto' ? 'op_pub_v2436_iniciarItem' : (tipo==='soporte' ? 'op_pub_iniciarSoporteTimer' : 'op_pub_v2436_iniciarItem');
+  google.script.run
+    .withSuccessHandler(function(r){ if(!r||r.ok===false) notif('Error al iniciar timer',false); })
+    .withFailureHandler(function(e){ notif('Error: '+e.message,false); })
+    [fn]({id:id});
+  cargar(); // refrescar cards
+}
+
+function pararTimerVisual(){
+  if(TIMER.ivId) clearInterval(TIMER.ivId);
+  document.getElementById('timerBar').classList.remove('show');
+  var copy = TIMER;
+  TIMER = {activo:false, id:null, tipo:null, startTs:null, ivId:null, itemData:null};
+  return copy;
+}
+
+function pararTimer(){
+  var t = pararTimerVisual();
+  if(!t.id) return;
+  var durMin = Math.max(1,Math.round((Date.now()-t.startTs)/60000));
+  MODAL_TARGET = {id:t.id, tipo:t.tipo, tiempoMin:durMin, itemData:t.itemData};
+  document.getElementById('okNotas').value='';
+  document.getElementById('modalOk').classList.add('show');
+}
+
+// ── Modales ──────────────────────────────────────────────────────────────────
+function abrirModalOk(id, tipo, nombre, marca, proyecto, tipoItem){
+  MODAL_TARGET = {id:id, tipo:tipo, tiempoMin:0, itemData:{nombre:nombre,marca:marca,proyecto:proyecto,tipoProyecto:tipoItem}};
+  document.getElementById('okNotas').value='';
+  document.getElementById('modalOk').classList.add('show');
+}
+function abrirModalBlq(id, tipo){
+  MODAL_TARGET = {id:id, tipo:tipo};
+  document.getElementById('blqMotivo').value='';
+  document.getElementById('modalBlq').classList.add('show');
+}
+function cerrarModal(id){document.getElementById(id).classList.remove('show');MODAL_TARGET=null;}
+
+function confirmarOk(){
+  if(!MODAL_TARGET) return;
+  var btn=document.getElementById('btnOkConfirm');
+  btn.disabled=true; btn.textContent='Guardando...';
+  var notas = document.getElementById('okNotas').value.trim() || 'Completado';
+  var data = Object.assign({}, MODAL_TARGET, {notas:notas});
+  var fn = MODAL_TARGET.tipo==='soporte' ? 'op_pub_terminarSoporteTimer' : 'op_pub_v2436_terminarItem';
+  google.script.run
+    .withSuccessHandler(function(r){
+      cerrarModal('modalOk');
+      btn.disabled=false; btn.textContent='Confirmar';
+      if(r&&r.ok!==false){
+        notif('✅ Completado'+(MODAL_TARGET.itemData?' · '+MODAL_TARGET.itemData.nombre:'')+(r.tiempoMin?' ('+r.tiempoMin+' min)':''));
+        cargar();
+      } else { notif('Error: '+(r&&r.msg||'?'),false); }
+    })
+    .withFailureHandler(function(e){cerrarModal('modalOk');btn.disabled=false;btn.textContent='Confirmar';notif('Error: '+e.message,false);})
+    [fn](data);
+}
+
+function confirmarBloqueo(){
+  if(!MODAL_TARGET) return;
+  var data = {id:MODAL_TARGET.id, bloqueadoPor:document.getElementById('blqPor').value, motivo:document.getElementById('blqMotivo').value};
+  google.script.run
+    .withSuccessHandler(function(r){
+      cerrarModal('modalBlq');
+      notif(r&&r.ok!==false?'🚫 Bloqueado marcado':'Error',r&&r.ok!==false);
+      cargar();
+    })
+    .withFailureHandler(function(e){cerrarModal('modalBlq');notif('Error: '+e.message,false);})
+    .op_pub_v2436_bloquearItem(data);
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function prioridad(item){
+  if(item.origenTipo==='soporte'){
+    if(/urgente|alta/i.test(item.prioridad||'')) return 0;
+    if(item.diasAbierto>3) return 1;
+    return 2;
+  }
+  if(/bloquead/i.test(item.estado||'')) return 0;
+  if((item.diasAlLimite||999)<=0) return 0;
+  if((item.diasAlLimite||999)<=1) return 1;
+  if((item.diasEnEstado||0)>3) return 1;
+  return 2;
+}
+
+function renderItem(item){
+  var esSop = item.origenTipo==='soporte';
+  var icono = esSop ? '🛠️' : (item.tipo==='SEO' ? '📈' : '🌐');
+  var estado = String(item.estado||'').trim();
+  var esBloq = /bloquead/i.test(estado);
+  var enProceso = /proceso/i.test(estado) || (TIMER.activo && TIMER.id===item.id);
+  var timerEsteItem = TIMER.activo && TIMER.id===item.id;
+
+  var badgeBg = esBloq?'#FEE2E2':enProceso?'#EFF6FF':'#F3F4F6';
+  var badgeFg = esBloq?'#DC2626':enProceso?'#1D4ED8':'#374151';
+  var badgeTxt = esBloq?('🚫 Bloqueado'+(item.bloqueadoPor?' ('+item.bloqueadoPor+')':'')):enProceso?'▶ En proceso':estado;
+
+  var meta = '<span class="badge" style="background:'+badgeBg+';color:'+badgeFg+'">'+esc(badgeTxt)+'</span>';
+  if(item.marca) meta+='<span class="tag">'+esc(item.marca)+'</span>';
+  if(!esSop && item.proyecto) meta+='<span class="tag">'+esc(item.proyecto)+'</span>';
+  if(!esSop && item.tipoItem) meta+='<span class="tag">'+esc(item.tipoItem)+'</span>';
+  if(esSop && item.tipoSoporte) meta+='<span class="tag">'+esc(item.tipoSoporte)+'</span>';
+  if(item.diasAbierto>0) meta+='<span style="color:#DC2626;font-size:9px">'+item.diasAbierto+'d abierto</span>';
+  if(item.diasEnEstado>0&&!esSop) meta+='<span style="color:'+(item.diasEnEstado>3?'#DC2626':'#78716C')+';font-size:9px">'+item.diasEnEstado+'d en esta fase</span>';
+  if(item.limite) meta+='<span style="font-size:9px;color:'+(item.diasAlLimite<=1?'#DC2626':item.diasAlLimite<=3?'#D97706':'#78716C')+'">Límite: '+item.limite+'</span>';
+
+  var acciones = '';
+  if(timerEsteItem){
+    acciones = '<span style="font-size:10px;color:var(--v);font-weight:600">⏱ corriendo</span>';
+  } else if(enProceso){
+    acciones = '<button class="btn-ok" onclick="abrirModalOk(\''+item.id+'\',\''+item.origenTipo+'\',\''+esc(item.nombre)+'\',\''+esc(item.marca)+'\',\''+esc(item.proyecto||'')+'\',\''+esc(item.tipo||'')+'\')">✅ Listo</button>';
+  } else if(!esBloq){
+    acciones =
+      '<button class="btn-ini" onclick="iniciarTimer(\''+item.id+'\',\''+item.origenTipo+'\',\''+esc(item.nombre)+'\',\''+esc(item.marca)+'\',\''+esc(item.proyecto||'')+'\',\''+esc(item.tipo||'')+'\')">▶</button>'+
+      '<button class="btn-ok" onclick="abrirModalOk(\''+item.id+'\',\''+item.origenTipo+'\',\''+esc(item.nombre)+'\',\''+esc(item.marca)+'\',\''+esc(item.proyecto||'')+'\',\''+esc(item.tipo||'')+'\')">✅</button>'+
+      '<button class="btn-blq" onclick="abrirModalBlq(\''+item.id+'\',\''+item.origenTipo+'\')">🚫</button>';
+  }
+
+  return '<div class="item">'+
+    '<div class="item-icon">'+icono+'</div>'+
+    '<div class="item-info">'+
+      '<div class="item-nombre">'+esc(esSop?item.nombre:(item.proyecto?item.proyecto+' · ':'')+item.nombre)+'</div>'+
+      '<div class="item-meta">'+meta+'</div>'+
+    '</div>'+
+    '<div class="item-actions">'+acciones+'</div>'+
+  '</div>';
+}
+
+function renderReunion(r){
+  return '<div class="reunion-card">'+
+    '<div class="reunion-hora">'+esc(r.hora||'')+'</div>'+
+    '<div class="reunion-info">'+
+      '<div class="reunion-titulo">'+esc(r.titulo)+'</div>'+
+      '<div class="reunion-meta">'+esc(r.tipo||'')+(r.participantes?' · '+esc(r.participantes):'')+'</div>'+
+      (r.link?'<a class="reunion-link" href="'+r.link+'" target="_blank">🔗 Abrir Meet</a>':'')+'</div>'+
+  '</div>';
+}
+
+function render(d){
+  if(!d || d.ok===false){
+    document.getElementById('scroll').innerHTML='<div class="loading-msg">Error cargando datos.<br>Pulsa ↻ para reintentar.</div>';
+    return;
+  }
+  DATA = d;
+  var hoy = new Date();
+  document.getElementById('hdrFecha').textContent =
+    hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'}).replace(/^\w/,function(c){return c.toUpperCase();});
+
+  // Restaurar timer si hay uno activo
+  if(d.timerActivo && !TIMER.activo){
+    TIMER.activo=true; TIMER.id=d.timerActivo.id; TIMER.startTs=d.timerActivo.startTs;
+    TIMER.tipo=d.timerActivo.tipo||'proyecto';
+    TIMER.itemData={nombre:d.timerActivo.nombre,marca:d.timerActivo.marca,proyecto:d.timerActivo.proyecto};
+    var bar=document.getElementById('timerBar');
+    document.getElementById('timerNombre').textContent=(d.timerActivo.marca||'')+' · '+(d.timerActivo.nombre||'');
+    bar.classList.add('show');
+    if(!TIMER.ivId) TIMER.ivId=setInterval(function(){
+      var s=Math.floor((Date.now()-TIMER.startTs)/1000);
+      var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+      document.getElementById('timerClock').textContent=(h>0?pad(h)+':':'')+pad(m)+':'+pad(sec);
+    },1000);
+  }
+
+  // Clasificar ítems (proyectos + soporte juntos)
+  var todos = (d.items||[]).concat(d.soporte||[]);
+  var bloq=[], urgentes=[], hoyD=[], manana=[], despues=[];
+  todos.forEach(function(item){
+    if(/bloquead/i.test(item.estado||'')){ bloq.push(item); return; }
+    var p=prioridad(item);
+    if(p===0) urgentes.push(item);
+    else if(p===1) hoyD.push(item);
+    else despues.push(item);
+  });
+
+  var html='';
+
+  // Reuniones de hoy
+  if((d.reuniones||[]).length){
+    html+='<div class="sec"><div class="sec-hdr" style="background:#EFF6FF;color:#1D4ED8">📅 Reuniones de hoy<span class="sec-count" style="background:#1D4ED8;color:#fff">'+d.reuniones.length+'</span></div><div class="sec-body">';
+    d.reuniones.forEach(function(r){html+=renderReunion(r);});
+    html+='</div></div>';
+  }
+
+  // Bloqueados
+  if(bloq.length){
+    html+='<div class="sec"><div class="sec-hdr" style="background:#FEE2E2;color:#DC2626">🚫 Bloqueados<span class="sec-count" style="background:#DC2626;color:#fff">'+bloq.length+'</span></div><div class="sec-body">';
+    bloq.forEach(function(i){html+=renderItem(i);});
+    html+='</div></div>';
+  }
+
+  // Urgentes / vencidos
+  if(urgentes.length){
+    html+='<div class="sec"><div class="sec-hdr" style="background:#FEF9C3;color:#92400E">🔴 Urgente / Vencido<span class="sec-count" style="background:#D97706;color:#fff">'+urgentes.length+'</span></div><div class="sec-body">';
+    urgentes.forEach(function(i){html+=renderItem(i);});
+    html+='</div></div>';
+  }
+
+  // Para hoy / sin mover
+  html+='<div class="sec"><div class="sec-hdr" style="background:var(--vl);color:var(--v)">🟡 Para hoy<span class="sec-count" style="background:var(--v);color:#fff">'+hoyD.length+'</span></div><div class="sec-body">';
+  html+=hoyD.length?hoyD.map(renderItem).join(''):'<div class="empty">Sin ítems urgentes para hoy ✅</div>';
+  html+='</div></div>';
+
+  // Cuando puedas
+  if(despues.length){
+    html+='<div class="sec"><div class="sec-hdr" style="background:#F0FDF9;color:#065F46">🟢 Cuando puedas<span class="sec-count" style="background:#059669;color:#fff">'+despues.length+'</span></div><div class="sec-body">';
+    despues.forEach(function(i){html+=renderItem(i);});
+    html+='</div></div>';
+  }
+
+  if(!todos.length && !(d.reuniones||[]).length){
+    html='<div class="loading-msg">🎉 ¡Sin pendientes por ahora!<br>Pulsa ↻ si acabas de recibir algo.</div>';
+  }
+
+  document.getElementById('scroll').innerHTML=html;
+}
+
+function cargar(){
+  document.getElementById('scroll').innerHTML='<div class="loading-msg">Cargando...</div>';
+  google.script.run
+    .withSuccessHandler(render)
+    .withFailureHandler(function(e){document.getElementById('scroll').innerHTML='<div class="loading-msg">Error: '+esc(e.message)+'</div>';})
+    .mc_v22_miDia_getData_pub();
+}
+
+cargar();
+</script>
+</body>
+</html>

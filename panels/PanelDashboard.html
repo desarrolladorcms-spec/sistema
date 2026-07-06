@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  background: #0F172A; color: #E2E8F0; font-size: 13px; min-height: 100vh;
+}
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; background: #1E1B4B;
+  border-bottom: 1px solid rgba(165,180,252,.15);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 34px; height: 34px; background: linear-gradient(135deg,#4F46E5,#7C3AED);
+  border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.logo-text { font-size: 14px; font-weight: 700; color: #EEF2FF; }
+.logo-sub  { font-size: 10px; color: #A5B4FC; }
+.btn-refresh {
+  background: rgba(165,180,252,.12); color: #A5B4FC;
+  border: 1px solid rgba(165,180,252,.2); border-radius: 7px;
+  padding: 6px 14px; font-size: 12px; cursor: pointer; font-weight: 600;
+  transition: all .15s;
+}
+.btn-refresh:hover { background: rgba(165,180,252,.22); }
+.content { padding: 16px; }
+/* Metric cards */
+.cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+.card {
+  background: #1E293B; border-radius: 12px; padding: 14px;
+  border: 1px solid rgba(255,255,255,.06);
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 12px 12px 0 0;
+}
+.card-purple::before { background: linear-gradient(90deg,#4F46E5,#7C3AED); }
+.card-green::before  { background: linear-gradient(90deg,#0F6E56,#1D9E75); }
+.card-amber::before  { background: linear-gradient(90deg,#B45309,#D97706); }
+.card-red::before    { background: linear-gradient(90deg,#991B1B,#DC2626); }
+.card-label { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; }
+.card-purple .card-label { color: #A5B4FC; }
+.card-green  .card-label { color: #6EE7B7; }
+.card-amber  .card-label { color: #FCD34D; }
+.card-red    .card-label { color: #FCA5A5; }
+.card-value { font-size: 30px; font-weight: 800; margin: 6px 0 2px; color: #F8FAFC; line-height: 1; }
+.card-sub   { font-size: 11px; color: #64748B; }
+.card-icon  { position: absolute; top: 14px; right: 14px; font-size: 22px; opacity: .25; }
+/* Rows */
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.row3 { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.panel {
+  background: #1E293B; border-radius: 12px; padding: 14px;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.panel-title {
+  font-size: 11px; font-weight: 700; color: #94A3B8;
+  text-transform: uppercase; letter-spacing: .7px; margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.badge {
+  font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+}
+/* Área bars */
+.area-item { margin-bottom: 10px; }
+.area-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+.area-name  { color: #CBD5E1; }
+.area-count { color: #64748B; font-size: 11px; }
+.bar-track { background: rgba(255,255,255,.07); border-radius: 4px; height: 7px; }
+.bar-fill  { height: 7px; border-radius: 4px; transition: width .6s ease; }
+/* Persona cards */
+.persona {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.persona:last-child { border-bottom: none; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.persona-name { font-size: 12px; font-weight: 600; color: #E2E8F0; }
+.persona-sub  { font-size: 11px; color: #64748B; }
+.persona-stat { margin-left: auto; text-align: right; }
+.persona-num  { font-size: 16px; font-weight: 800; color: #F8FAFC; }
+.persona-lbl  { font-size: 10px; color: #64748B; }
+/* Deadlines */
+.deadline {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.deadline:last-child { border-bottom: none; }
+.dl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.dl-title { font-size: 12px; color: #E2E8F0; line-height: 1.3; }
+.dl-meta  { font-size: 11px; color: #64748B; margin-top: 2px; }
+.dl-badge { flex-shrink: 0; margin-left: auto; }
+/* Loading */
+.loading { text-align: center; padding: 60px 20px; color: #475569; }
+.loading-dot { display: inline-block; width: 8px; height: 8px; background: #4F46E5; border-radius: 50%; animation: pulse 1.2s ease-in-out infinite; margin: 0 3px; }
+.loading-dot:nth-child(2) { animation-delay: .2s; }
+.loading-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes pulse { 0%,100% { opacity: .3; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.2); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🧠</div>
+    <div>
+      <div class="logo-text">Panel de Áreas</div>
+      <div class="logo-sub">Agencia Monstruo Creativo · CMS v3.0</div>
+    </div>
+  </div>
+  <button class="btn-refresh" onclick="cargarDatos()">↻ Actualizar</button>
+</div>
+
+<div class="content" id="main">
+  <div class="loading">
+    <div style="margin-bottom:16px">
+      <span class="loading-dot"></span>
+      <span class="loading-dot"></span>
+      <span class="loading-dot"></span>
+    </div>
+    <div style="font-size:13px">Cargando métricas...</div>
+  </div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+function cargarDatos() {
+  document.getElementById('main').innerHTML =
+    '<div class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span><div style="font-size:13px;margin-top:12px">Actualizando...</div></div>';
+  google.script.run
+    .withSuccessHandler(renderizar)
+    .withFailureHandler(function(e) {
+      document.getElementById('main').innerHTML =
+        '<div class="loading">❌ Error: ' + e.message + '</div>';
+    })
+    .mc_dash_getDatos();
+}
+
+function clr(v) {
+  return v < 0 ? '#DC2626' : v === 0 ? '#CA8A04' : '#1D9E75';
+}
+
+function pct(n, t) { return t > 0 ? Math.round(n/t*100) : 0; }
+
+function barColor(area) {
+  var m = { 'Web':'#4F46E5','SEO':'#1D9E75','Campañas':'#D97706',
+            'Soporte Técnico':'#DC2626','Admin':'#94A3B8' };
+  return m[area] || '#4F46E5';
+}
+
+function avatarColor(name) {
+  return name === 'Rossio' ? '#4F46E5' : name === 'Camila' ? '#1D9E75' : '#185FA5';
+}
+
+function alertaBadge(dias) {
+  if (dias === undefined || dias === null) return '';
+  var d = Number(dias);
+  var bg, col, txt;
+  if (d < 0) { bg='#FEE2E2'; col='#DC2626'; txt='🔴 Vencida'; }
+  else if (d===0) { bg='#FEE2E2'; col='#DC2626'; txt='🔴 Hoy'; }
+  else if (d<=2) { bg='#FEF3C7'; col='#B45309'; txt='🟠 '+d+'d'; }
+  else if (d<=7) { bg='#FFF9C4'; col='#92400E'; txt='🟡 '+d+'d'; }
+  else           { bg='#DCFCE7'; col='#15803D'; txt='🟢 '+d+'d'; }
+  return '<span class="badge" style="background:'+bg+';color:'+col+'">'+txt+'</span>';
+}
+
+function renderizar(d) {
+  if (!d) { document.getElementById('main').innerHTML='<div class="loading">Sin datos</div>'; return; }
+
+  var totalT = (d.totalRossio||0)+(d.totalCamila||0)+(d.totalLucy||0);
+  var compT  = (d.completasRossio||0)+(d.completasCamila||0)+(d.completasLucy||0);
+  var urgT   = d.urgentes || 0;
+  var vencT  = d.vencidas || 0;
+  var pctComp = pct(compT, totalT);
+
+  // ── Métrica cards ───────────────────────────────────────────────────────
+  var cardsHtml = '<div class="cards">'
+    +'<div class="card card-purple"><div class="card-icon">📋</div>'
+    +'<div class="card-label">Total Tareas</div><div class="card-value">'+totalT+'</div>'
+    +'<div class="card-sub">activas en el sistema</div></div>'
+
+    +'<div class="card card-green"><div class="card-icon">✅</div>'
+    +'<div class="card-label">% Completadas</div><div class="card-value">'+pctComp+'%</div>'
+    +'<div class="card-sub">'+compT+' de '+totalT+' tareas</div></div>'
+
+    +'<div class="card card-amber"><div class="card-icon">⚡</div>'
+    +'<div class="card-label">Urgentes</div><div class="card-value">'+urgT+'</div>'
+    +'<div class="card-sub">requieren atención hoy</div></div>'
+
+    +'<div class="card card-red"><div class="card-icon">🔴</div>'
+    +'<div class="card-label">Vencidas</div><div class="card-value">'+vencT+'</div>'
+    +'<div class="card-sub">necesitan acción inmediata</div></div>'
+    +'</div>';
+
+  // ── Por área + por persona ───────────────────────────────────────────────
+  var maxArea = 1;
+  var areas = d.areas || {};
+  Object.keys(areas).forEach(function(a){ if((areas[a].total||0)>maxArea) maxArea=areas[a].total; });
+
+  var areasHtml = '';
+  Object.keys(areas).forEach(function(a) {
+    var ai = areas[a];
+    var w = pct(ai.total||0, maxArea);
+    areasHtml += '<div class="area-item">'
+      +'<div class="area-header"><span class="area-name">'+a+'</span>'
+      +'<span class="area-count">'+((ai.completas||0))+'/'+(ai.total||0)+'</span></div>'
+      +'<div class="bar-track"><div class="bar-fill" style="width:'+w+'%;background:'+barColor(a)+'"></div></div>'
+      +'</div>';
+  });
+
+  var personasHtml = '';
+  var personas = [
+    {n:'Rossio',  t:d.totalRossio||0,  c:d.completasRossio||0},
+    {n:'Camila',  t:d.totalCamila||0,  c:d.completasCamila||0},
+    {n:'Lucy',    t:d.totalLucy||0,    c:d.completasLucy||0}
+  ];
+  personas.forEach(function(p) {
+    var pp = pct(p.c, p.t);
+    personasHtml += '<div class="persona">'
+      +'<div class="avatar" style="background:'+avatarColor(p.n)+'">'+p.n[0]+'</div>'
+      +'<div><div class="persona-name">'+p.n+'</div>'
+      +'<div class="persona-sub">'+p.c+' completadas de '+p.t+'</div></div>'
+      +'<div class="persona-stat"><div class="persona-num">'+pp+'%</div>'
+      +'<div class="persona-lbl">avance</div></div>'
+      +'</div>';
+  });
+
+  // ── Próximas entregas ────────────────────────────────────────────────────
+  var deadlinesHtml = '';
+  var dl = d.deadlines || [];
+  if (dl.length === 0) {
+    deadlinesHtml = '<div style="color:#475569;font-size:12px;text-align:center;padding:20px">🟢 Sin entregas urgentes</div>';
+  } else {
+    dl.slice(0, 8).forEach(function(item) {
+      var dc = item.dias < 0 ? '#DC2626' : item.dias <= 2 ? '#D97706' : '#1D9E75';
+      deadlinesHtml += '<div class="deadline">'
+        +'<div class="dl-dot" style="background:'+dc+'"></div>'
+        +'<div><div class="dl-title">'+item.tarea+'</div>'
+        +'<div class="dl-meta">'+item.persona+' · '+item.marca+'</div></div>'
+        +'<div class="dl-badge">'+alertaBadge(item.dias)+'</div>'
+        +'</div>';
+    });
+  }
+
+  var html = cardsHtml
+    +'<div class="row2">'
+      +'<div class="panel"><div class="panel-title">Por área <span class="badge" style="background:rgba(165,180,252,.15);color:#A5B4FC">'+Object.keys(areas).length+' áreas</span></div>'+areasHtml+'</div>'
+      +'<div class="panel"><div class="panel-title">Por trabajadora</div>'+personasHtml+'</div>'
+    +'</div>'
+    +'<div class="panel"><div class="panel-title">Próximas entregas <span class="badge" style="background:rgba(165,180,252,.15);color:#A5B4FC">'+dl.length+' tareas</span></div>'+deadlinesHtml+'</div>';
+
+  document.getElementById('main').innerHTML = html;
+}
+
+// Cargar al abrir
+cargarDatos();
+</script>
+
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body>
+</html>

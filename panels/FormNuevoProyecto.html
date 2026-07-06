@@ -1,0 +1,265 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--green:#059669;--amber:#D97706;--red:#DC2626}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:linear-gradient(120deg,#1E1B4B,#4C1D95);color:#fff;padding:12px 18px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700;color:#FDE68A;margin-bottom:1px}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.scroll{flex:1;overflow-y:auto;padding:14px 16px}
+.card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s2{grid-column:1/-1}
+.f label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:4px}
+.f select,.f input,.f textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;color:var(--text);background:#FAFBFC;transition:.15s}
+.f select:focus,.f input:focus{outline:none;border-color:var(--v);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.07)}
+
+/* Tipo de proyecto — selector visual grande */
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tipo-opt{padding:14px;border:2px solid var(--border);border-radius:14px;cursor:pointer;transition:.15s;background:var(--surface);text-align:center;position:relative}
+.tipo-opt:hover{border-color:var(--v);background:var(--vl)}
+.tipo-opt.sel{border-color:var(--v);background:var(--vl)}
+.tipo-opt.sel::after{content:'✓';position:absolute;top:8px;right:10px;width:18px;height:18px;background:var(--v);color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tipo-icon{font-size:26px;margin-bottom:6px}
+.tipo-nombre{font-size:12px;font-weight:700;color:var(--text)}
+.tipo-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* Items de checklist */
+.items-section{margin-top:14px}
+.items-section-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.item-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:9px;margin-bottom:5px;border:1.5px solid transparent;transition:.15s}
+.item-row:hover{border-color:var(--border)}
+.item-chk{width:16px;height:16px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.15s}
+.item-chk.on{background:var(--v);border-color:var(--v);color:#fff}
+.item-chk.on::after{content:'✓';font-size:10px;font-weight:700}
+.item-chk input{display:none}
+.item-txt{flex:1;padding:4px 7px;border:none;background:transparent;font-size:12px;font-family:inherit;color:var(--text);min-width:0}
+.item-txt:focus{outline:none}
+.item-tipo-tag{font-size:9px;background:var(--vl);color:#5B21B6;padding:2px 7px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.item-del{background:none;border:none;cursor:pointer;color:var(--faint);font-size:16px;line-height:1;flex-shrink:0;transition:.15s}
+.item-del:hover{color:var(--red)}
+.btn-add-item{width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:9px;background:none;cursor:pointer;font-size:11px;color:var(--muted);transition:.15s;margin-top:4px}
+.btn-add-item:hover{border-color:var(--v);color:var(--v);background:var(--vl)}
+
+/* Responsable chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.chip{padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--v);color:var(--v);background:var(--vl)}
+.chip.on{background:var(--v);border-color:var(--v);color:#fff}
+
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.footer-info{font-size:10px;color:var(--faint)}
+.btn{padding:9px 18px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-ghost{background:var(--bg);color:var(--muted)}
+.btn-create{background:var(--v);color:#fff}
+.btn-create:hover{background:var(--vd);box-shadow:0 4px 12px rgba(124,58,237,.3)}
+.btn-create:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr"><h1>📦 Nuevo Proyecto</h1><p>Crea el proyecto y define los ítems del checklist</p></div>
+<div class="scroll">
+  <!-- Tipo de proyecto -->
+  <div class="card"><div class="card-title">¿Qué tipo de proyecto es?</div>
+    <div class="tipo-grid">
+      <div class="tipo-opt sel" id="tipoWeb" onclick="selTipo('Web')">
+        <div class="tipo-icon">🌐</div>
+        <div class="tipo-nombre">Proyecto Web</div>
+        <div class="tipo-desc">Landing page, sitio corporativo, e-commerce</div>
+      </div>
+      <div class="tipo-opt" id="tipoSEO" onclick="selTipo('SEO')">
+        <div class="tipo-icon">📈</div>
+        <div class="tipo-nombre">SEO Mensual</div>
+        <div class="tipo-desc">Posicionamiento orgánico en Google</div>
+      </div>
+      <div class="tipo-opt" id="tipoCampanas" onclick="selTipo('Campañas + Soporte Técnico')">
+        <div class="tipo-icon">📣</div>
+        <div class="tipo-nombre">Campañas + Soporte</div>
+        <div class="tipo-desc">Google Ads con soporte web incluido</div>
+      </div>
+      <div class="tipo-opt" id="tipoOtro" onclick="selTipo('Otro')">
+        <div class="tipo-icon">⚙️</div>
+        <div class="tipo-nombre">Otro / Personalizado</div>
+        <div class="tipo-desc">Define los ítems manualmente</div>
+      </div>
+    </div>
+    <input type="hidden" id="tipoHidden" value="Web">
+  </div>
+
+  <!-- Datos del proyecto -->
+  <div class="card"><div class="card-title">Datos del proyecto</div>
+    <div class="g2">
+      <div class="f"><label>Cliente / Marca *</label>
+        <select id="marca" onchange="onMarcaChange()"><option value="">— Seleccionar —</option></select></div>
+      <div class="f"><label>Nombre del proyecto *</label>
+        <input type="text" id="proyecto" placeholder="Ej: Sitio Web Voltwell 2026"></div>
+      <div class="f"><label>Área</label>
+        <select id="area">
+          <option>Web</option><option>SEO</option><option>ADS</option>
+          <option>Diseño</option><option>Gestión</option>
+        </select></div>
+      <div class="f"><label>Responsable principal</label>
+        <div class="chips" id="chkResp">
+          <div class="chip" data-v="Rossio">🧠 Rossio</div>
+          <div class="chip on" data-v="Camila">🎨 Camila</div>
+          <div class="chip" data-v="Lucy">🌐 Lucy</div>
+        </div>
+        <input type="hidden" id="respHidden" value="Camila">
+      </div>
+      <div class="f"><label>Fecha límite</label>
+        <input type="date" id="limite"></div>
+      <div class="f"><label>Link carpeta Drive</label>
+        <input type="url" id="linkDrive" placeholder="https://drive.google.com/..."></div>
+    </div>
+  </div>
+
+  <!-- Items del checklist -->
+  <div class="card">
+    <div class="card-title">
+      Ítems del proyecto (checklist)
+      <span id="itemCount" style="font-size:10px;color:var(--v);font-weight:700;text-transform:none;letter-spacing:0">0 ítems</span>
+    </div>
+    <div id="itemsList"></div>
+    <button class="btn-add-item" onclick="addItem()">＋ Agregar ítem personalizado</button>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-info" id="fInfo">Selecciona el cliente para continuar</div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost" onclick="google.script.host.close()">Cancelar</button>
+    <button class="btn btn-create" id="btnCreate" onclick="crear()">📦 Crear proyecto</button>
+  </div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+var TIPO='Web', TIPO_ID={
+  'Web':'tipoWeb','SEO':'tipoSEO','Campañas + Soporte Técnico':'tipoCampanas','Otro':'tipoOtro'
+};
+var MARCAS=[];
+// Cargar marcas desde el backend
+MC_API.call('mc_proyectos_getMarcas',{},function(m){MARCAS=Array.isArray(m)?m:[];MARCAS.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;document.getElementById('marca').appendChild(o);});});
+
+var TEMPLATES={
+  'Web':[
+    {nombre:'Briefing del cliente',tipo:'Inicio'},
+    {nombre:'Diseño mockup / wireframe',tipo:'Diseño'},
+    {nombre:'Configuración de hosting y dominio',tipo:'Técnico'},
+    {nombre:'Instalación de WordPress y tema',tipo:'Técnico'},
+    {nombre:'Configuración de plugins esenciales',tipo:'Técnico'},
+    {nombre:'Desarrollo de páginas principales',tipo:'Desarrollo'},
+    {nombre:'Carga de textos e imágenes',tipo:'Contenido'},
+    {nombre:'Configuración SEO básico (Rank Math)',tipo:'SEO'},
+    {nombre:'Optimización de velocidad',tipo:'Técnico'},
+    {nombre:'Test en mobile y tablet',tipo:'QA'},
+    {nombre:'Revisión interna (Rossio)',tipo:'Revisión'},
+    {nombre:'Demo al cliente',tipo:'Cliente'},
+    {nombre:'Correcciones finales',tipo:'Desarrollo'},
+    {nombre:'Registro de accesos',tipo:'Entrega'},
+    {nombre:'Go live / publicación',tipo:'Entrega'}
+  ],
+  'SEO':[
+    {nombre:'Briefing del cliente',tipo:'Inicio'},
+    {nombre:'Auditoría SEO inicial',tipo:'Análisis'},
+    {nombre:'Investigación de keywords',tipo:'Análisis'},
+    {nombre:'Configuración GSC y GA4',tipo:'Técnico'},
+    {nombre:'Optimización on-page mes 1',tipo:'SEO'},
+    {nombre:'Creación de contenido mes 1',tipo:'Contenido'},
+    {nombre:'Reporte mensual',tipo:'Reporte'}
+  ],
+  'Campañas + Soporte Técnico':[
+    {nombre:'Briefing ADS + web',tipo:'Inicio'},
+    {nombre:'Configuración soporte mensual',tipo:'Técnico'},
+    {nombre:'Revisión inicial del sitio',tipo:'QA'},
+    {nombre:'Reporte mensual',tipo:'Reporte'}
+  ],
+  'Otro':[]
+};
+var itemN=0;
+
+// Inicializar
+MARCAS.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;document.getElementById('marca').appendChild(o);});
+document.getElementById('limite').value=(function(){var d=new Date();d.setMonth(d.getMonth()+1);return d.toISOString().split('T')[0];})();
+
+// Chips responsable
+document.querySelectorAll('#chkResp .chip').forEach(function(c){
+  c.addEventListener('click',function(){
+    document.querySelectorAll('#chkResp .chip').forEach(function(x){x.classList.remove('on');});
+    c.classList.add('on');document.getElementById('respHidden').value=c.dataset.v;
+  });
+});
+
+function selTipo(t){
+  TIPO=t;
+  Object.values(TIPO_ID).forEach(function(id){document.getElementById(id).classList.remove('sel');});
+  if(TIPO_ID[t]) document.getElementById(TIPO_ID[t]).classList.add('sel');
+  document.getElementById('tipoHidden').value=t;
+  cargarTemplate(t);
+}
+
+function cargarTemplate(tipo){
+  var items=TEMPLATES[tipo]||[];
+  var list=document.getElementById('itemsList');
+  list.innerHTML='';itemN=0;
+  items.forEach(function(it){addItemRow(it.nombre,it.tipo,true);});
+  updateCount();
+}
+
+function addItemRow(nombre,tipo,checked){
+  var id='item-'+itemN++;
+  var div=document.createElement('div');div.className='item-row';div.id=id;
+  div.innerHTML='<div class="item-chk'+(checked?' on':'')+'" onclick="toggleItem(this)"></div>'+
+    '<input class="item-txt" type="text" value="'+esc(nombre)+'" placeholder="Nombre del ítem" oninput="updateCount()">'+
+    (tipo?'<span class="item-tipo-tag">'+esc(tipo)+'</span>':'')+
+    '<button class="item-del" onclick="document.getElementById(\''+id+'\').remove();updateCount()">×</button>';
+  document.getElementById('itemsList').appendChild(div);
+  updateCount();
+}
+
+function addItem(){addItemRow('','',true);}
+
+function toggleItem(el){el.classList.toggle('on');}
+
+function updateCount(){
+  var rows=document.querySelectorAll('.item-row').length;
+  document.getElementById('itemCount').textContent=rows+' ítem'+(rows!==1?'s':'');
+}
+
+function onMarcaChange(){
+  var m=document.getElementById('marca').value;
+  document.getElementById('fInfo').textContent=m?('Proyecto para: '+m):'Selecciona el cliente para continuar';
+}
+
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function crear(){
+  var marca=document.getElementById('marca').value;
+  var proyecto=document.getElementById('proyecto').value.trim();
+  if(!marca){alert('Selecciona el cliente.');return;}
+  if(!proyecto){alert('Escribe el nombre del proyecto.');return;}
+  var items=[];
+  document.querySelectorAll('.item-row').forEach(function(row){
+    var txt=row.querySelector('.item-txt').value.trim();
+    var checked=row.querySelector('.item-chk').classList.contains('on');
+    var tag=row.querySelector('.item-tipo-tag');
+    if(txt) items.push({nombre:txt,tipo:tag?tag.textContent:'',incluido:checked});
+  });
+  var btn=document.getElementById('btnCreate');btn.disabled=true;btn.textContent='Creando...';
+  google.script.run
+    .withSuccessHandler(function(r){btn.disabled=false;btn.textContent='📦 Crear proyecto';
+      if(r&&r.ok!==false){alert('✅ Proyecto creado: '+proyecto+(r.itemsCreados?' ('+r.itemsCreados+' ítems)':''));google.script.host.close();}
+      else alert('Error: '+(r&&r.msg||'?'));})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='📦 Crear proyecto';alert('Error: '+e.message);})
+    .mc_pub_v2436_crearProyecto({
+      marca:marca,proyecto:proyecto,tipo:TIPO,
+      area:document.getElementById('area').value,
+      responsable:document.getElementById('respHidden').value,
+      limite:document.getElementById('limite').value,
+      linkDrive:document.getElementById('linkDrive').value,
+      items:items.filter(function(i){return i.incluido;})
+    });
+}
+
+// Cargar template inicial
+cargarTemplate('Web');
+</script></body></html>

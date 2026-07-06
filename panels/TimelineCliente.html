@@ -1,0 +1,87 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#111827}
+header{background:linear-gradient(120deg,#1A0A36,#3b0764,#9333EA);color:#fff;padding:18px 22px}
+.title{font-size:20px;font-weight:950}.sub{font-size:12px;opacity:.8;margin-top:3px}
+.toolbar{padding:10px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:8px 14px;background:#9333EA;color:#fff;font-weight:800;cursor:pointer;font-size:12px}
+.select{border:1px solid #e5e7eb;border-radius:10px;padding:8px 12px;font-size:13px;background:#fff;min-width:200px}
+.content{padding:14px 16px 24px}
+.client-card{background:linear-gradient(135deg,#ede9fe,#faf5ff);border:1px solid #ddd6fe;border-radius:18px;padding:14px;margin-bottom:14px}
+.client-name{font-size:17px;font-weight:950;color:#4c1d95}
+.client-meta{font-size:12px;color:#7c3aed;margin-top:4px}
+.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800;margin:2px 4px 2px 0}
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#ddd6fe,#e5e7eb)}
+.event{position:relative;margin-bottom:12px}
+.event::before{content:'';position:absolute;left:-22px;top:8px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px}
+.ev-proyecto::before{background:#7c3aed;box-shadow:0 0 0 2px #7c3aed}
+.ev-soporte::before{background:#d97706;box-shadow:0 0 0 2px #d97706}
+.ev-solicitud::before{background:#0284c7;box-shadow:0 0 0 2px #0284c7}
+.ev-reunion::before{background:#059669;box-shadow:0 0 0 2px #059669}
+.ev-demo::before{background:#dc2626;box-shadow:0 0 0 2px #dc2626}
+.ev-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px}
+.ev-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ev-title{font-size:13px;font-weight:800;color:#111827}
+.ev-date{font-size:11px;color:#94a3b8;flex-shrink:0}
+.ev-detail{font-size:12px;color:#64748b;margin-top:3px;line-height:1.4}
+.ev-estado{font-size:11px;font-weight:700;margin-top:4px}
+.p-pry{background:#ede9fe;color:#6b21a8}.p-sup{background:#fef3c7;color:#92400e}
+.p-sol{background:#dbeafe;color:#1e40af}.p-reu{background:#dcfce7;color:#166534}.p-dem{background:#fee2e2;color:#b91c1c}
+.filter-types{display:flex;gap:6px;flex-wrap:wrap}
+.ftype{border:1px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;background:#f8fafc}
+.ftype.active{background:#f3e8ff;border-color:#9333EA;color:#7c3aed}
+.loading{padding:30px;text-align:center;color:#667085}
+.empty{padding:20px;text-align:center;color:#94a3b8;border:1px dashed #cbd5e1;border-radius:14px}
+</style></head><body>
+<header><div class="title">⏱️ Timeline del Cliente</div><div class="sub">Historial cronológico completo de interacciones</div></header>
+<div class="toolbar">
+  <select id="marca" class="select" onchange="loadTimeline()"><option value="">— Seleccionar cliente —</option></select>
+  <div class="filter-types">
+    <button class="ftype active" data-tipo="proyecto" onclick="toggleFilter(this)">📦 Proyectos</button>
+    <button class="ftype active" data-tipo="soporte" onclick="toggleFilter(this)">🛠️ Soporte</button>
+    <button class="ftype active" data-tipo="solicitud" onclick="toggleFilter(this)">📋 Solicitudes</button>
+    <button class="ftype active" data-tipo="reunion" onclick="toggleFilter(this)">📅 Reuniones</button>
+    <button class="ftype active" data-tipo="demo" onclick="toggleFilter(this)">🧪 Demos</button>
+  </div>
+</div>
+<div class="content" id="app"><div class="empty">Selecciona un cliente para ver su historial completo</div></div>
+<script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+var activeFilters=new Set(['proyecto','soporte','solicitud','reunion','demo']);
+var allData=null;
+var tipoCls={proyecto:'p-pry',soporte:'p-sup',solicitud:'p-sol',reunion:'p-reu',demo:'p-dem'};
+var tipoEvCls={proyecto:'ev-proyecto',soporte:'ev-soporte',solicitud:'ev-solicitud',reunion:'ev-reunion',demo:'ev-demo'};
+google.script.run.withSuccessHandler(function(ms){var s=document.getElementById('marca');ms.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;s.appendChild(o);});}).mc_v23_getMarcas_pub();
+function toggleFilter(btn){var t=btn.dataset.tipo;if(activeFilters.has(t)){activeFilters.delete(t);btn.classList.remove('active');}else{activeFilters.add(t);btn.classList.add('active');}if(allData) renderTimeline(allData);}
+function renderTimeline(d){
+  allData=d;
+  if(!d||!d.ok){document.getElementById('app').innerHTML='<div class="empty">Sin datos</div>';return;}
+  var ev=(d.eventos||[]).filter(e=>activeFilters.has(e.tipo));
+  var cli=d.cliente||{};
+  var html='<div class="client-card"><div class="client-name">'+esc(cli.marca||d.marca)+'</div>';
+  html+='<div class="client-meta"><span class="pill" style="background:#ede9fe;color:#6b21a8">'+esc(cli.plan||'-')+'</span>';
+  html+='<span class="pill" style="background:#dcfce7;color:#166534">'+esc(cli.estado||'-')+'</span>';
+  html+='<span class="pill" style="background:#f0f9ff;color:#0369a1">'+esc(cli.resp||'-')+'</span></div>';
+  html+='<div style="font-size:12px;color:#6b21a8;margin-top:6px">'+ev.length+' evento(s) en el historial</div></div>';
+  if(!ev.length){html+='<div class="empty">Sin eventos para los filtros seleccionados</div>';document.getElementById('app').innerHTML=html;return;}
+  html+='<div class="timeline">';
+  ev.forEach(function(e){
+    var evCls=tipoEvCls[e.tipo]||'';
+    var pillCls=tipoCls[e.tipo]||'';
+    html+='<div class="event '+evCls+'"><div class="ev-card">';
+    html+='<div class="ev-header"><div class="ev-title">'+esc(e.icono)+' '+esc(e.titulo)+'</div><div class="ev-date">'+esc(e.fecha)+'</div></div>';
+    if(e.detalle) html+='<div class="ev-detail">'+esc(e.detalle)+'</div>';
+    if(e.estado) html+='<div class="ev-estado"><span class="pill '+pillCls+'">'+esc(e.estado)+'</span></div>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+  document.getElementById('app').innerHTML=html;
+}
+function loadTimeline(){
+  var m=document.getElementById('marca').value;
+  if(!m){document.getElementById('app').innerHTML='<div class="empty">Selecciona un cliente para ver su historial</div>';return;}
+  document.getElementById('app').innerHTML='<div class="loading">Cargando historial de '+esc(m)+'...</div>';
+  google.script.run.withSuccessHandler(renderTimeline).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>'}).mc_v23_timelineCliente_getData_pub(m);
+}
+</script></body></html>

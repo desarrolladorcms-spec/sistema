@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F8F5FF;color:#1A0A36;font-size:13px}
+:root{--v:#9333EA;--dark:#1A0A36;--gold:#FDE68A}
+.toolbar{background:var(--dark);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar h1{font-size:14px;font-weight:700;color:var(--gold);flex:1}
+select.sel{padding:6px 10px;border:none;border-radius:6px;font-size:11px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+.btn-t{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600}
+.btn-gsc{background:var(--v);color:#fff}
+.btn-pdf{background:#059669;color:#fff}
+.btn-diag{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+#body{padding:18px;max-width:900px;margin:0 auto}
+.loading{text-align:center;padding:40px;color:#9CA3AF;font-size:13px}
+
+/* Print */
+@media print{.toolbar{display:none!important}#body{padding:10px;max-width:100%}}
+
+/* Encabezado reporte */
+.rep-hdr{text-align:center;padding:16px 0;border-bottom:3px solid var(--v);margin-bottom:18px}
+.rep-agencia{font-size:10px;color:#78716C;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.rep-titulo{font-size:20px;font-weight:800;color:var(--dark)}
+.rep-meta{font-size:12px;color:var(--v);font-weight:600;margin-top:2px}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.kpi-c{background:#fff;border-radius:8px;border:1px solid #E5E7EB;padding:12px;text-align:center}
+.kpi-n{font-size:22px;font-weight:800;color:var(--v)}
+.kpi-l{font-size:9px;color:#78716C;margin-top:2px}
+
+/* Tabla keywords */
+.tabla{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;margin-bottom:16px;font-size:11px}
+.tabla th{background:#1A0A36;color:#FDE68A;padding:6px 10px;text-align:left;font-size:10px}
+.tabla td{padding:6px 10px;border-bottom:1px solid #F3F4F6}
+.tabla tr:last-child td{border-bottom:none}
+.cambio-pos{font-weight:700}
+.cambio-mejor{color:#059669}
+.cambio-peor{color:#DC2626}
+.top10-badge{background:#D1FAE5;color:#065F46;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700}
+
+/* Contenido */
+.contenido-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:16px}
+.contenido-card{background:#fff;border-radius:8px;border:1px solid #E5E7EB;padding:10px}
+.contenido-tipo{font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 6px;border-radius:4px;margin-bottom:5px;display:inline-block}
+.contenido-titulo{font-size:11px;font-weight:600;margin-bottom:3px}
+.contenido-url{font-size:10px;color:#78716C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Aviso GSC */
+.aviso{background:#FEF9C3;border:1px solid #D97706;border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px}
+.aviso b{color:#92400E}
+.sec-title{font-size:13px;font-weight:800;color:var(--dark);margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>📈 Reporte SEO</h1>
+  <select class="sel" id="selCliente" onchange="cargar()"><option value="">— Seleccionar cliente —</option></select>
+  <select class="sel" id="selMes" onchange="cargar()"></select>
+  <button class="btn-t btn-diag" onclick="diagnosticar()">🔌 Verificar GSC</button>
+  <button class="btn-t btn-gsc" onclick="actualizarGSC()">↻ Actualizar GSC</button>
+  <button class="btn-t btn-pdf" onclick="window.print()">🖨️ PDF</button>
+</div>
+
+<div id="body"><div class="loading">Selecciona un cliente y mes para ver el reporte.</div></div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})}
+
+// Meses
+(function(){
+  var sel=document.getElementById('selMes'),now=new Date();
+  for(var i=0;i<=5;i++){
+    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    var v=d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1);
+    var opt=document.createElement('option');
+    opt.value=v;opt.textContent=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][d.getMonth()]+' '+d.getFullYear();
+    if(i===1)opt.selected=true;
+    sel.appendChild(opt);
+  }
+})();
+
+// Cargar clientes SEO
+google.script.run
+  .withSuccessHandler(function(clientes){
+    var sel=document.getElementById('selCliente');
+    (clientes||[]).forEach(function(c){
+      var o=document.createElement('option');o.value=c.marca;
+      o.textContent=c.marca+(c.responsable?' ('+c.responsable+')':'');
+      sel.appendChild(o);
+    });
+  })
+  .mc_pub_getClientesSEO();
+
+function cargar(){
+  var marca=document.getElementById('selCliente').value;
+  var mes=document.getElementById('selMes').value;
+  if(!marca){document.getElementById('body').innerHTML='<div class="loading">Selecciona un cliente.</div>';return;}
+  document.getElementById('body').innerHTML='<div class="loading">Generando reporte...</div>';
+  google.script.run
+    .withSuccessHandler(renderReporte)
+    .withFailureHandler(function(e){document.getElementById('body').innerHTML='<div class="loading" style="color:#DC2626">Error: '+esc(e.message)+'</div>';})
+    .mc_pub_getReporteSEO(marca,mes);
+}
+
+function renderReporte(d){
+  if(!d||d.ok===false){document.getElementById('body').innerHTML='<div class="loading" style="color:#DC2626">'+esc(d&&d.msg||'Error')+'</div>';return;}
+  var t=d.totales||{}, mes=d.mes||'';
+  var mesLbl=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][parseInt(mes.split('-')[1])-1]+' '+mes.split('-')[0];
+  var html='';
+  // Header
+  html+='<div class="rep-hdr"><div class="rep-agencia">Agencia Monstruo Creativo · Reporte SEO</div>'+
+    '<div class="rep-titulo">'+esc(d.marca)+'</div>'+
+    '<div class="rep-meta">'+mesLbl+' · '+esc(d.config&&d.config.dominio||'')+'</div></div>';
+  // Aviso si no hay datos GSC
+  if(!d.mejores||!d.mejores.length){
+    html+='<div class="aviso">⚠️ <b>Sin datos de Google Search Console para este período.</b><br>Para obtener datos: asegura que la PROPIEDAD GSC esté configurada en la hoja 📊 SEO - Config, y usa el botón "↻ Actualizar GSC" en la barra superior.<br><br>Puedes completar los datos manualmente directamente en la hoja 📊 SEO - Seguimiento.</div>';
+  }
+  // KPIs
+  html+='<div class="kpi-grid">'+
+    kpi(t.clics||0,'Clics totales')+
+    kpi(t.impresiones||0,'Impresiones')+
+    kpi(t.top10||0,'Keywords top 10')+
+    kpi(t.keywords||0,'Keywords rastreadas')+
+    kpi(t.contenidos||0,'Contenidos publicados')+
+  '</div>';
+  // Keywords
+  if(d.mejores&&d.mejores.length){
+    html+='<div class="sec-title">🔑 Keywords con más clics</div>';
+    html+='<table class="tabla"><thead><tr><th>Keyword</th><th>Pos.</th><th>Cambio</th><th>Clics</th><th>Impr.</th><th>CTR</th><th>URL</th></tr></thead><tbody>';
+    d.mejores.forEach(function(k){
+      var cambTxt=k.cambio?'<span class="cambio-pos '+(k.cambio<0?'cambio-mejor':'cambio-peor')+'">'+(k.cambio<0?'↑'+Math.abs(k.cambio):'↓'+k.cambio)+'</span>':'—';
+      var top10=Number(k.posActual)<=10?'<span class="top10-badge">TOP 10</span>':'';
+      html+='<tr><td>'+esc(k.keyword)+' '+top10+'</td><td>'+k.posActual+'</td><td>'+cambTxt+'</td><td><b>'+k.clics+'</b></td><td>'+k.impresiones+'</td><td>'+esc(k.ctr||'—')+'</td><td><a href="'+esc(k.url||'')+'" target="_blank" style="color:#9333EA;font-size:10px">'+esc((k.url||'').replace(/https?:\/\//,'').substring(0,30))+'</a></td></tr>';
+    });
+    html+='</tbody></table>';
+  }
+  // Contenido publicado
+  if(d.contenidos&&d.contenidos.length){
+    html+='<div class="sec-title">📝 Contenido publicado este mes</div>';
+    html+='<div class="contenido-grid">';
+    d.contenidos.forEach(function(c){
+      html+='<div class="contenido-card">'+
+        '<div class="contenido-tipo">'+esc(c.tipo||'Artículo')+'</div>'+
+        '<div class="contenido-titulo">'+esc(c.titulo)+'</div>'+
+        (c.url?'<div class="contenido-url"><a href="'+esc(c.url)+'" target="_blank" style="color:#9333EA">'+esc(c.url.replace(/https?:\/\//,''))+'</a></div>':'')+
+      '</div>';
+    });
+    html+='</div>';
+  }
+  document.getElementById('body').innerHTML=html;
+}
+
+function kpi(n,l){return '<div class="kpi-c"><div class="kpi-n">'+n+'</div><div class="kpi-l">'+esc(l)+'</div></div>';}
+
+function diagnosticar(){
+  alert('Verificando conexión GSC...');
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r&&r.ok){
+        var sitios=(r.sitios||[]).join('\n');
+        alert('✅ GSC conectado correctamente.\n\nSitios disponibles:\n'+sitios);
+      } else {
+        alert('❌ GSC no conectado.\n\nError: '+r.msg+'\n\n📋 Para conectar:\n1. Abre el editor de Apps Script\n2. Archivo → Configuración del proyecto\n3. Agrega el servicio: Search Console API\n   o añade en appsscript.json:\n   "oauthScopes": ["https://www.googleapis.com/auth/webmasters.readonly"]\n4. Vuelve a autorizar el script');
+      }
+    })
+    .withFailureHandler(function(e){alert('Error: '+e.message);})
+    .mc_pub_diagnosticarGSC();
+}
+
+function actualizarGSC(){
+  if(!confirm('¿Actualizar datos de GSC? Esto puede tardar 1-2 minutos.')) return;
+  document.getElementById('body').innerHTML='<div class="loading">Actualizando datos de GSC...</div>';
+  google.script.run
+    .withSuccessHandler(function(r){
+      alert(r&&r.ok!==false?'✅ GSC actualizado correctamente.':'Error: '+(r&&r.msg||'?'));
+      cargar();
+    })
+    .withFailureHandler(function(e){alert('Error: '+e.message);cargar();})
+    .mc_pub_ejecutarGSC();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--dark:#1A0A36;--violet:#9333EA;--orange:#EA580C}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#111827}
+header{background:linear-gradient(120deg,#1A0A36,#3b0764,#ea580c);color:#fff;padding:18px 22px}
+.title{font-size:20px;font-weight:950}.sub{font-size:12px;opacity:.8;margin-top:3px}
+.toolbar{padding:10px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:8px}
+.btn{border:0;border-radius:10px;padding:8px 14px;background:#9333EA;color:white;font-weight:800;cursor:pointer;font-size:12px}
+.content{padding:14px 16px 24px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid #edf2f7;border-radius:16px;padding:12px;box-shadow:0 6px 16px rgba(15,23,42,.04)}
+.kpi b{font-size:26px;display:block;line-height:1.1}.kpi span{font-size:11px;color:#667085}
+.kpi.red b{color:#dc2626}.kpi.green b{color:#059669}.kpi.violet b{color:#7c3aed}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.chart-card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,.04)}
+.chart-card h3{font-size:14px;color:#32115c;margin:0 0 10px;font-weight:800}
+canvas{max-height:200px}
+.full{grid-column:1/-1}
+.table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.table th{text-align:left;padding:8px;background:#f8f9fa;color:#475569;font-weight:700;border-bottom:2px solid #e5e7eb}
+.table td{padding:8px;border-bottom:1px solid #f1f5f9}
+.bar{height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle;margin-left:6px}
+.bar>div{height:8px;border-radius:99px}
+.loading{padding:30px;text-align:center;color:#667085}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
+</style></head><body>
+<header><div class="title">📊 Dashboard Visual</div><div class="sub">Métricas del equipo con gráficos interactivos</div></header>
+<div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button></div>
+<div class="content" id="app"><div class="loading">Cargando dashboard...</div></div>
+<script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+var chartInstances=[];
+function destroyCharts(){chartInstances.forEach(c=>{try{c.destroy()}catch(e){}});chartInstances=[]}
+
+function render(d){
+  destroyCharts();
+  var r=d.resumen||{},app=document.getElementById('app');
+  var html='<div class="kpis">'+
+    '<div class="kpi violet"><b>'+r.total+'</b><span>Tareas totales</span></div>'+
+    '<div class="kpi green"><b>'+r.completas+'</b><span>Completadas</span></div>'+
+    '<div class="kpi"><b>'+r.pendientes+'</b><span>Pendientes</span></div>'+
+    '<div class="kpi red"><b>'+r.vencidas+'</b><span>Vencidas</span></div>'+
+  '</div>';
+  html+='<div class="charts">'+
+    '<div class="chart-card"><h3>Distribución por área</h3><canvas id="chartArea"></canvas></div>'+
+    '<div class="chart-card"><h3>Estado de tareas</h3><canvas id="chartEstado"></canvas></div>'+
+    '<div class="chart-card full"><h3>Rendimiento por trabajadora</h3><canvas id="chartResp"></canvas></div>'+
+  '</div>';
+  // Table
+  html+='<div class="chart-card full"><h3>Detalle por trabajadora</h3><table class="table"><tr><th>Nombre</th><th>Total</th><th>Completas</th><th>Pendientes</th><th>Bloqueadas</th><th>Horas</th><th>Avance</th></tr>';
+  (d.porResp||[]).forEach(function(w){
+    var pct=w.total>0?Math.round(w.completas/w.total*100):0;
+    var color=pct>=80?'#059669':pct>=60?'#d97706':'#dc2626';
+    html+='<tr><td><b>'+esc(w.nombre)+'</b></td><td>'+w.total+'</td><td>'+w.completas+'</td><td>'+w.pendientes+'</td><td>'+w.bloqueadas+'</td><td>'+Math.round(w.minutos/60*10)/10+'h</td><td>'+pct+'% <span class="bar"><div style="width:'+pct+'%;background:'+color+'"></div></span></td></tr>';
+  });
+  html+='</table></div>';
+  app.innerHTML=html;
+  
+  // Area donut
+  var areas=d.porArea||[];
+  var c1=new Chart(document.getElementById('chartArea'),{type:'doughnut',data:{labels:areas.map(a=>a.area),datasets:[{data:areas.map(a=>a.total),backgroundColor:['#7c3aed','#059669','#ea580c','#0284c7','#d97706','#dc2626'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  chartInstances.push(c1);
+  
+  // Estado pie
+  var estados=d.porEstado||[];
+  var estColors={'Pendiente':'#f97316','En proceso':'#7c3aed','Completo':'#059669','Completado':'#059669','Bloqueado':'#dc2626','Revisión':'#eab308','Pausa':'#94a3b8','En espera del cliente':'#3b82f6'};
+  var c2=new Chart(document.getElementById('chartEstado'),{type:'doughnut',data:{labels:estados.map(e=>e.estado),datasets:[{data:estados.map(e=>e.cantidad),backgroundColor:estados.map(e=>estColors[e.estado]||'#94a3b8'),borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+  chartInstances.push(c2);
+  
+  // Resp bar chart
+  var resp=d.porResp||[];
+  var c3=new Chart(document.getElementById('chartResp'),{type:'bar',data:{labels:resp.map(r=>r.nombre),datasets:[{label:'Completas',data:resp.map(r=>r.completas),backgroundColor:'#059669',borderRadius:6},{label:'Pendientes',data:resp.map(r=>r.pendientes),backgroundColor:'#f97316',borderRadius:6},{label:'Bloqueadas',data:resp.map(r=>r.bloqueadas),backgroundColor:'#dc2626',borderRadius:6}]},options:{responsive:true,scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}},plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  chartInstances.push(c3);
+}
+function loadData(){document.getElementById('app').innerHTML='<div class="loading">Actualizando...</div>';google.script.run.withSuccessHandler(render).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message)+'</div>'}).mc_v22_dashboard_getData_pub()}
+loadData();
+</script>
+</body></html>

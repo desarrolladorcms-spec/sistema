@@ -1,0 +1,137 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--v:#7C3AED;--vl:#F5F3FF;--vd:#5B21B6;--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--green:#059669;--red:#DC2626;--amber:#D97706}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:linear-gradient(120deg,#0C4A6E,#0284C7);color:#fff;padding:13px 18px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700;color:#BAE6FD;margin-bottom:2px}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s2{grid-column:1/-1}
+.f label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:4px}
+.f select,.f input,.f textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;color:var(--text);background:#FAFBFC;transition:.15s}
+.f select:focus,.f input:focus,.f textarea:focus{outline:none;border-color:#0284C7;background:#fff;box-shadow:0 0 0 3px rgba(2,132,199,.07)}
+/* Prioridad visual */
+.prio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.prio-opt{padding:10px 8px;border:1.5px solid var(--border);border-radius:12px;text-align:center;cursor:pointer;transition:.15s;background:var(--surface)}
+.prio-opt:hover{border-color:#0284C7;background:#EFF6FF}
+.prio-opt.sel-urgente{background:#FEE2E2;border-color:var(--red);color:var(--red)}
+.prio-opt.sel-alta{background:#FEF9C3;border-color:var(--amber);color:var(--amber)}
+.prio-opt.sel-media{background:#EFF6FF;border-color:#0284C7;color:#0284C7}
+.prio-opt.sel-baja{background:#F0FDF4;border-color:var(--green);color:var(--green)}
+.prio-icon{font-size:18px;margin-bottom:3px}
+.prio-lbl{font-size:10px;font-weight:700}
+.prio-sub{font-size:9px;opacity:.75;margin-top:1px}
+/* SLA badge */
+.sla-box{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px;display:none;margin-top:8px;font-size:11px;color:#065F46}
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:11px 18px;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.btn{padding:9px 18px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn-ghost{background:var(--bg);color:var(--muted)}
+.btn-save{background:#0284C7;color:#fff}.btn-save:hover{background:#0369A1}
+.btn-save:disabled{opacity:.5}
+</style></head><body>
+<div class="hdr"><h1>🛠️ Nuevo Ticket de Soporte</h1><p>Registra el ticket y asígnalo al responsable</p></div>
+<div class="scroll">
+  <div class="card"><div class="card-title">¿Para qué cliente y quién atiende?</div>
+    <div class="g2">
+      <div class="f"><label>Cliente / Marca *</label>
+        <select id="marca"><option value="">— Seleccionar —</option></select></div>
+      <div class="f"><label>Responsable *</label>
+        <select id="responsable"><option>Rossio</option><option>Camila</option><option>Lucy</option></select></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">¿Qué tipo de soporte es?</div>
+    <div class="f"><label>Tipo de solicitud *</label>
+      <select id="tipo" onchange="updateSLA()">
+        <option value="">— Seleccionar —</option>
+        <option>🔴 Sitio caído / error crítico</option>
+        <option>🔴 Bloqueo de IP</option>
+        <option>🟠 Error en formulario de contacto</option>
+        <option>🟠 Error en correo corporativo</option>
+        <option>🟠 Ajustar textos / copy en web</option>
+        <option>🟠 Cambiar imágenes o banners</option>
+        <option>🟠 Modificar botón o campo específico</option>
+        <option>🟡 Actualizar productos o precios</option>
+        <option>🟡 Actualizar imágenes de productos</option>
+        <option>🟡 Revisar acceso a web / panel admin</option>
+        <option>🟡 Pixel, tracking o Analytics</option>
+        <option>🟡 Revisión general de landing</option>
+        <option>🟢 Cambio menor de estilo o contenido</option>
+        <option>🟢 Reunión / asesoría técnica</option>
+        <option>Crear landing page nueva</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <div id="slaBox" class="sla-box"></div>
+  </div>
+  <div class="card"><div class="card-title">Urgencia</div>
+    <div class="prio-grid" id="prioGrid">
+      <div class="prio-opt" onclick="selPrio(this,'Urgente')">
+        <div class="prio-icon">🔴</div><div class="prio-lbl">Urgente</div><div class="prio-sub">Hoy / 2-4h</div></div>
+      <div class="prio-opt" onclick="selPrio(this,'Alta')">
+        <div class="prio-icon">🟠</div><div class="prio-lbl">Alta</div><div class="prio-sub">48 horas</div></div>
+      <div class="prio-opt" onclick="selPrio(this,'Media')">
+        <div class="prio-icon">🟡</div><div class="prio-lbl">Media</div><div class="prio-sub">3-5 días</div></div>
+      <div class="prio-opt" onclick="selPrio(this,'Baja')">
+        <div class="prio-icon">🟢</div><div class="prio-lbl">Baja</div><div class="prio-sub">Cuando pueda</div></div>
+    </div>
+    <input type="hidden" id="prioridad" value="">
+  </div>
+  <div class="card"><div class="card-title">Descripción del ticket</div>
+    <div class="f s2"><label>¿Qué necesita? *</label>
+      <textarea id="descripcion" rows="3" placeholder="Describe el problema o solicitud con el mayor detalle posible..."></textarea></div>
+    <div class="g2" style="margin-top:10px">
+      <div class="f"><label>Link de la página afectada</label>
+        <input type="url" id="link" placeholder="https://..."></div>
+      <div class="f"><label>Notas internas</label>
+        <input type="text" id="notas" placeholder="Para el equipo (no va al cliente)"></div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <button class="btn btn-ghost" onclick="google.script.host.close()">Cancelar</button>
+  <button class="btn btn-save" id="btnSave" onclick="guardar()">🛠️ Crear ticket</button>
+</div>
+<script src="../assets/api.js"></script>
+<script>
+var PRIO_SEL='';
+google.script.run.withSuccessHandler(function(clientes){
+  var sel=document.getElementById('marca');
+  (clientes||[]).forEach(function(c){var o=document.createElement('option');o.value=c.marca||c;o.textContent=c.marca||c;sel.appendChild(o);});
+}).mc_pub_getClientesMarcas();
+
+function selPrio(el,v){
+  document.querySelectorAll('.prio-opt').forEach(function(x){x.className='prio-opt';});
+  el.classList.add('sel-'+v.toLowerCase());PRIO_SEL=v;document.getElementById('prioridad').value=v;
+  updateSLA();
+}
+
+function updateSLA(){
+  var tipo=document.getElementById('tipo').value,prio=PRIO_SEL;
+  if(!prio){if(/🔴/.test(tipo))prio='Urgente';else if(/🟠/.test(tipo))prio='Alta';else if(/🟡/.test(tipo))prio='Media';else prio='Baja';}
+  var sla={Urgente:'Hoy — máx. 4 horas',Alta:'48 horas',Media:'3-5 días',Baja:'Cuando pueda'};
+  var box=document.getElementById('slaBox');
+  if(sla[prio]&&tipo){box.style.display='block';box.textContent='⏱️ SLA: '+sla[prio];}
+  else box.style.display='none';
+}
+
+function guardar(){
+  var marca=document.getElementById('marca').value,desc=document.getElementById('descripcion').value.trim();
+  var tipo=document.getElementById('tipo').value;
+  if(!marca){alert('Selecciona el cliente.');return;}
+  if(!tipo){alert('Selecciona el tipo de solicitud.');return;}
+  if(!desc){alert('Escribe la descripción del ticket.');return;}
+  var btn=document.getElementById('btnSave');btn.disabled=true;btn.textContent='Creando...';
+  google.script.run
+    .withSuccessHandler(function(r){btn.disabled=false;btn.textContent='🛠️ Crear ticket';
+      if(r&&r.ok!==false){alert('✅ Ticket creado');google.script.host.close();}
+      else alert('Error: '+(r&&r.msg||'?'));})
+    .withFailureHandler(function(e){btn.disabled=false;btn.textContent='🛠️ Crear ticket';alert('Error: '+e.message);})
+    .mc_pub_nuevoSoporte({marca:marca,tipo:tipo,responsable:document.getElementById('responsable').value,
+      descripcion:desc,link:document.getElementById('link').value,notas:document.getElementById('notas').value,
+      prioridad:PRIO_SEL||'Media'});
+}
+</script></body></html>

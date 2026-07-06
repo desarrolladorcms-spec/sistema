@@ -1,0 +1,52 @@
+<!doctype html>
+<html><head><base target="_top"><meta charset="utf-8"><style>
+:root{--dark:#1A0A36;--orange:#ea580c;--violet:#9333EA;--txt:#25324b;--muted:#667085}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:var(--txt)}header{background:linear-gradient(120deg,#1A0A36,#3b0764,#ea580c);color:white;padding:18px 22px}.title{font-size:22px;font-weight:900}.sub{font-size:13px;opacity:.8;margin-top:3px}.toolbar{padding:12px 18px;background:#fff;border-bottom:1px solid #eee;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar select,.toolbar button{padding:9px 11px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;font-weight:800;color:#4c1d95}.toolbar button{background:#9333EA;color:#fff;cursor:pointer}.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 18px}.kpi{background:#fff;border:1px solid #edf2f7;border-radius:16px;padding:12px;box-shadow:0 8px 18px rgba(15,23,42,.04)}.kpi b{font-size:24px;display:block}.kpi span{font-size:12px;color:#667085}.content{padding:0 18px 22px}.section{margin:14px 0}.section h2{font-size:16px;margin:0 0 10px;color:#32115c}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}.card{background:#fff;border:1px solid #e5e7eb;border-left:5px solid #9333EA;border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(15,23,42,.05)}.card.atrasado{border-left-color:#dc2626;background:#fff7f7}.card.hoy{border-left-color:#ea580c;background:#fff7ed}.card.h24,.card.h48{border-left-color:#d97706;background:#fffbeb}.card.semana{border-left-color:#7c3aed;background:#faf5ff}.card.excepcion{border-left-color:#2563eb;background:#eff6ff}.card.sin_fecha{border-left-color:#6b7280;background:#f9fafb}.card.completado{border-left-color:#16a34a;background:#f0fdf4}.card h3{margin:0 0 5px;font-size:15px}.meta{font-size:12px;color:#667085;line-height:1.5}.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;background:#f3f4f6;margin:3px 4px 3px 0}.btn{margin-top:10px;padding:9px 10px;border:0;background:#ea580c;color:white;font-weight:900;border-radius:10px;cursor:pointer}.empty{padding:18px;text-align:center;color:#98a2b3;border:1px dashed #cbd5e1;border-radius:14px;background:#fff}.note{font-size:12px;color:#667085;padding:0 18px 10px}.loading{padding:20px;color:#667085}
+</style></head><body><header><div class="title">⚠️ Monitor de Entregas</div><div class="sub">Atrasadas, vencen hoy, próximas 24/48h, excepciones y entregas sin fecha.</div></header><div class="toolbar"><select id="resp"></select><select id="fuente"><option value="">Todas las fuentes</option><option>Proyecto</option><option>Tarea</option></select><button onclick="loadData()">Actualizar</button><button onclick="openCalendar()">📦 Ver calendario</button></div><div class="kpis" id="kpis"></div><div class="note" id="generated"></div><div class="content" id="content"><div class="loading">Cargando...</div></div><script src="../assets/api.js"></script>
+<script>
+let DATA={items:[],contadores:{},responsables:[]};function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function loadData(){document.getElementById('content').innerHTML='<div class="loading">Cargando entregas...</div>';google.script.run.withSuccessHandler(r=>{DATA=r||{items:[],contadores:{},responsables:[]};setup();render();}).withFailureHandler(e=>{document.getElementById('content').innerHTML='<div class="loading">Error: '+esc(e.message||e)+'</div>';}).mc_entregas_getData_pub();}
+function setup(){let resp=document.getElementById('resp');let old=resp.value;let rs=DATA.responsables||[];resp.innerHTML='<option value="">Todas las responsables</option>'+rs.map(x=>'<option>'+esc(x)+'</option>').join('');if(old)resp.value=old;document.getElementById('generated').textContent='Actualizado: '+(DATA.generado||'')+' · No cuentan como atraso: '+(DATA.excepciones||[]).join(', ');}
+function filtered(){let r=document.getElementById('resp').value,f=document.getElementById('fuente').value;return (DATA.items||[]).filter(it=>(!r||it.responsableVisual===r||it.responsable===r)&&(!f||it.fuente===f));}
+function kpis(){let c=DATA.contadores||{};document.getElementById('kpis').innerHTML=[['atrasado','Atrasadas'],['hoy','Hoy'],['h24','24h'],['h48','48h'],['excepcion','Excepciones'],['sin_fecha','Sin fecha']].map(([k,t])=>`<div class="kpi"><b>${c[k]||0}</b><span>${t}</span></div>`).join('');}
+function card(it){return `<div class="card ${it.categoria}"><h3>${esc(it.marca||'Sin marca')}</h3><div><span class="pill">${esc(it.alerta)}</span><span class="pill">${esc(it.fuente)}</span><span class="pill">${esc(it.responsableVisual||'-')}</span></div><div class="meta"><b>Proyecto:</b> ${esc(it.proyecto||'-')}<br><b>Tarea/entrega:</b> ${esc(it.tarea||'-')}<br><b>Límite:</b> ${esc(it.fechaTxt||'Sin fecha')} ${it.diasRestantes!==null?'('+it.diasRestantes+' días)':''}<br><b>Estado:</b> ${esc(it.estado||'-')}<br>${it.detalle?'<b>Detalle:</b> '+esc(it.detalle).slice(0,180):''}</div><button class="btn" onclick='openItem(${JSON.stringify(it.id)},${JSON.stringify(it.fuente)})'>Ver en hoja</button> <button class="btn" style="background:#4c1d95" onclick='reprogramar(${JSON.stringify(it.id)},${JSON.stringify(it.fuente)})'>Reprogramar</button>${it.link?` <a class="btn" style="display:inline-block;text-decoration:none;background:#4c1d95" href="${esc(it.link)}" target="_blank">Abrir link</a>`:''}</div>`}
+function render(){kpis();let items=filtered();let groups=[['atrasado','🔴 Atrasadas'],['hoy','🟠 Vencen hoy'],['24h','🟡 Faltan 24h'],['48h','🟡 Faltan 48h'],['semana','🟣 Vencen esta semana'],['excepcion','🔵 En espera / pausadas'],['sin_fecha','⚫ Sin fecha límite']];let html='';groups.forEach(([cat,title])=>{let arr=items.filter(x=>x.categoria===cat);html+=`<section class="section"><h2>${title} (${arr.length})</h2>`+(arr.length?`<div class="cards">${arr.map(card).join('')}</div>`:'<div class="empty">Sin entregas en esta categoría.</div>')+'</section>';});document.getElementById('content').innerHTML=html;}
+function openItem(id,fuente){google.script.run.withSuccessHandler(r=>{}).mc_entregas_abrirItem_pub(id,fuente);}function reprogramar(id,fuente){let f=prompt('Nueva fecha límite (YYYY-MM-DD):');if(!f)return;let m=prompt('Motivo de la reprogramación:')||'';google.script.run.withSuccessHandler(r=>{alert((r&&r.msg)||'Listo');loadData();}).withFailureHandler(e=>alert(e.message||e)).mc_entregas_reprogramarItem_pub(id,fuente,f,m);}function openCalendar(){google.script.run.mc_pub_abrirCalendarioEntregas();}
+['resp','fuente'].forEach(id=>document.addEventListener('change',e=>{if(e.target&&e.target.id===id)render();}));loadData();
+</script>
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body></html>

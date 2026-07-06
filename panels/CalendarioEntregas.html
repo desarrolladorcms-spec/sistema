@@ -1,0 +1,125 @@
+<!DOCTYPE html><html><head><base target="_top"><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F1F5F9;--surface:#fff;--border:#E8ECF0;--text:#0F172A;--muted:#64748B;--faint:#94A3B8;--v:#7C3AED;--green:#059669;--red:#DC2626;--amber:#D97706;--blue:#0284C7}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.hdr{background:linear-gradient(120deg,#0C4A6E,#0284C7);color:#fff;padding:12px 16px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:15px;font-weight:700;color:#BAE6FD}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
+.toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-hdr{padding:5px 12px;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9)}
+.btn-hdr:hover{background:rgba(255,255,255,.25)}
+.nav-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:11px;background:var(--surface);color:var(--muted)}
+.nav-btn:hover{border-color:var(--blue);color:var(--blue)}
+.mes-lbl{font-size:13px;font-weight:700;color:var(--text);flex:1;text-align:center}
+/* Filtro cliente */
+.filtros{padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;gap:8px;align-items:center}
+.filtros label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
+.filtros select{padding:5px 9px;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--surface)}
+/* Semana grid */
+.cal{padding:12px}
+.week-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.wh{text-align:center;font-size:9px;font-weight:700;color:var(--faint);padding:4px 0;text-transform:uppercase}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.day{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;min-height:80px}
+.day.today{border-color:var(--blue);box-shadow:0 0 0 2px rgba(2,132,199,.1)}
+.day.other{background:#F8FAFC;opacity:.6}
+.day-n{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.day.today .day-n{background:var(--blue);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+/* Evento */
+.ev{padding:3px 6px;border-radius:5px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.web{background:#EDE9FE;color:#5B21B6;border-left:2px solid var(--v)}
+.ev.seo{background:#D1FAE5;color:#065F46;border-left:2px solid var(--green)}
+.ev.soporte{background:#DBEAFE;color:#1E40AF;border-left:2px solid var(--blue)}
+.ev.urgente{background:#FEE2E2;color:#991B1B;border-left:2px solid var(--red)}
+/* Leyenda */
+.legend{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap;border-top:1px solid var(--border)}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+.loading{text-align:center;padding:40px;color:var(--faint);font-size:12px}
+</style></head><body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div><div class="hdr-title">📅 Calendario de Entregas</div><div class="hdr-sub">Proyectos + soporte + límites del mes</div></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-hdr" onclick="cargar()">↻</button>
+      <button class="btn-hdr" style="background:#BAE6FD;color:#0C4A6E" onclick="google.script.run.mc_pub_v2436_abrirFormProyecto()">＋</button>
+    </div>
+  </div>
+</div>
+<div class="toolbar">
+  <button class="nav-btn" onclick="cambiarMes(-1)">‹ Anterior</button>
+  <div class="mes-lbl" id="mesLbl">—</div>
+  <button class="nav-btn" onclick="cambiarMes(1)">Siguiente ›</button>
+</div>
+<div class="filtros">
+  <label>Filtrar:</label>
+  <select id="filtroCliente" onchange="renderCal()"><option value="">Todos los clientes</option></select>
+  <select id="filtroTipo" onchange="renderCal()"><option value="">Todos los tipos</option><option>Web</option><option>SEO</option><option>Soporte</option></select>
+</div>
+<div id="cal" class="cal"><div class="loading">Cargando...</div></div>
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#EDE9FE;border:1px solid #7C3AED"></div> Web</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#D1FAE5;border:1px solid #059669"></div> SEO</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#DBEAFE;border:1px solid #0284C7"></div> Soporte</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#FEE2E2;border:1px solid #DC2626"></div> Urgente</div>
+</div>
+
+<script src="../assets/api.js"></script>
+<script>
+function esc(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+var HOY=new Date(), MES=new Date(HOY.getFullYear(),HOY.getMonth(),1), EVENTOS=[];
+var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function cambiarMes(d){MES=new Date(MES.getFullYear(),MES.getMonth()+d,1);cargar();}
+
+function cargar(){
+  document.getElementById('mesLbl').textContent=MESES[MES.getMonth()]+' '+MES.getFullYear();
+  document.getElementById('cal').innerHTML='<div class="loading">Cargando...</div>';
+  google.script.run.withSuccessHandler(function(data){
+    EVENTOS=data||[];
+    var clientes=[...new Set(EVENTOS.map(function(e){return e.marca;}).filter(Boolean))];
+    var sel=document.getElementById('filtroCliente');
+    var cur=sel.value;sel.innerHTML='<option value="">Todos los clientes</option>';
+    clientes.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;if(c===cur)o.selected=true;sel.appendChild(o);});
+    renderCal();
+  }).mc_pub_getEntregasMes(MES.getFullYear()+'-'+(MES.getMonth()+1<10?'0':'')+(MES.getMonth()+1));
+}
+
+function renderCal(){
+  var filtroC=document.getElementById('filtroCliente').value;
+  var filtroT=document.getElementById('filtroTipo').value;
+  var evs=EVENTOS.filter(function(e){
+    return (!filtroC||e.marca===filtroC)&&(!filtroT||e.tipo===filtroT);
+  });
+  var start=new Date(MES);start.setDate(start.getDate()-start.getDay());
+  var end=new Date(MES.getFullYear(),MES.getMonth()+1,0);end.setDate(end.getDate()+(6-end.getDay()));
+  var html='<div class="week-header">'+['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(function(d){return '<div class="wh">'+d+'</div>';}).join('')+'</div>';
+  var cur=new Date(start);
+  while(cur<=end){
+    html+='<div class="week">';
+    for(var i=0;i<7;i++){
+      var d=new Date(cur);
+      var isToday=d.toDateString()===HOY.toDateString();
+      var isOther=d.getMonth()!==MES.getMonth();
+      var dayEvs=evs.filter(function(e){
+        var ef=e.fecha?new Date(e.fecha):null;
+        return ef&&ef.toDateString()===d.toDateString();
+      });
+      html+='<div class="day'+(isToday?' today':'')+(isOther?' other':'')+'">';
+      html+='<div class="day-n"'+(isToday?' style="display:flex"':'')+'>'+d.getDate()+'</div>';
+      dayEvs.slice(0,3).forEach(function(e){
+        var cls=e.urgente?'urgente':e.tipo==='SEO'?'seo':e.tipo==='Soporte'?'soporte':'web';
+        html+='<div class="ev '+cls+'" title="'+esc(e.marca)+': '+esc(e.tarea)+'">'+esc(e.marca)+'</div>';
+      });
+      if(dayEvs.length>3) html+='<div style="font-size:9px;color:var(--faint);padding:1px 4px">+'+( dayEvs.length-3)+' más</div>';
+      html+='</div>';
+      cur.setDate(cur.getDate()+1);
+    }
+    html+='</div>';
+  }
+  document.getElementById('cal').innerHTML=html;
+}
+cargar();
+</script></body></html>

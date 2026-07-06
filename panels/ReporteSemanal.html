@@ -1,0 +1,44 @@
+<!doctype html><html><head><base target="_top"><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f8fafc;color:#172033}header{background:linear-gradient(120deg,#3730a3,#06b6d4);color:#fff;padding:18px 22px}.title{font-size:22px;font-weight:950}.sub{font-size:13px;opacity:.9}.toolbar{padding:12px 18px;background:#fff;border-bottom:1px solid #e5e7eb}.btn{border:0;border-radius:10px;padding:9px 12px;background:#4f46e5;color:white;font-weight:900;cursor:pointer}.content{padding:16px 18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;box-shadow:0 8px 20px rgba(15,23,42,.05)}.name{font-weight:950}.num{font-size:30px;font-weight:950}.section{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px;margin-top:14px}.item{font-size:12px;border-top:1px dashed #e5e7eb;padding:7px 0}.loading{text-align:center;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:14px;padding:20px}
+</style></head><body><header><div class="title">📊 Reporte semanal</div><div class="sub">Resumen de tareas, atrasos, carga y clientes con más pendientes.</div></header><div class="toolbar"><button class="btn" onclick="loadData()">↻ Actualizar</button> <button class="btn" onclick="generar()">📄 Generar en hoja</button></div><div class="content" id="app"><div class="loading">Cargando...</div></div><script src="../assets/api.js"></script>
+<script>
+function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));}function loadData(){document.getElementById('app').innerHTML='<div class="loading">Cargando...</div>';google.script.run.withSuccessHandler(render).withFailureHandler(e=>{document.getElementById('app').innerHTML='<div class="loading">Error: '+esc(e.message||e)+'</div>';}).mc_reporteSemanal_getData_pub();}
+function render(r){let reps=Object.keys(r.responsables||{}).map(k=>{let x=r.responsables[k];return '<div class="card"><div class="name">'+esc(k)+'</div><div class="num">'+esc(x.activas)+'</div><small>Activas</small><br><b>Creadas:</b> '+esc(x.creadas)+'<br><b>Completadas:</b> '+esc(x.completadas)+'<br><b>Atrasadas:</b> '+esc(x.atrasadas)+'<br><b>Minutos:</b> '+esc(x.min)+'</div>';}).join('');let atras=(r.atrasadas||[]).map(x=>'<div class="item"><b>'+esc(x.responsable)+'</b> · '+esc(x.marca)+' · '+esc(x.tarea)+' · límite '+esc(x.limite)+'</div>').join('')||'<div class="item">Sin atrasos 🎉</div>';let cli=(r.clientes||[]).map(c=>'<div class="item"><b>'+esc(c.marca)+'</b> · score '+esc(c.score)+' · atrasadas '+esc(c.atrasadas)+' · bloqueos '+esc(c.bloqueadas)+' · sin mov. '+esc(c.sinMovimiento)+'</div>').join('');document.getElementById('app').innerHTML='<p><b>Periodo:</b> '+esc(r.desde)+' al '+esc(r.hasta)+' · generado '+esc(r.generado)+'</p><div class="grid">'+reps+'</div><div class="section"><h3>🔴 Tareas atrasadas</h3>'+atras+'</div><div class="section"><h3>👥 Clientes con más pendientes</h3>'+cli+'</div>';}function generar(){google.script.run.withSuccessHandler(r=>alert(r.msg||'Generado')).mc_reporteSemanal_generarHoja_pub()}loadData();
+</script>
+<script>
+(function(){
+  if(window.__cmsVisualNotifyInstalled) return;
+  window.__cmsVisualNotifyInstalled = true;
+  function ensureNotify(){
+    var cssId='cmsNotifyCss';
+    if(!document.getElementById(cssId)){
+      var st=document.createElement('style'); st.id=cssId;
+      st.textContent='.cms-notify-overlay{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:99999;padding:22px}.cms-notify-card{width:min(460px,calc(100vw - 44px));background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 85px rgba(15,23,42,.28);border-radius:28px;padding:26px;text-align:center;font-family:Arial,sans-serif;color:#1f2937}.cms-notify-icon{width:74px;height:74px;border-radius:999px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#ede9fe,#dbeafe);box-shadow:0 12px 34px rgba(124,58,237,.22)}.cms-notify-title{font-size:23px;font-weight:900;margin:0 0 7px;color:#111827}.cms-notify-msg{font-size:14px;line-height:1.55;color:#64748b;white-space:pre-line;margin:0 0 18px}.cms-notify-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.cms-notify-btn{border:0;border-radius:15px;padding:12px 20px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;box-shadow:0 14px 26px rgba(124,58,237,.24)}.cms-notify-btn.secondary{background:#fff;color:#4c1d95;border:1px solid #e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,.08)}';
+      document.head.appendChild(st);
+    }
+    var ov=document.getElementById('cmsNotifyOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='cmsNotifyOverlay'; ov.className='cms-notify-overlay';
+      ov.innerHTML='<div class="cms-notify-card"><div class="cms-notify-icon" id="cmsNotifyIcon">✅</div><h2 class="cms-notify-title" id="cmsNotifyTitle">Listo</h2><p class="cms-notify-msg" id="cmsNotifyMsg"></p><div class="cms-notify-actions" id="cmsNotifyActions"><button class="cms-notify-btn" id="cmsNotifyOk">Aceptar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+  window.cmsNotify=function(msg, opts){
+    opts=opts||{}; var ov=ensureNotify();
+    document.getElementById('cmsNotifyIcon').textContent=opts.icon||'✅';
+    document.getElementById('cmsNotifyTitle').textContent=opts.title||'Listo';
+    document.getElementById('cmsNotifyMsg').textContent=String(msg||'');
+    var actions=document.getElementById('cmsNotifyActions');
+    actions.innerHTML='';
+    var ok=document.createElement('button'); ok.className='cms-notify-btn'; ok.textContent=opts.okText||'Aceptar';
+    ok.onclick=function(){ov.style.display='none'; if(typeof opts.onOk==='function') opts.onOk();};
+    actions.appendChild(ok);
+    if(opts.cancelText){ var c=document.createElement('button'); c.className='cms-notify-btn secondary'; c.textContent=opts.cancelText; c.onclick=function(){ov.style.display='none'; if(typeof opts.onCancel==='function') opts.onCancel();}; actions.insertBefore(c,ok); }
+    ov.style.display='flex';
+  };
+  window.alert=function(msg){ window.cmsNotify(msg,{title:'Aviso del sistema', icon:'🔔'}); };
+})();
+</script>
+
+</body></html>
