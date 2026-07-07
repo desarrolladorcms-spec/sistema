@@ -166,6 +166,19 @@ document.querySelectorAll('.chips').forEach(g=>{
     });
   });
 });
+// El grupo de "Responsable del proyecto" necesita su propio manejador porque,
+// a diferencia de los demás chips, su valor se lee de un campo oculto
+// (#responsable) en vez de leerse directo de qué chip tiene la clase "on".
+// El manejador genérico de arriba nunca actualizaba ese campo oculto — por
+// eso el resumen mostraba siempre "Camila" (su valor inicial fijo),
+// sin importar qué persona se hubiera clickeado.
+document.querySelectorAll('#chkResponsable .chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('#chkResponsable .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');
+    document.getElementById('responsable').value = c.dataset.v;
+  });
+});
 function gc(id){return [...document.querySelectorAll('#'+id+' .chip.on')].map(c=>c.dataset.v);}
 function next(){
   if(S===0&&!document.getElementById('marca').value.trim()){alert('Escribe el nombre de la marca.');return;}

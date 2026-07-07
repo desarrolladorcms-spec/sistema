@@ -26,6 +26,7 @@
   var jarvisEscuchando = false;  // recognition corriendo ahora mismo
   var esperandoConfirmacionVoz = false;
   var pendiente = null;          // {accion, data, resumen}
+  var historial = [];            // últimas preguntas/respuestas de esta sesión (memoria de corto plazo)
   var WAKE_WORDS = ['jarvis', 'yarvis', 'harvis'];
 
   function inyectarEstilos() {
@@ -182,8 +183,16 @@
 
   function interpretar(texto, opts) {
     opts = opts || {};
+    // Saludo/chequeo simple: se contesta solo, sin gastar cuota de Gemini —
+    // aplica igual si lo escribiste o lo dijiste por voz.
+    var respuestaLocal = intentarRespuestaLocal_(texto);
+    if (respuestaLocal) {
+      mostrarMsg('💬 ' + respuestaLocal);
+      if (opts.porVoz) hablar(respuestaLocal, function () { if (jarvisActivo) reanudarEscuchaJarvis(); });
+      return;
+    }
     mostrarMsg('Entendiendo la orden...');
-    MC_API.call('AI_INTERPRETAR_COMANDO', { texto: texto }, function (r) {
+    MC_API.call('AI_INTERPRETAR_COMANDO', { texto: texto, historial: historial }, function (r) {
       if (!r || !r.ok) {
         var m = '⚠️ ' + ((r && r.msg) || 'No se pudo interpretar la orden.');
         mostrarMsg(m); if (opts.porVoz) hablar('No entendí eso, ¿puedes repetirlo?');
@@ -194,6 +203,8 @@
         if (opts.porVoz) hablar(r.resumen);
         return;
       }
+      historial.push({ pregunta: texto, resumen: r.resumen });
+      if (historial.length > 5) historial.shift();
       pendiente = { accion: r.accion, data: r.data, resumen: r.resumen, esConsulta: r.esConsulta, pregunta: texto };
       mostrarMsg(
         '<div class="mc-cmd-confirm"><div class="r">' + r.resumen + '</div>' +
@@ -215,6 +226,21 @@
     });
   }
 
+  // Contesta sin IA cuando el resultado es una lista simple y la pregunta
+  // suena a "cuántos/cuántas" — evita gastar cuota de Gemini en casos obvios.
+  function intentarRespuestaRapida_(pregunta, r) {
+    var esCuantos = /cu[aá]nt[oa]s?\b/i.test(pregunta);
+    if (!esCuantos) return null;
+    // Buscar el primer campo del resultado que sea un arreglo (items, marcas, etc.)
+    var campoLista = null;
+    for (var k in r) {
+      if (Array.isArray(r[k])) { campoLista = k; break; }
+    }
+    if (!campoLista) return null;
+    var n = r[campoLista].length;
+    return 'Tienes ' + n + (n === 1 ? ' resultado' : ' resultados') + '.';
+  }
+
   function ejecutarPendiente(porVoz) {
     if (!pendiente) return;
     mostrarMsg('Ejecutando...');
@@ -224,9 +250,16 @@
     var nombre = nombreUsuario();
     MC_API.call(accion, data, function (r) {
       if (r && r.ok) {
-        // Si era una consulta (ver/contar/listar algo), pedimos que resuma el
-        // resultado real contestando la pregunta, en vez de un genérico "listo".
+        // Si era una consulta (ver/contar/listar algo), primero intentamos
+        // contestar SIN gastar cuota de IA: si el resultado es una lista
+        // simple o ya trae "cuántos", armamos la frase nosotros mismos.
         if (esConsulta && pregunta) {
+          var respuestaRapida = intentarRespuestaRapida_(pregunta, r);
+          if (respuestaRapida) {
+            mostrarMsg('✅ ' + respuestaRapida);
+            if (porVoz) hablar(respuestaRapida, function () { if (jarvisActivo) reanudarEscuchaJarvis(); });
+            return;
+          }
           MC_API.call('AI_RESUMIR_RESULTADO', { pregunta: pregunta, resultado: r }, function (rr) {
             var respuesta = (rr && rr.ok && rr.respuesta) ? rr.respuesta : (r.msg || 'Listo, ya tengo la información.');
             mostrarMsg('✅ ' + respuesta);
@@ -330,6 +363,22 @@
   function reanudarEscuchaJarvis() {
     esperandoConfirmacionVoz = false;
     if (jarvisActivo && !jarvisEscuchando) iniciarEscuchaJarvis();
+  }
+
+  // Saludos y chequeos simples que se contestan solos, sin gastar cuota de
+  // Gemini — no son órdenes reales del sistema, son solo "¿estás ahí?".
+  var RESPUESTAS_LOCALES_ = [
+    { patron: /^(me escuchas|est[aá]s ah[ií]|est[aá]s(\s+aqu[ií])?)\??$/i, respuesta: function(n){ return 'Sí' + (n?', '+n:'') + ', aquí estoy.'; } },
+    { patron: /^(hola|buenas|buen[oa]s d[ií]as|buenas tardes|buenas noches)\.?$/i, respuesta: function(n){ return 'Hola' + (n?', '+n:'') + ', ¿en qué te ayudo?'; } },
+    { patron: /^(gracias|muchas gracias)\.?$/i, respuesta: function(){ return 'De nada.'; } },
+    { patron: /^(c[oó]mo est[aá]s|qu[eé] tal)\??$/i, respuesta: function(){ return 'Todo en orden. ¿En qué te ayudo?'; } }
+  ];
+  function intentarRespuestaLocal_(orden) {
+    var limpio = orden.trim();
+    for (var i = 0; i < RESPUESTAS_LOCALES_.length; i++) {
+      if (RESPUESTAS_LOCALES_[i].patron.test(limpio)) return RESPUESTAS_LOCALES_[i].respuesta(nombreUsuario());
+    }
+    return null;
   }
 
   function procesarPosibleWake_(textoOido) {
