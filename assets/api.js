@@ -102,6 +102,15 @@
   }
   global.google.script.run = mc_makeRunner_(null, null);
 
+  // ── Shim de google.script.host ─────────────────────────────────────────────
+  // En Apps Script real, .close() cierra el modal del formulario. Aquí no hay
+  // modales — los formularios son pantallas completas dentro del sistema — así
+  // que "cerrar" equivale a volver a la pantalla anterior (el shell ya guarda
+  // el historial de navegación en el navegador).
+  global.google.script.host = {
+    close: function () { try { parent.history.back(); } catch (e) {} }
+  };
+
   // google.script.host.close() — no hace nada fuera de GAS pero tampoco rompe
   global.google.script.host = { close: function() {
     // En web app standalone, cerrar un "modal" equivale a volver al panel anterior

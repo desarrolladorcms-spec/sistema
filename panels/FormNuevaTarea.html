@@ -227,19 +227,22 @@ function crear(){
       if(r&&r.ok!==false){alert('✅ Tarea creada correctamente');google.script.host.close();}
       else alert('Error: '+(r&&r.msg||'?'));})
     .withFailureHandler(function(e){btn.disabled=false;btn.textContent='✅ Crear tarea';alert('Error: '+e.message);})
-    .mc_pub_nuevaTarea({
+    .mc_form_guardarTarea({
       para:document.getElementById('paraHidden').value,
       asignadaPor:document.getElementById('asignadaPorHidden').value,
+      asignada_por:document.getElementById('asignadaPorHidden').value,
       marca:marca,tarea:tarea,
       tipo:document.getElementById('tipoHidden').value,
       area:document.getElementById('areaHidden').value,
       proyecto:document.getElementById('proyecto').value,
       sitioWeb:document.getElementById('sitioWeb').value,
+      web:document.getElementById('sitioWeb').value,
       prioridad:PRIO,limite:document.getElementById('limite').value,
       estimado:document.getElementById('estimado').value,
       entregable:document.getElementById('entregable').value,
       ayudas:document.getElementById('ayudas').value,
-      linkDrive:document.getElementById('linkDrive').value
+      linkDrive:document.getElementById('linkDrive').value,
+      link:document.getElementById('linkDrive').value
     });
 }
 </script></body></html>

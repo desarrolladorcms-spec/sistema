@@ -56,9 +56,10 @@
   <label>URL del sistema (la que termina en /exec)</label>
   <input id="url" placeholder="https://script.google.com/macros/s/..." />
 
-  <button class="btn btn-v" id="btnEjecutar" onclick="ejecutarTodo()">▶ Ejecutar todo</button>
+  <button class="btn btn-v" id="btnEjecutar" onclick="ejecutarTodo()">▶ Ejecutar todo (por pasos)</button>
   <button class="btn btn-ghost" id="btnEstado" onclick="verEstado()">Ver estado actual</button>
   <button class="btn btn-red" id="btnReiniciar" onclick="reiniciar()">♻ Reiniciar avance</button>
+  <button class="btn btn-ghost" id="btnDirecto" onclick="instalacionDirecta()" style="margin-top:8px">⚡ Instalación directa (sin pasos, una sola vez)</button>
 
   <div class="progress-wrap" id="progressWrap">
     <div class="step-info" id="stepInfo">—</div>
@@ -158,6 +159,27 @@ async function ejecutarTodo() {
   corriendo = false;
   document.getElementById('btnEjecutar').disabled = false;
   document.getElementById('btnEjecutar').textContent = '▶ Ejecutar todo';
+}
+
+async function instalacionDirecta() {
+  if (!confirm('Esto borra todo lo que haya en el Excel y crea las hojas de nuevo, todo en un solo paso (sin la barra de progreso por etapas). ¿Continuar?')) return;
+  var btn = document.getElementById('btnDirecto');
+  btn.disabled = true; btn.textContent = 'Instalando... (puede tardar un minuto)';
+  document.getElementById('doneBadge').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+  var r = await llamar('SETUP_DIRECTO');
+  btn.disabled = false; btn.textContent = '⚡ Instalación directa (sin pasos, una sola vez)';
+  if (!r) { mostrarError('No hubo respuesta. Si tardó mucho, puede que Apps Script haya cortado la ejecución — intenta con "Ejecutar todo (por pasos)" en su lugar.'); return; }
+  if (r.errores && r.errores.length) {
+    mostrarError(r.errores.join('\n'));
+  }
+  if (r.hojasCreadas && r.hojasCreadas.length) {
+    document.getElementById('logBox').innerHTML = 'Hojas creadas: ' + r.hojasCreadas.join(', ');
+  }
+  if (r.ok) {
+    document.getElementById('doneBadge').style.display = 'block';
+    document.getElementById('doneBadge').textContent = '✅ ' + (r.msg || 'Listo.');
+  }
 }
 
 async function reiniciar() {

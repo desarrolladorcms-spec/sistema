@@ -118,15 +118,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;f
     </div>
     <div class="nav-scroll">
       <div class="ns">Inicio</div>
-      <div class="ni on" id="n-PanelCentral" onclick="go('PanelCentral','⬡','Panel Central')"><div class="ni-ic">⬡</div>Panel Central<span class="nav-badge hide" id="nb-sol" style="margin-left:auto;background:#DC2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:999px"></span></div>
-      <div class="ni" id="n-PanelMiDia_Master" onclick="go('PanelMiDia_Master','☀','Mi Día')"><div class="ni-ic">☀</div>Mi Día</div>
-      <div class="ni" id="n-MonitorSolicitudes" onclick="go('MonitorSolicitudes','◎','Monitor')"><div class="ni-ic">◎</div>Monitor<span class="nav-badge hide" id="nb-mon" style="margin-left:auto;background:#D97706;color:#fff;font-size:9px;padding:1px 6px;border-radius:999px"></span></div>
-      <div class="ni" id="n-CentroCliente" onclick="go('CentroCliente','👤','Clientes')"><div class="ni-ic">👤</div>Centro Cliente</div>
+      <div class="ni on staff-only" id="n-PanelCentral" onclick="go('PanelCentral','⬡','Panel Central')"><div class="ni-ic">⬡</div>Panel Central<span class="nav-badge hide" id="nb-sol" style="margin-left:auto;background:#DC2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:999px"></span></div>
+      <div class="ni" id="n-PanelMiDia_Master" onclick="goMiDia()"><div class="ni-ic">☀</div>Mi Día</div>
+      <div class="ni staff-only" id="n-MonitorSolicitudes" onclick="go('MonitorSolicitudes','◎','Monitor')"><div class="ni-ic">◎</div>Monitor<span class="nav-badge hide" id="nb-mon" style="margin-left:auto;background:#D97706;color:#fff;font-size:9px;padding:1px 6px;border-radius:999px"></span></div>
+      <div class="ni staff-only" id="n-CentroCliente" onclick="go('CentroCliente','👤','Clientes')"><div class="ni-ic">👤</div>Centro Cliente</div>
       <div class="sep"></div>
       <div class="ns">Proyectos</div>
-      <div class="ni" id="n-PanelProyectos" onclick="go('PanelProyectos','📦','Proyectos')"><div class="ni-ic">📦</div>Panel Proyectos</div>
-      <div class="ni" id="n-FormNuevoProyecto" onclick="go('FormNuevoProyecto','＋','Nuevo Proyecto')"><div class="ni-ic">＋</div>Nuevo Proyecto</div>
-      <div class="ni" id="n-FormBriefingWeb" onclick="go('FormBriefingWeb','📋','Briefing Web')"><div class="ni-ic">📋</div>Briefing Web</div>
+      <div class="ni" id="n-PanelProyectos" onclick="goProyectos()"><div class="ni-ic">📦</div>Panel Proyectos</div>
+      <div class="ni staff-only" id="n-FormNuevoProyecto" onclick="go('FormNuevoProyecto','＋','Nuevo Proyecto')"><div class="ni-ic">＋</div>Nuevo Proyecto</div>
+      <div class="ni staff-only" id="n-FormBriefingWeb" onclick="go('FormBriefingWeb','📋','Briefing Web')"><div class="ni-ic">📋</div>Briefing Web</div>
       <div class="ni" id="n-FormBriefingSEO" onclick="go('FormBriefingSEO','📋','Briefing SEO')"><div class="ni-ic">📋</div>Briefing SEO</div>
       <div class="ni" id="n-PanelRevisionDemos" onclick="go('PanelRevisionDemos','🧪','Demos')"><div class="ni-ic">🧪</div>Demos</div>
       <div class="sep"></div>
@@ -139,15 +139,34 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;f
       <div class="ns">Agenda</div>
       <div class="ni" id="n-CalendarioReuniones" onclick="go('CalendarioReuniones','📅','Reuniones')"><div class="ni-ic">📅</div>Reuniones</div>
       <div class="ni" id="n-CalendarioEntregas" onclick="go('CalendarioEntregas','🗓️','Entregas')"><div class="ni-ic">🗓️</div>Entregas</div>
-      <div class="ni" id="n-DisponibilidadEquipo" onclick="go('DisponibilidadEquipo','🧭','Equipo')"><div class="ni-ic">🧭</div>Disponibilidad</div>
+      <div class="ni staff-only" id="n-DisponibilidadEquipo" onclick="go('DisponibilidadEquipo','🧭','Equipo')"><div class="ni-ic">🧭</div>Disponibilidad</div>
       <div class="sep"></div>
       <div class="ns">Análisis</div>
       <div class="ni" id="n-ReporteSEO" onclick="go('ReporteSEO','📈','SEO')"><div class="ni-ic">📈</div>Reporte SEO</div>
-      <div class="ni" id="n-ReporteMensual" onclick="go('ReporteMensual','📊','Mensual')"><div class="ni-ic">📊</div>Reporte Mensual</div>
+      <div class="ni staff-only" id="n-ReporteMensual" onclick="go('ReporteMensual','📊','Mensual')"><div class="ni-ic">📊</div>Reporte Mensual</div>
       <div class="sep"></div>
       <div class="ns">Gestión</div>
       <div class="ni staff-only" id="n-FormNuevoCliente" onclick="go('FormNuevoCliente','👤','Nuevo Cliente')"><div class="ni-ic">👤</div>Nuevo Cliente</div>
       <div class="ni staff-only" id="n-FormActualizacionPlugin" onclick="go('FormActualizacionPlugin','🧩','Plugin')"><div class="ni-ic">🧩</div>Plugin Update</div>
+      <div class="sep"></div>
+      <div class="ns">Gestión avanzada</div>
+      <div class="ni staff-only" id="n-FormAccesos" onclick="go('FormAccesos','🔐','Accesos')"><div class="ni-ic">🔐</div>Accesos</div>
+      <div class="ni staff-only" id="n-ClientesPendientes" onclick="go('ClientesPendientes','⏳','Pendientes Cliente')"><div class="ni-ic">⏳</div>Clientes Pendientes</div>
+      <div class="ni staff-only" id="n-GruposWhatsApp" onclick="go('GruposWhatsApp','💬','Grupos WhatsApp')"><div class="ni-ic">💬</div>Grupos WhatsApp</div>
+      <div class="ni staff-only" id="n-PlantillasWhatsApp" onclick="go('PlantillasWhatsApp','💬','Plantillas WhatsApp')"><div class="ni-ic">💬</div>Plantillas WhatsApp</div>
+      <div class="ni staff-only" id="n-ControlBloqueos" onclick="go('ControlBloqueos','🚫','Bloqueos')"><div class="ni-ic">🚫</div>Control de Bloqueos</div>
+      <div class="ni staff-only" id="n-TimerTareas" onclick="go('TimerTareas','⏱️','Timer Tareas')"><div class="ni-ic">⏱️</div>Timer de Tareas</div>
+      <div class="ni staff-only" id="n-CargaLaboral" onclick="go('CargaLaboral','📉','Carga Laboral')"><div class="ni-ic">📉</div>Carga Laboral</div>
+      <div class="ni staff-only" id="n-RiesgosOperativos" onclick="go('RiesgosOperativos','⚠️','Riesgos')"><div class="ni-ic">⚠️</div>Riesgos Operativos</div>
+      <div class="ni staff-only" id="n-OportunidadesComerciales" onclick="go('OportunidadesComerciales','💡','Oportunidades')"><div class="ni-ic">💡</div>Oportunidades</div>
+      <div class="ni staff-only" id="n-DecisionesRossio" onclick="go('DecisionesRossio','🧭','Decisiones')"><div class="ni-ic">🧭</div>Decisiones</div>
+      <div class="ni staff-only" id="n-EstrategiaSemanal" onclick="go('EstrategiaSemanal','📅','Estrategia Semanal')"><div class="ni-ic">📅</div>Estrategia Semanal</div>
+      <div class="ni staff-only" id="n-MonitorEntregas" onclick="go('MonitorEntregas','📡','Monitor Entregas')"><div class="ni-ic">📡</div>Monitor Entregas</div>
+      <div class="ni staff-only" id="n-MonitorMovimiento" onclick="go('MonitorMovimiento','📡','Monitor Movimiento')"><div class="ni-ic">📡</div>Monitor Movimiento</div>
+      <div class="ni staff-only" id="n-CentroAdministracion" onclick="go('CentroAdministracion','⚙️','Administración')"><div class="ni-ic">⚙️</div>Administración</div>
+      <div class="ni staff-only" id="n-PermisosOperativos" onclick="go('PermisosOperativos','🔐','Permisos')"><div class="ni-ic">🔐</div>Permisos Operativos</div>
+      <div class="ni staff-only" id="n-ReporteGerencia" onclick="go('ReporteGerencia','📊','Reporte Gerencia')"><div class="ni-ic">📊</div>Reporte Gerencia</div>
+      <div class="ni staff-only" id="n-ReporteSemanal" onclick="go('ReporteSemanal','📅','Reporte Semanal')"><div class="ni-ic">📅</div>Reporte Semanal</div>
     </div>
     <div class="su" onclick="confirmLogout()">
       <div class="u-av" id="uAv">?</div>
@@ -168,7 +187,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;f
     </div>
     <div class="qbar">
       <span class="ql">Accesos rápidos</span>
-      <div class="qc" onclick="go('PanelMiDia_Master','☀','Mi Día')">☀️ Mi Día</div>
+      <div class="qc" onclick="goMiDia()">☀️ Mi Día</div>
       <div class="qc" onclick="go('FormNuevoSoporte','🛠️','Soporte')">🛠️ Ticket</div>
       <div class="qc" onclick="go('FormBriefingWeb','📋','Briefing')">📋 Briefing Web</div>
       <div class="qc" onclick="go('PanelRevisionDemos','🧪','Demos')">🧪 Demos</div>
@@ -243,8 +262,12 @@ function initApp(user){
   document.getElementById('uR').textContent=user.rol==='jefa'?'Jefa de Área':'Especialista';
   if(user.rol==='operativa'){
     document.querySelectorAll('.staff-only').forEach(function(el){el.style.display='none';});
+    document.getElementById('n-PanelCentral').classList.remove('on');
+    document.getElementById('n-PanelMiDia_Master').classList.add('on');
+    go('PanelMiDia','☀','Mi Día');
+  } else {
+    go('PanelCentral','⬡','Panel Central');
   }
-  go('PanelCentral','⬡','Panel Central');
   poll();setInterval(poll,90000);
 }
 
@@ -264,6 +287,20 @@ function mcInjectTheme(iframe){
     link.href=new URL('../assets/theme.css', iframe.src).href;
     doc.head.appendChild(link);
   }catch(e){}
+}
+
+// "Mi Día" y "Proyectos" tienen una versión para jefa y otra para operativas
+// (más simple, sin datos que no les corresponde ver). Se elige sola según
+// el rol de la sesión activa.
+function goMiDia(){
+  var u=MC_AUTH.getUser();
+  if(u.rol==='operativa') go('PanelMiDia','☀','Mi Día');
+  else go('PanelMiDia_Master','☀','Mi Día');
+}
+function goProyectos(){
+  var u=MC_AUTH.getUser();
+  if(u.rol==='operativa') go('PanelProyectosOp','📦','Proyectos');
+  else go('PanelProyectos','📦','Proyectos');
 }
 
 function go(panel,icon,title){

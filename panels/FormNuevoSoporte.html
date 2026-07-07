@@ -130,8 +130,8 @@ function guardar(){
       if(r&&r.ok!==false){alert('✅ Ticket creado');google.script.host.close();}
       else alert('Error: '+(r&&r.msg||'?'));})
     .withFailureHandler(function(e){btn.disabled=false;btn.textContent='🛠️ Crear ticket';alert('Error: '+e.message);})
-    .mc_pub_nuevoSoporte({marca:marca,tipo:tipo,responsable:document.getElementById('responsable').value,
-      descripcion:desc,link:document.getElementById('link').value,notas:document.getElementById('notas').value,
+    .mc_form_guardarSoporte({marca:marca,cliente:marca,tipo:tipo,tipo_soporte:tipo,responsable:document.getElementById('responsable').value,encargado:document.getElementById('responsable').value,
+      descripcion:desc,detalle:desc,link:document.getElementById('link').value,link_evidencia:document.getElementById('link').value,notas:document.getElementById('notas').value,
       prioridad:PRIO_SEL||'Media'});
 }
 </script></body></html>

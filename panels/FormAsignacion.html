@@ -125,8 +125,8 @@ function asignar(){
       if(r&&r.ok!==false){alert('✅ Tarea asignada a '+PARA);google.script.host.close();}
       else alert('Error: '+(r&&r.msg||'?'));})
     .withFailureHandler(function(e){btn.disabled=false;btn.textContent='📋 Asignar tarea';alert('Error: '+e.message);})
-    .mc_pub_formAsignacion({tipo:tipo,marca:document.getElementById('marca').value,tarea:tarea,
+    .mc_form_guardarTarea({tipo:tipo,marca:document.getElementById('marca').value,tarea:tarea,
       proyecto:document.getElementById('proyecto').value,limite:document.getElementById('limite').value,
-      para:PARA,prioridad:PRIO,notas:document.getElementById('notas').value});
+      para:PARA,prioridad:PRIO,notas:document.getElementById('notas').value,ayudas:document.getElementById('notas').value});
 }
 </script></body></html>

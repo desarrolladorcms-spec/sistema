@@ -208,6 +208,6 @@ function guardar(){
       if(r&&r.ok!==false){alert('✅ Cliente creado: '+data.marca+(r.proyecto&&r.proyecto.ok?'\nProyecto creado automáticamente con '+r.proyecto.itemsCreados+' ítems para '+data.responsable:''));google.script.host.close();}
       else alert('Error: '+(r&&r.msg||'?'));})
     .withFailureHandler(e=>{btn.disabled=false;btn.textContent='✓ Crear cliente';alert('Error: '+e.message);})
-    .mc_pub_nuevoCliente(data);
+    .mc_form_guardarCliente(data);
 }
 </script></body></html>
